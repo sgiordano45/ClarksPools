@@ -1392,7 +1392,7 @@
                     <a class="nav-item" data-section="pools">
                         <span class="icon">🏈</span>
                         All Pools
-                        <span class="badge">3</span>
+                        <span class="badge" id="badgePools" style="display:none;">0</span>
                     </a>
                     <a class="nav-item" data-section="create-pool">
                         <span class="icon">➕</span>
@@ -1429,7 +1429,7 @@
                     <a class="nav-item" data-section="betting-bets">
                         <span class="icon">🎯</span>
                         All Bets
-                        <span class="badge">47</span>
+                        <span class="badge" id="badgeBets" style="display:none;">0</span>
                     </a>
                     <a class="nav-item" data-section="betting-settle">
                         <span class="icon">✅</span>
@@ -1446,7 +1446,7 @@
                     <a class="nav-item" data-section="payments">
                         <span class="icon">💰</span>
                         Payments
-                        <span class="badge">5</span>
+                        <span class="badge" id="badgePayments" style="display:none;">0</span>
                     </a>
                 </div>
             </nav>
@@ -1539,42 +1539,9 @@
                                 <th>User</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="recentActivityTable">
                             <tr>
-                                <td>2 min ago</td>
-                                <td><span style="color: var(--accent-gold);">New bet placed</span></td>
-                                <td>High Stakes Showdown</td>
-                                <td>@tom_k</td>
-                            </tr>
-                            <tr>
-                                <td>5 min ago</td>
-                                <td>New entry submitted</td>
-                                <td>Clarkside Pool 2025</td>
-                                <td>@mike_j</td>
-                            </tr>
-                            <tr>
-                                <td>12 min ago</td>
-                                <td><span style="color: var(--accent-gold);">New bet placed</span></td>
-                                <td>High Stakes Showdown</td>
-                                <td>@sarah_r</td>
-                            </tr>
-                            <tr>
-                                <td>23 min ago</td>
-                                <td>Payment received</td>
-                                <td>Office Champions</td>
-                                <td>@sarah_k</td>
-                            </tr>
-                            <tr>
-                                <td>1 hour ago</td>
-                                <td>New entry submitted</td>
-                                <td>High Rollers League</td>
-                                <td>@tom_b</td>
-                            </tr>
-                            <tr>
-                                <td>2 hours ago</td>
-                                <td>Entry updated</td>
-                                <td>Clarkside Pool 2025</td>
-                                <td>@chris_w</td>
+                                <td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-muted);">No recent activity</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1819,9 +1786,6 @@
                         <input type="text" class="form-control search-input" placeholder="Search entries...">
                         <select class="form-control" style="width: 200px;" id="poolFilter">
                             <option value="">All Pools</option>
-                            <option value="clarkside">Clarkside Pool 2025</option>
-                            <option value="office">Office Champions</option>
-                            <option value="highrollers">High Rollers League</option>
                         </select>
                         <select class="form-control" style="width: 150px;">
                             <option value="">All Payment</option>
@@ -1841,68 +1805,9 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="entriesTableBody">
                             <tr>
-                                <td><strong>Stephen's Squad</strong></td>
-                                <td>@stephen</td>
-                                <td>Clarkside Pool 2025</td>
-                                <td>48</td>
-                                <td>82.1</td>
-                                <td><span class="status-badge paid">Paid</span></td>
-                                <td>
-                                    <div class="action-btns">
-                                        <button class="action-btn" title="View Roster" onclick="openEntryDetailModal()">👁</button>
-                                        <button class="action-btn" title="Edit">✏️</button>
-                                        <button class="action-btn danger" title="Delete">🗑</button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>MJ's Picks</strong></td>
-                                <td>@mjohnson</td>
-                                <td>Clarkside Pool 2025</td>
-                                <td>52</td>
-                                <td>87.5</td>
-                                <td><span class="status-badge paid">Paid</span></td>
-                                <td>
-                                    <div class="action-btns">
-                                        <button class="action-btn" title="View Roster">👁</button>
-                                        <button class="action-btn" title="Edit">✏️</button>
-                                        <button class="action-btn danger" title="Delete">🗑</button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>Tom's Team</strong></td>
-                                <td>@tomclark</td>
-                                <td>Clarkside Pool 2025</td>
-                                <td>44</td>
-                                <td>79.8</td>
-                                <td><span class="status-badge unpaid">Unpaid</span></td>
-                                <td>
-                                    <div class="action-btns">
-                                        <button class="action-btn" title="View Roster">👁</button>
-                                        <button class="action-btn" title="Edit">✏️</button>
-                                        <button class="action-btn" title="Mark Paid" onclick="markPaid(this)">💰</button>
-                                        <button class="action-btn danger" title="Delete">🗑</button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>Wildcard Winners</strong></td>
-                                <td>@jwilson</td>
-                                <td>Office Champions</td>
-                                <td>51</td>
-                                <td>76.4</td>
-                                <td><span class="status-badge unpaid">Unpaid</span></td>
-                                <td>
-                                    <div class="action-btns">
-                                        <button class="action-btn" title="View Roster">👁</button>
-                                        <button class="action-btn" title="Edit">✏️</button>
-                                        <button class="action-btn" title="Mark Paid" onclick="markPaid(this)">💰</button>
-                                        <button class="action-btn danger" title="Delete">🗑</button>
-                                    </div>
-                                </td>
+                                <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">No entries yet</td>
                             </tr>
                         </tbody>
                     </table>
@@ -2277,19 +2182,19 @@
                 <div class="stats-grid">
                     <div class="stat-card green">
                         <div class="stat-label">Total Collected</div>
-                        <div class="stat-value">$1,050</div>
+                        <div class="stat-value" id="paymentsCollected">$0</div>
                     </div>
                     <div class="stat-card orange">
                         <div class="stat-label">Outstanding</div>
-                        <div class="stat-value">$125</div>
+                        <div class="stat-value" id="paymentsOutstanding">$0</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">Paid Entries</div>
-                        <div class="stat-value">42</div>
+                        <div class="stat-value" id="paymentsPaidCount">0</div>
                     </div>
                     <div class="stat-card gold">
                         <div class="stat-label">Unpaid Entries</div>
-                        <div class="stat-value">5</div>
+                        <div class="stat-value" id="paymentsUnpaidCount">0</div>
                     </div>
                 </div>
 
@@ -2308,42 +2213,9 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="unpaidEntriesTable">
                             <tr>
-                                <td><strong>Tom's Team</strong></td>
-                                <td>@tomclark</td>
-                                <td>Clarkside Pool 2025</td>
-                                <td>$25</td>
-                                <td>
-                                    <div class="action-btns">
-                                        <button class="btn btn-sm btn-primary" onclick="markPaid(this)">Mark Paid</button>
-                                        <button class="action-btn" title="Send Reminder">📧</button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>Wildcard Winners</strong></td>
-                                <td>@jwilson</td>
-                                <td>Office Champions</td>
-                                <td>$50</td>
-                                <td>
-                                    <div class="action-btns">
-                                        <button class="btn btn-sm btn-primary" onclick="markPaid(this)">Mark Paid</button>
-                                        <button class="action-btn" title="Send Reminder">📧</button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>Kelly's Killers</strong></td>
-                                <td>@kelly</td>
-                                <td>Clarkside Pool 2025</td>
-                                <td>$25</td>
-                                <td>
-                                    <div class="action-btns">
-                                        <button class="btn btn-sm btn-primary" onclick="markPaid(this)">Mark Paid</button>
-                                        <button class="action-btn" title="Send Reminder">📧</button>
-                                    </div>
-                                </td>
+                                <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">No unpaid entries</td>
                             </tr>
                         </tbody>
                     </table>
@@ -2374,64 +2246,13 @@
                                 <th>User</th>
                                 <th>Email</th>
                                 <th>Role</th>
-                                <th>Entries</th>
                                 <th>Joined</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="usersTableBody">
                             <tr>
-                                <td>
-                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.75rem;">AD</div>
-                                        <strong>Admin User</strong>
-                                    </div>
-                                </td>
-                                <td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="650401080c0b25001d04081509004b060a08">[email&#160;protected]</a></td>
-                                <td><span class="status-badge" style="background: rgba(255,193,7,0.15); color: var(--accent-gold);">Admin</span></td>
-                                <td>3</td>
-                                <td>Dec 15, 2024</td>
-                                <td>
-                                    <div class="action-btns">
-                                        <button class="action-btn" title="Edit">✏️</button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.75rem; background: var(--tertiary-dark);">SD</div>
-                                        <strong>Stephen D.</strong>
-                                    </div>
-                                </td>
-                                <td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="26555243564e434866435e474b564a430845494b">[email&#160;protected]</a></td>
-                                <td><span class="status-badge" style="background: rgba(255,255,255,0.1);">User</span></td>
-                                <td>2</td>
-                                <td>Jan 2, 2025</td>
-                                <td>
-                                    <div class="action-btns">
-                                        <button class="action-btn" title="Edit">✏️</button>
-                                        <button class="action-btn" title="Make Admin">👑</button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.75rem; background: var(--tertiary-dark);">MJ</div>
-                                        <strong>Mike Johnson</strong>
-                                    </div>
-                                </td>
-                                <td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e4898d8f81a4819c8589948881ca878b89">[email&#160;protected]</a></td>
-                                <td><span class="status-badge" style="background: rgba(255,255,255,0.1);">User</span></td>
-                                <td>1</td>
-                                <td>Jan 5, 2025</td>
-                                <td>
-                                    <div class="action-btns">
-                                        <button class="action-btn" title="Edit">✏️</button>
-                                        <button class="action-btn" title="Make Admin">👑</button>
-                                    </div>
-                                </td>
+                                <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">Loading users...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -2447,8 +2268,7 @@
                     </div>
                     <div style="display: flex; gap: 1rem;">
                         <select class="form-control" style="width: 220px;" id="bettingPoolSelect">
-                            <option value="highstakes">High Stakes Showdown</option>
-                            <option value="office-bet">Office Betting Pool</option>
+                            <option value="">Select a pool</option>
                         </select>
                         <button class="btn btn-primary" onclick="showSection('betting-lines')">
                             <span>📊</span> Manage Lines
@@ -2459,22 +2279,22 @@
                 <div class="betting-stats-grid">
                     <div class="betting-stat-card">
                         <div class="stat-icon">👥</div>
-                        <div class="stat-value">24</div>
+                        <div class="stat-value" id="bettingPlayers">0</div>
                         <div class="stat-label">Players</div>
                     </div>
                     <div class="betting-stat-card">
                         <div class="stat-icon">🎯</div>
-                        <div class="stat-value">47</div>
+                        <div class="stat-value" id="bettingActiveBets">0</div>
                         <div class="stat-label">Active Bets</div>
                     </div>
                     <div class="betting-stat-card">
                         <div class="stat-icon">💵</div>
-                        <div class="stat-value" style="color: var(--accent-green);">$4,820</div>
+                        <div class="stat-value" style="color: var(--accent-green);" id="bettingTotalWagered">$0</div>
                         <div class="stat-label">Total Wagered</div>
                     </div>
                     <div class="betting-stat-card">
                         <div class="stat-icon">🏆</div>
-                        <div class="stat-value" style="color: var(--accent-gold);">$1,892</div>
+                        <div class="stat-value" style="color: var(--accent-gold);" id="bettingTopBankroll">$0</div>
                         <div class="stat-label">Top Bankroll</div>
                     </div>
                     <div class="betting-stat-card">
@@ -2501,139 +2321,9 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="bankrollsTableBody">
                             <tr>
-                                <td><strong style="color: var(--accent-gold);">1</strong></td>
-                                <td>
-                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.75rem;">TK</div>
-                                        <strong>Tom K.</strong>
-                                    </div>
-                                </td>
-                                <td><span class="bankroll-amount" style="color: var(--accent-green);">$1,892</span></td>
-                                <td><span class="bankroll-change positive">+$892</span></td>
-                                <td>3</td>
-                                <td>72%</td>
-                                <td>
-                                    <div class="action-btns">
-                                        <button class="action-btn" title="View Bets">🎯</button>
-                                        <button class="action-btn" title="Adjust Bankroll">💰</button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>2</strong></td>
-                                <td>
-                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.75rem; background: var(--tertiary-dark);">MJ</div>
-                                        <strong>Mike J.</strong>
-                                    </div>
-                                </td>
-                                <td><span class="bankroll-amount" style="color: var(--accent-green);">$1,654</span></td>
-                                <td><span class="bankroll-change positive">+$654</span></td>
-                                <td>2</td>
-                                <td>68%</td>
-                                <td>
-                                    <div class="action-btns">
-                                        <button class="action-btn" title="View Bets">🎯</button>
-                                        <button class="action-btn" title="Adjust Bankroll">💰</button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>3</strong></td>
-                                <td>
-                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.75rem; background: var(--tertiary-dark);">SR</div>
-                                        <strong>Sarah R.</strong>
-                                    </div>
-                                </td>
-                                <td><span class="bankroll-amount" style="color: var(--accent-green);">$1,445</span></td>
-                                <td><span class="bankroll-change positive">+$445</span></td>
-                                <td>4</td>
-                                <td>62%</td>
-                                <td>
-                                    <div class="action-btns">
-                                        <button class="action-btn" title="View Bets">🎯</button>
-                                        <button class="action-btn" title="Adjust Bankroll">💰</button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>4</strong></td>
-                                <td>
-                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.75rem; background: var(--tertiary-dark);">JW</div>
-                                        <strong>Jake W.</strong>
-                                    </div>
-                                </td>
-                                <td><span class="bankroll-amount" style="color: var(--accent-blue);">$1,280</span></td>
-                                <td><span class="bankroll-change positive">+$280</span></td>
-                                <td>2</td>
-                                <td>58%</td>
-                                <td>
-                                    <div class="action-btns">
-                                        <button class="action-btn" title="View Bets">🎯</button>
-                                        <button class="action-btn" title="Adjust Bankroll">💰</button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>5</strong></td>
-                                <td>
-                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.75rem;">SD</div>
-                                        <strong>Stephen D.</strong>
-                                    </div>
-                                </td>
-                                <td><span class="bankroll-amount" style="color: var(--accent-blue);">$1,247</span></td>
-                                <td><span class="bankroll-change positive">+$247</span></td>
-                                <td>1</td>
-                                <td>55%</td>
-                                <td>
-                                    <div class="action-btns">
-                                        <button class="action-btn" title="View Bets">🎯</button>
-                                        <button class="action-btn" title="Adjust Bankroll">💰</button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>6</strong></td>
-                                <td>
-                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.75rem; background: var(--tertiary-dark);">CL</div>
-                                        <strong>Chris L.</strong>
-                                    </div>
-                                </td>
-                                <td><span class="bankroll-amount">$980</span></td>
-                                <td><span class="bankroll-change negative">-$20</span></td>
-                                <td>3</td>
-                                <td>48%</td>
-                                <td>
-                                    <div class="action-btns">
-                                        <button class="action-btn" title="View Bets">🎯</button>
-                                        <button class="action-btn" title="Adjust Bankroll">💰</button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>7</strong></td>
-                                <td>
-                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.75rem; background: var(--tertiary-dark);">BP</div>
-                                        <strong>Brian P.</strong>
-                                    </div>
-                                </td>
-                                <td><span class="bankroll-amount" style="color: var(--accent-red);">$745</span></td>
-                                <td><span class="bankroll-change negative">-$255</span></td>
-                                <td>2</td>
-                                <td>38%</td>
-                                <td>
-                                    <div class="action-btns">
-                                        <button class="action-btn" title="View Bets">🎯</button>
-                                        <button class="action-btn" title="Adjust Bankroll">💰</button>
-                                    </div>
-                                </td>
+                                <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">No players in this pool yet</td>
                             </tr>
                         </tbody>
                     </table>
@@ -2836,17 +2526,8 @@
                 <div class="data-card">
                     <div class="filter-bar">
                         <input type="text" class="form-control search-input" placeholder="Search player or bet...">
-                        <select class="form-control" style="width: 180px;">
+                        <select class="form-control" style="width: 180px;" id="betPoolFilter">
                             <option value="">All Pools</option>
-                            <option value="highstakes">High Stakes Showdown</option>
-                            <option value="office-bet">Office Betting Pool</option>
-                        </select>
-                        <select class="form-control" style="width: 150px;">
-                            <option value="">All Games</option>
-                            <option value="lac-hou">LAC @ HOU</option>
-                            <option value="pit-bal">PIT @ BAL</option>
-                            <option value="den-buf">DEN @ BUF</option>
-                            <option value="gb-phi">GB @ PHI</option>
                         </select>
                         <select class="form-control" style="width: 130px;">
                             <option value="">All Results</option>
@@ -2866,104 +2547,9 @@
                             <div>Result</div>
                         </div>
                     </div>
-                    <div>
-                        <div class="bet-history-item">
-                            <div class="bet-user">
-                                <div class="bet-user-avatar">TK</div>
-                                <span>Tom K.</span>
-                            </div>
-                            <div class="bet-pick">
-                                <div>BAL -9.5</div>
-                                <div class="bet-pick-game">PIT @ BAL • Spread</div>
-                            </div>
-                            <div class="bet-wager">$200</div>
-                            <div class="bet-to-win">$182</div>
-                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Jan 9, 2:34 PM</div>
-                            <div><span class="bet-result pending">Pending</span></div>
-                        </div>
-                        <div class="bet-history-item">
-                            <div class="bet-user">
-                                <div class="bet-user-avatar">MJ</div>
-                                <span>Mike J.</span>
-                            </div>
-                            <div class="bet-pick">
-                                <div>HOU -2.5</div>
-                                <div class="bet-pick-game">LAC @ HOU • Spread</div>
-                            </div>
-                            <div class="bet-wager">$150</div>
-                            <div class="bet-to-win">$136</div>
-                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Jan 9, 1:22 PM</div>
-                            <div><span class="bet-result pending">Pending</span></div>
-                        </div>
-                        <div class="bet-history-item">
-                            <div class="bet-user">
-                                <div class="bet-user-avatar">SR</div>
-                                <span>Sarah R.</span>
-                            </div>
-                            <div class="bet-pick">
-                                <div>LAC ML</div>
-                                <div class="bet-pick-game">LAC @ HOU • Moneyline</div>
-                            </div>
-                            <div class="bet-wager">$100</div>
-                            <div class="bet-to-win">$118</div>
-                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Jan 9, 11:45 AM</div>
-                            <div><span class="bet-result pending">Pending</span></div>
-                        </div>
-                        <div class="bet-history-item">
-                            <div class="bet-user">
-                                <div class="bet-user-avatar">SD</div>
-                                <span>Stephen D.</span>
-                            </div>
-                            <div class="bet-pick">
-                                <div>PHI -4.5</div>
-                                <div class="bet-pick-game">GB @ PHI • Spread</div>
-                            </div>
-                            <div class="bet-wager">$100</div>
-                            <div class="bet-to-win">$91</div>
-                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Jan 9, 10:18 AM</div>
-                            <div><span class="bet-result pending">Pending</span></div>
-                        </div>
-                        <div class="bet-history-item">
-                            <div class="bet-user">
-                                <div class="bet-user-avatar">CL</div>
-                                <span>Chris L.</span>
-                            </div>
-                            <div class="bet-pick">
-                                <div>BUF -8.5</div>
-                                <div class="bet-pick-game">DEN @ BUF • Spread</div>
-                            </div>
-                            <div class="bet-wager">$250</div>
-                            <div class="bet-to-win">$227</div>
-                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Jan 8, 9:44 PM</div>
-                            <div><span class="bet-result pending">Pending</span></div>
-                        </div>
-                        <div class="bet-history-item">
-                            <div class="bet-user">
-                                <div class="bet-user-avatar">JW</div>
-                                <span>Jake W.</span>
-                            </div>
-                            <div class="bet-pick">
-                                <div>PIT +9.5</div>
-                                <div class="bet-pick-game">PIT @ BAL • Spread</div>
-                            </div>
-                            <div class="bet-wager">$175</div>
-                            <div class="bet-to-win">$159</div>
-                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Jan 8, 8:15 PM</div>
-                            <div><span class="bet-result pending">Pending</span></div>
-                        </div>
-                        <div class="bet-history-item">
-                            <div class="bet-user">
-                                <div class="bet-user-avatar">BP</div>
-                                <span>Brian P.</span>
-                            </div>
-                            <div class="bet-pick">
-                                <div>GB ML</div>
-                                <div class="bet-pick-game">GB @ PHI • Moneyline</div>
-                            </div>
-                            <div class="bet-wager">$100</div>
-                            <div class="bet-to-win">$180</div>
-                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Jan 8, 6:30 PM</div>
-                            <div><span class="bet-result pending">Pending</span></div>
+                    <div id="allBetsContainer">
+                        <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                            No bets placed yet
                         </div>
                     </div>
                 </div>
@@ -3159,34 +2745,21 @@
             <div class="modal-body">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
                     <div>
-                        <h4 style="font-family: 'Oswald', sans-serif; font-size: 1.25rem;">Stephen's Squad</h4>
-                        <p style="color: var(--text-secondary);">@stephen • Clarkside Pool 2025</p>
+                        <h4 style="font-family: 'Oswald', sans-serif; font-size: 1.25rem;" id="entryDetailName">Entry Name</h4>
+                        <p style="color: var(--text-secondary);" id="entryDetailMeta">Loading...</p>
                     </div>
                     <div style="text-align: right;">
-                        <div style="font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--accent-blue);">82.1</div>
+                        <div style="font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--accent-blue);" id="entryDetailPoints">--</div>
                         <div style="font-size: 0.8rem; color: var(--text-secondary);">Total Points</div>
                     </div>
                 </div>
                 <div style="background: var(--tertiary-dark); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
                     <span style="color: var(--text-secondary); font-size: 0.85rem;">Tiebreaker:</span>
-                    <span style="font-family: 'Bebas Neue', sans-serif; font-size: 1.25rem; margin-left: 0.5rem;">48 points</span>
+                    <span style="font-family: 'Bebas Neue', sans-serif; font-size: 1.25rem; margin-left: 0.5rem;" id="entryDetailTiebreaker">--</span>
                 </div>
                 <h5 style="font-family: 'Oswald', sans-serif; margin-bottom: 0.75rem; color: var(--text-secondary);">ROSTER</h5>
-                <div class="entry-detail-roster">
-                    <div class="entry-player"><span class="pos">QB</span> P. Mahomes (KC)</div>
-                    <div class="entry-player"><span class="pos">QB</span> L. Jackson (BAL)</div>
-                    <div class="entry-player"><span class="pos">RB</span> J. Gibbs (DET)</div>
-                    <div class="entry-player"><span class="pos">RB</span> S. Barkley (PHI)</div>
-                    <div class="entry-player"><span class="pos">RB</span> J. Jacobs (GB)</div>
-                    <div class="entry-player"><span class="pos">RB</span> J. Williams (DEN)</div>
-                    <div class="entry-player"><span class="pos">WR</span> J. Jefferson (MIN)</div>
-                    <div class="entry-player"><span class="pos">WR</span> A. Cooper (BUF)</div>
-                    <div class="entry-player"><span class="pos">WR</span> N. Collins (HOU)</div>
-                    <div class="entry-player"><span class="pos">WR</span> P. Nacua (LAR)</div>
-                    <div class="entry-player"><span class="pos">TE</span> P. Freiermuth (PIT)</div>
-                    <div class="entry-player"><span class="pos">TE</span> C. Otton (TB)</div>
-                    <div class="entry-player"><span class="pos">K</span> A. Seibert (WAS)</div>
-                    <div class="entry-player"><span class="pos">K</span> C. Dicker (LAC)</div>
+                <div class="entry-detail-roster" id="entryDetailRoster">
+                    <p style="color: var(--text-muted);">No roster data</p>
                 </div>
             </div>
             <div class="modal-footer">
@@ -3211,11 +2784,8 @@
                     </div>
                     <div class="form-group">
                         <label>Pool</label>
-                        <select class="form-control">
+                        <select class="form-control" id="manualEntryPoolSelect">
                             <option value="">Select Pool</option>
-                            <option value="clarkside">Clarkside Pool 2025</option>
-                            <option value="office">Office Champions</option>
-                            <option value="highrollers">High Rollers League</option>
                         </select>
                     </div>
                 </div>
