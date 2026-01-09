@@ -1062,13 +1062,13 @@
     <!-- Header -->
     <header>
         <nav>
-            <a href="index.html" class="logo">
+            <a href="home.html" class="logo">
                 <div class="logo-icon">GP</div>
                 <span class="logo-text">Gridiron<span>Pools</span></span>
             </a>
             <div class="nav-user" id="navUser">
                 <div class="auth-buttons" id="authButtons" style="display: none;">
-                    <a href="index.html" style="color: var(--accent-blue); text-decoration: none; font-size: 0.9rem;">Log In</a>
+                    <a href="home.html" style="color: var(--accent-blue); text-decoration: none; font-size: 0.9rem;">Log In</a>
                 </div>
                 <div id="userLoggedIn" style="display: flex; align-items: center; gap: 1rem;">
                     <div class="bankroll-display">
@@ -1389,7 +1389,7 @@
                 if (authButtons) authButtons.style.display = 'flex';
                 if (userLoggedIn) userLoggedIn.style.display = 'none';
                 // Redirect to login
-                window.location.href = 'index.html';
+                window.location.href = 'home.html';
             }
         });
 
@@ -1967,7 +1967,7 @@
             const user = auth.currentUser;
             if (!user) {
                 alert('Please log in to place bets');
-                window.location.href = 'index.html';
+                window.location.href = 'home.html';
                 return;
             }
 

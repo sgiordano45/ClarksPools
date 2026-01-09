@@ -3,25 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gridiron Pools | NFL Playoff Fantasy Pools</title>
+    <title>Clark's Pool Service | Professional Pool Cleaning & Maintenance</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto+Condensed:wght@300;400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-dark: #0a1628;
-            --secondary-dark: #132238;
-            --accent-blue: #00d4ff;
-            --accent-gold: #ffc107;
-            --accent-green: #00c853;
-            --text-primary: #ffffff;
-            --text-secondary: #8ba3c7;
-            --gradient-field: linear-gradient(135deg, #1a472a 0%, #2d5a3d 50%, #1a472a 100%);
-            --gradient-hero: linear-gradient(180deg, rgba(10,22,40,0.95) 0%, rgba(19,34,56,0.98) 100%);
-            --card-bg: rgba(255,255,255,0.03);
-            --card-border: rgba(255,255,255,0.08);
-            --glow-blue: 0 0 40px rgba(0,212,255,0.3);
-            --glow-gold: 0 0 30px rgba(255,193,7,0.4);
+            --primary-blue: #0077b6;
+            --light-blue: #00b4d8;
+            --sky-blue: #90e0ef;
+            --pale-blue: #caf0f8;
+            --dark-blue: #023e8a;
+            --white: #ffffff;
+            --gray-light: #f8f9fa;
+            --gray: #6c757d;
+            --gray-dark: #343a40;
         }
 
         * {
@@ -31,53 +27,24 @@
         }
 
         body {
-            font-family: 'Roboto Condensed', sans-serif;
-            background: var(--primary-dark);
-            color: var(--text-primary);
-            min-height: 100vh;
-            overflow-x: hidden;
+            font-family: 'Open Sans', sans-serif;
+            color: var(--gray-dark);
+            line-height: 1.6;
         }
 
-        /* Animated field pattern background */
-        .field-pattern {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                repeating-linear-gradient(
-                    90deg,
-                    transparent,
-                    transparent 80px,
-                    rgba(255,255,255,0.02) 80px,
-                    rgba(255,255,255,0.02) 82px
-                ),
-                repeating-linear-gradient(
-                    0deg,
-                    transparent,
-                    transparent 120px,
-                    rgba(255,255,255,0.015) 120px,
-                    rgba(255,255,255,0.015) 122px
-                );
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        /* Header/Navigation */
+        /* Header */
         header {
+            background: var(--white);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 1000;
-            background: rgba(10,22,40,0.95);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--card-border);
         }
 
         nav {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 1rem 2rem;
             display: flex;
@@ -90,344 +57,142 @@
             align-items: center;
             gap: 0.75rem;
             text-decoration: none;
+            cursor: pointer;
+            user-select: none;
         }
 
         .logo-icon {
-            width: 48px;
-            height: 48px;
-            background: var(--gradient-field);
-            border-radius: 8px;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--light-blue), var(--primary-blue));
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo-icon::before {
+            content: '~';
+            font-size: 2rem;
             color: white;
-            box-shadow: var(--glow-blue);
-            border: 2px solid rgba(0,212,255,0.3);
+            animation: wave 2s ease-in-out infinite;
+        }
+
+        @keyframes wave {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
         }
 
         .logo-text {
-            font-family: 'Oswald', sans-serif;
-            font-size: 1.75rem;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.5rem;
             font-weight: 700;
-            color: var(--text-primary);
-            letter-spacing: 2px;
-            text-transform: uppercase;
+            color: var(--dark-blue);
         }
 
         .logo-text span {
-            color: var(--accent-blue);
+            color: var(--light-blue);
         }
 
         .nav-links {
             display: flex;
-            align-items: center;
             gap: 2rem;
+            list-style: none;
         }
 
         .nav-links a {
-            font-family: 'Oswald', sans-serif;
-            font-size: 0.95rem;
+            font-family: 'Montserrat', sans-serif;
             font-weight: 500;
-            color: var(--text-secondary);
+            color: var(--gray-dark);
             text-decoration: none;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: color 0.3s ease;
-            position: relative;
+            transition: color 0.3s;
         }
 
         .nav-links a:hover {
-            color: var(--accent-blue);
-        }
-
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -4px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--accent-blue);
-            transition: width 0.3s ease;
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-        .auth-buttons {
-            display: flex;
-            gap: 1rem;
+            color: var(--primary-blue);
         }
 
         .btn {
-            font-family: 'Oswald', sans-serif;
-            font-size: 0.9rem;
+            font-family: 'Montserrat', sans-serif;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
             padding: 0.75rem 1.5rem;
-            border-radius: 4px;
+            border-radius: 50px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
             text-decoration: none;
             border: none;
         }
 
-        .btn-outline {
-            background: transparent;
-            color: var(--text-primary);
-            border: 2px solid var(--card-border);
-        }
-
-        .btn-outline:hover {
-            border-color: var(--accent-blue);
-            color: var(--accent-blue);
-        }
-
         .btn-primary {
-            background: var(--accent-blue);
-            color: var(--primary-dark);
-            box-shadow: var(--glow-blue);
+            background: linear-gradient(135deg, var(--light-blue), var(--primary-blue));
+            color: white;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 0 50px rgba(0,212,255,0.5);
-        }
-
-        .btn-gold {
-            background: var(--accent-gold);
-            color: var(--primary-dark);
-            box-shadow: var(--glow-gold);
-        }
-
-        .btn-gold:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 50px rgba(255,193,7,0.6);
+            box-shadow: 0 4px 15px rgba(0,119,182,0.4);
         }
 
         /* Hero Section */
         .hero {
+            background: linear-gradient(135deg, var(--pale-blue) 0%, var(--sky-blue) 100%);
+            padding: 10rem 2rem 6rem;
             position: relative;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8rem 2rem 4rem;
-            background: var(--gradient-hero);
             overflow: hidden;
         }
 
         .hero::before {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle at 30% 40%, rgba(0,212,255,0.08) 0%, transparent 50%),
-                        radial-gradient(circle at 70% 60%, rgba(255,193,7,0.05) 0%, transparent 40%);
-            animation: heroGlow 15s ease-in-out infinite alternate;
-        }
-
-        @keyframes heroGlow {
-            0% { transform: translate(0, 0) rotate(0deg); }
-            100% { transform: translate(-5%, 5%) rotate(5deg); }
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 100'%3E%3Cpath fill='%23ffffff' d='M0,50 C360,100 1080,0 1440,50 L1440,100 L0,100 Z'/%3E%3C/svg%3E");
+            background-size: cover;
         }
 
         .hero-content {
-            position: relative;
-            z-index: 1;
             max-width: 1200px;
-            text-align: center;
-        }
-
-        .hero-badge {
-            display: inline-flex;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
             align-items: center;
-            gap: 0.5rem;
-            background: rgba(0,212,255,0.1);
-            border: 1px solid rgba(0,212,255,0.3);
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            font-size: 0.85rem;
-            color: var(--accent-blue);
-            margin-bottom: 2rem;
-            animation: fadeInDown 0.8s ease-out;
-        }
-
-        .hero-badge .live-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--accent-green);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.2); }
         }
 
         .hero h1 {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: clamp(3.5rem, 10vw, 8rem);
-            line-height: 0.95;
-            letter-spacing: 4px;
-            margin-bottom: 1.5rem;
-            animation: fadeInUp 0.8s ease-out 0.2s both;
-        }
-
-        .hero h1 .highlight {
-            color: var(--accent-blue);
-            text-shadow: var(--glow-blue);
-        }
-
-        .hero-subtitle {
-            font-family: 'Roboto Condensed', sans-serif;
-            font-size: 1.35rem;
-            font-weight: 300;
-            color: var(--text-secondary);
-            max-width: 600px;
-            margin: 0 auto 3rem;
-            line-height: 1.6;
-            animation: fadeInUp 0.8s ease-out 0.4s both;
-        }
-
-        .hero-cta {
-            display: flex;
-            justify-content: center;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-            animation: fadeInUp 0.8s ease-out 0.6s both;
-        }
-
-        .hero-cta .btn {
-            padding: 1rem 2.5rem;
-            font-size: 1rem;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Stats Bar */
-        .stats-bar {
-            position: relative;
-            background: var(--secondary-dark);
-            border-top: 1px solid var(--card-border);
-            border-bottom: 1px solid var(--card-border);
-            padding: 2rem 0;
-        }
-
-        .stats-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 2rem;
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-number {
-            font-family: 'Bebas Neue', sans-serif;
+            font-family: 'Montserrat', sans-serif;
             font-size: 3rem;
-            color: var(--accent-blue);
-            line-height: 1;
-        }
-
-        .stat-label {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-top: 0.5rem;
-        }
-
-        /* Active Pools Section */
-        .pools-section {
-            position: relative;
-            padding: 6rem 2rem;
-            background: var(--primary-dark);
-        }
-
-        .section-header {
-            text-align: center;
-            margin-bottom: 4rem;
-        }
-
-        .section-header h2 {
-            font-family: 'Oswald', sans-serif;
-            font-size: 2.5rem;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            margin-bottom: 1rem;
+            color: var(--dark-blue);
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
         }
 
-        .section-header p {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-            max-width: 600px;
-            margin: 0 auto;
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--gray);
+            margin-bottom: 2rem;
         }
 
-        .pools-grid {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 2rem;
-        }
-
-        .pool-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 12px;
-            overflow: hidden;
-            transition: all 0.4s ease;
+        .hero-image {
             position: relative;
         }
 
-        .pool-card:hover {
-            transform: translateY(-8px);
-            border-color: rgba(0,212,255,0.3);
-            box-shadow: 0 20px 60px rgba(0,0,0,0.4), var(--glow-blue);
-        }
-
-        .pool-card-header {
-            background: var(--gradient-field);
-            padding: 1.5rem;
+        .pool-graphic {
+            width: 100%;
+            height: 350px;
+            background: linear-gradient(180deg, var(--light-blue) 0%, var(--primary-blue) 100%);
+            border-radius: 20px;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,119,182,0.3);
         }
 
-        .pool-card-header::before {
+        .pool-graphic::before {
             content: '';
             position: absolute;
             top: 0;
@@ -436,1391 +201,564 @@
             bottom: 0;
             background: 
                 repeating-linear-gradient(
-                    0deg,
+                    90deg,
                     transparent,
-                    transparent 10px,
-                    rgba(255,255,255,0.03) 10px,
-                    rgba(255,255,255,0.03) 11px
+                    transparent 40px,
+                    rgba(255,255,255,0.1) 40px,
+                    rgba(255,255,255,0.1) 42px
                 );
+            animation: shimmer 3s linear infinite;
         }
 
-        .pool-type {
-            font-family: 'Oswald', sans-serif;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--accent-gold);
-            margin-bottom: 0.5rem;
-            position: relative;
+        @keyframes shimmer {
+            0% { transform: translateX(-50px); }
+            100% { transform: translateX(50px); }
         }
 
-        .pool-name {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 2rem;
-            letter-spacing: 2px;
-            position: relative;
-        }
-
-        .pool-status {
+        .pool-float {
             position: absolute;
-            top: 1rem;
-            right: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            background: rgba(0,0,0,0.4);
-            padding: 0.4rem 0.8rem;
-            border-radius: 50px;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .pool-status.active {
-            color: var(--accent-green);
-        }
-
-        .pool-status.upcoming {
-            color: var(--accent-gold);
-        }
-
-        .pool-status .status-dot {
-            width: 6px;
-            height: 6px;
+            width: 60px;
+            height: 60px;
+            background: #ff6b6b;
             border-radius: 50%;
-            background: currentColor;
+            top: 30%;
+            left: 20%;
+            animation: float 4s ease-in-out infinite;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
-        .pool-status.active .status-dot {
-            animation: pulse 2s infinite;
+        .pool-float::before {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
 
-        .pool-card-body {
-            padding: 1.5rem;
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(10px, -10px) rotate(5deg); }
+            50% { transform: translate(20px, 0) rotate(0deg); }
+            75% { transform: translate(10px, 10px) rotate(-5deg); }
         }
 
-        .pool-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .pool-detail {
-            background: rgba(255,255,255,0.02);
-            padding: 1rem;
-            border-radius: 8px;
-        }
-
-        .pool-detail-label {
-            font-size: 0.7rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 0.25rem;
-        }
-
-        .pool-detail-value {
-            font-family: 'Oswald', sans-serif;
-            font-size: 1.25rem;
-            font-weight: 600;
-        }
-
-        .pool-card-footer {
-            padding: 0 1.5rem 1.5rem;
-        }
-
-        .pool-card-footer .btn {
-            width: 100%;
-            text-align: center;
-        }
-
-        /* Pool Types Section */
-        .pool-types-section {
-            position: relative;
+        /* Services Section */
+        .services {
             padding: 6rem 2rem;
-            background: var(--secondary-dark);
+            background: var(--white);
         }
 
-        .pool-types-grid {
+        .section-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            color: var(--dark-blue);
+            margin-bottom: 1rem;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--gray);
+            margin-bottom: 4rem;
+            font-size: 1.1rem;
+        }
+
+        .services-grid {
             max-width: 1200px;
             margin: 0 auto;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .pool-type-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 12px;
-            padding: 2rem;
-            text-align: center;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .pool-type-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--accent-blue);
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-        }
-
-        .pool-type-card:hover::before {
-            transform: scaleX(1);
-        }
-
-        .pool-type-card:hover {
-            border-color: rgba(0,212,255,0.2);
-            background: rgba(255,255,255,0.05);
-        }
-
-        .pool-type-icon {
-            width: 64px;
-            height: 64px;
-            margin: 0 auto 1.5rem;
-            background: rgba(0,212,255,0.1);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-        }
-
-        .pool-type-card h3 {
-            font-family: 'Oswald', sans-serif;
-            font-size: 1.25rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 0.75rem;
-        }
-
-        .pool-type-card p {
-            font-size: 0.95rem;
-            color: var(--text-secondary);
-            line-height: 1.5;
-        }
-
-        .coming-soon-badge {
-            display: inline-block;
-            background: rgba(255,193,7,0.2);
-            color: var(--accent-gold);
-            font-size: 0.7rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: 0.25rem 0.75rem;
-            border-radius: 50px;
-            margin-top: 1rem;
-        }
-
-        /* How It Works */
-        .how-it-works {
-            position: relative;
-            padding: 6rem 2rem;
-            background: var(--primary-dark);
-        }
-
-        .steps-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
             gap: 2rem;
-            position: relative;
         }
 
-        .steps-container::before {
-            content: '';
-            position: absolute;
-            top: 40px;
-            left: 12.5%;
-            right: 12.5%;
-            height: 2px;
-            background: linear-gradient(90deg, var(--card-border), var(--accent-blue), var(--card-border));
-        }
-
-        .step {
+        .service-card {
+            background: var(--gray-light);
+            border-radius: 15px;
+            padding: 2.5rem;
             text-align: center;
-            position: relative;
+            transition: all 0.3s;
         }
 
-        .step-number {
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+        }
+
+        .service-icon {
             width: 80px;
             height: 80px;
-            margin: 0 auto 1.5rem;
-            background: var(--secondary-dark);
-            border: 2px solid var(--accent-blue);
+            background: linear-gradient(135deg, var(--sky-blue), var(--light-blue));
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Bebas Neue', sans-serif;
+            margin: 0 auto 1.5rem;
             font-size: 2rem;
-            color: var(--accent-blue);
-            position: relative;
-            z-index: 1;
         }
 
-        .step h3 {
-            font-family: 'Oswald', sans-serif;
-            font-size: 1.1rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 0.5rem;
+        .service-card h3 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.25rem;
+            color: var(--dark-blue);
+            margin-bottom: 1rem;
         }
 
-        .step p {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            line-height: 1.5;
-        }
-
-        /* How It Works Tabs */
-        .how-tabs {
-            display: flex;
-            justify-content: center;
-            gap: 0.5rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .how-tab {
-            padding: 0.75rem 1.5rem;
-            border-radius: 30px;
-            border: 2px solid var(--card-border);
-            background: transparent;
-            color: var(--text-secondary);
-            font-family: 'Oswald', sans-serif;
+        .service-card p {
+            color: var(--gray);
             font-size: 0.95rem;
+        }
+
+        /* Testimonials */
+        .testimonials {
+            padding: 6rem 2rem;
+            background: linear-gradient(135deg, var(--dark-blue), var(--primary-blue));
+            color: white;
+        }
+
+        .testimonials .section-title {
+            color: white;
+        }
+
+        .testimonials .section-subtitle {
+            color: var(--sky-blue);
+        }
+
+        .testimonial-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .testimonial-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .testimonial-card p {
+            font-style: italic;
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            background: var(--sky-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            color: var(--dark-blue);
         }
 
-        .how-tab:hover {
-            border-color: var(--accent-blue);
-            color: var(--accent-blue);
-        }
-
-        .how-tab.active {
-            background: linear-gradient(135deg, var(--accent-blue), #0099cc);
-            border-color: var(--accent-blue);
-            color: var(--primary-dark);
-        }
-
-        .how-content {
-            display: none;
-        }
-
-        .how-content.active {
+        .author-info strong {
             display: block;
-            animation: fadeIn 0.3s ease;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .author-info span {
+            font-size: 0.85rem;
+            color: var(--sky-blue);
         }
 
-        .how-cta {
+        /* Contact Section */
+        .contact {
+            padding: 6rem 2rem;
+            background: var(--gray-light);
+        }
+
+        .contact-content {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .contact-info {
             display: flex;
             justify-content: center;
-            gap: 1rem;
-            margin-top: 2rem;
+            gap: 3rem;
+            margin: 3rem 0;
             flex-wrap: wrap;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .contact-icon {
+            width: 45px;
+            height: 45px;
+            background: var(--primary-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
         }
 
         /* Footer */
         footer {
-            background: var(--secondary-dark);
-            border-top: 1px solid var(--card-border);
-            padding: 4rem 2rem 2rem;
+            background: var(--gray-dark);
+            color: white;
+            padding: 3rem 2rem;
         }
 
         .footer-content {
             max-width: 1200px;
             margin: 0 auto;
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 3rem;
-        }
-
-        .footer-brand .logo {
-            margin-bottom: 1rem;
-        }
-
-        .footer-brand p {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            line-height: 1.6;
-            max-width: 300px;
-        }
-
-        .footer-column h4 {
-            font-family: 'Oswald', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--text-primary);
-            margin-bottom: 1.5rem;
-        }
-
-        .footer-column ul {
-            list-style: none;
-        }
-
-        .footer-column li {
-            margin-bottom: 0.75rem;
-        }
-
-        .footer-column a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.95rem;
-            transition: color 0.3s ease;
-        }
-
-        .footer-column a:hover {
-            color: var(--accent-blue);
-        }
-
-        .footer-bottom {
-            max-width: 1200px;
-            margin: 3rem auto 0;
-            padding-top: 2rem;
-            border-top: 1px solid var(--card-border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
+            flex-wrap: wrap;
+            gap: 2rem;
         }
 
-        /* Login Modal */
-        .modal-overlay {
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-links a {
+            color: var(--gray);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--light-blue);
+        }
+
+        /* Hidden entrance - subtle employee link */
+        .employee-link {
+            color: var(--gray-dark) !important;
+            font-size: 0.75rem !important;
+            opacity: 0.3;
+            transition: opacity 0.3s;
+        }
+
+        .employee-link:hover {
+            opacity: 0.6;
+            color: var(--light-blue) !important;
+        }
+
+        /* Secret code modal */
+        .secret-modal {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
             background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(10px);
-            display: none;
+            z-index: 9999;
             align-items: center;
             justify-content: center;
-            z-index: 2000;
-            opacity: 0;
-            transition: opacity 0.3s ease;
         }
 
-        .modal-overlay.active {
+        .secret-modal.active {
             display: flex;
-            opacity: 1;
         }
 
-        .modal {
-            background: var(--secondary-dark);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            width: 100%;
-            max-width: 420px;
-            padding: 2.5rem;
-            position: relative;
-            transform: scale(0.9);
-            transition: transform 0.3s ease;
-        }
-
-        .modal-overlay.active .modal {
-            transform: scale(1);
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            width: 40px;
-            height: 40px;
-            background: rgba(255,255,255,0.05);
-            border: none;
-            border-radius: 50%;
-            color: var(--text-secondary);
-            font-size: 1.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .modal-close:hover {
-            background: rgba(255,255,255,0.1);
-            color: var(--text-primary);
-        }
-
-        .modal h2 {
-            font-family: 'Oswald', sans-serif;
-            font-size: 1.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 0.5rem;
-        }
-
-        .modal-subtitle {
-            color: var(--text-secondary);
-            margin-bottom: 2rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 1rem;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--card-border);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-size: 1rem;
-            font-family: 'Roboto Condensed', sans-serif;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--accent-blue);
-        }
-
-        .form-group input::placeholder {
-            color: var(--text-secondary);
-        }
-
-        .modal .btn {
-            width: 100%;
-            padding: 1rem;
-            margin-top: 0.5rem;
-        }
-
-        .modal-footer {
+        .secret-box {
+            background: var(--gray-dark);
+            padding: 2rem;
+            border-radius: 10px;
             text-align: center;
-            margin-top: 1.5rem;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
+            border: 2px solid var(--primary-blue);
         }
 
-        .modal-footer a {
-            color: var(--accent-blue);
-            text-decoration: none;
-        }
-
-        .modal-footer a:hover {
-            text-decoration: underline;
-        }
-
-        .auth-error {
-            background: rgba(255,82,82,0.15);
-            border: 1px solid rgba(255,82,82,0.4);
-            color: #ff5252;
-            padding: 0.75rem 1rem;
-            border-radius: 6px;
+        .secret-box h3 {
+            color: var(--light-blue);
             margin-bottom: 1rem;
-            font-size: 0.9rem;
+            font-family: 'Montserrat', sans-serif;
         }
 
-        .auth-divider {
-            display: flex;
-            align-items: center;
-            margin: 1.25rem 0;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-        }
-
-        .auth-divider::before,
-        .auth-divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--card-border);
-        }
-
-        .auth-divider span {
-            padding: 0 1rem;
-        }
-
-        .btn-google {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1.5rem;
-            background: white;
-            color: #333;
-            border: none;
-            border-radius: 4px;
-            font-family: 'Roboto Condensed', sans-serif;
-            font-size: 0.95rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-google:hover {
-            background: #f5f5f5;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        /* Admin indicator */
-        .admin-only-notice {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: rgba(255,193,7,0.1);
-            border: 1px solid rgba(255,193,7,0.3);
+        .secret-box input {
             padding: 0.75rem 1rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-            font-size: 0.85rem;
-            color: var(--accent-gold);
+            border: 2px solid var(--gray);
+            border-radius: 5px;
+            background: var(--gray-dark);
+            color: white;
+            font-size: 1rem;
+            width: 200px;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .secret-box input:focus {
+            outline: none;
+            border-color: var(--light-blue);
+        }
+
+        .secret-box button {
+            display: block;
+            width: 100%;
+        }
+
+        .secret-hint {
+            color: var(--gray);
+            font-size: 0.8rem;
+            margin-top: 1rem;
         }
 
         /* Responsive */
-        @media (max-width: 1024px) {
-            .stats-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .steps-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .steps-container::before {
-                display: none;
-            }
-
-            .footer-content {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
         @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-
-            .hero h1 {
-                font-size: 3rem;
-            }
-
-            .hero-cta {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .stats-container {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .pools-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .steps-container {
-                grid-template-columns: 1fr;
-                gap: 3rem;
-            }
-
-            .footer-content {
+            .hero-content {
                 grid-template-columns: 1fr;
                 text-align: center;
             }
 
-            .footer-brand p {
-                max-width: none;
+            .hero h1 {
+                font-size: 2rem;
             }
 
-            .footer-bottom {
+            .nav-links {
+                display: none;
+            }
+
+            .footer-content {
                 flex-direction: column;
-                gap: 1rem;
+                text-align: center;
             }
-        }
-
-        /* User Menu (when logged in) */
-        .user-menu {
-            display: none;
-            position: relative;
-        }
-
-        .user-menu.logged-in {
-            display: block;
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            background: var(--gradient-field);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Oswald', sans-serif;
-            font-weight: 600;
-            cursor: pointer;
-            border: 2px solid var(--accent-blue);
-        }
-
-        .user-dropdown {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            margin-top: 0.5rem;
-            background: var(--secondary-dark);
-            border: 1px solid var(--card-border);
-            border-radius: 8px;
-            min-width: 200px;
-            display: none;
-            overflow: hidden;
-        }
-
-        .user-menu:hover .user-dropdown {
-            display: block;
-        }
-
-        .user-dropdown a {
-            display: block;
-            padding: 0.75rem 1rem;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-        }
-
-        .user-dropdown a:hover {
-            background: rgba(255,255,255,0.05);
-            color: var(--text-primary);
-        }
-
-        .user-dropdown .admin-link {
-            color: var(--accent-gold);
-            border-top: 1px solid var(--card-border);
         }
     </style>
 </head>
 <body>
-    <div class="field-pattern"></div>
-
-    <!-- Header -->
     <header>
         <nav>
-            <a href="/" class="logo">
-                <div class="logo-icon">GP</div>
-                <span class="logo-text">Gridiron<span>Pools</span></span>
-            </a>
-            <div class="nav-links">
-                <a href="#pools">Active Pools</a>
-                <a href="#pool-types">Pool Types</a>
-                <a href="#how-it-works">How It Works</a>
-                <a href="boxes-pool.html">Super Bowl Boxes</a>
-                <a href="betting-pool.html">Betting Pool</a>
-                <a href="/rules.html">Rules</a>
+            <div class="logo" id="logo">
+                <div class="logo-icon"></div>
+                <span class="logo-text">Clark's <span>Pool</span> Service</span>
             </div>
-            <div class="auth-buttons" id="authButtons">
-                <button class="btn btn-outline" onclick="openModal('login')">Log In</button>
-                <button class="btn btn-primary" onclick="openModal('signup')">Sign Up</button>
-            </div>
-            <!-- User menu (shown when logged in) -->
-            <div class="user-menu" id="userMenu">
-                <div class="user-avatar" id="userAvatar">JD</div>
-                <div class="user-dropdown">
-                    <a href="/my-entries.html">My Entries</a>
-                    <a href="/my-pools.html">My Pools</a>
-                    <a href="/settings.html">Settings</a>
-                    <a href="admin.html" class="admin-link" id="adminLink" style="display: none;">Admin Panel</a>
-                    <a href="#" onclick="logout()">Log Out</a>
-                </div>
-            </div>
+            <ul class="nav-links">
+                <li><a href="#services">Services</a></li>
+                <li><a href="#testimonials">Reviews</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+            <a href="#contact" class="btn btn-primary">Get a Quote</a>
         </nav>
     </header>
 
-    <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
-            <div class="hero-badge">
-                <span class="live-dot"></span>
-                2025 NFL Playoffs Now Open
+            <div class="hero-text">
+                <h1>Crystal Clear Pools, Every Time</h1>
+                <p>Professional pool cleaning and maintenance services for residential and commercial properties. Keep your pool sparkling all season long.</p>
+                <a href="#contact" class="btn btn-primary">Schedule Service</a>
             </div>
-            <h1>DOMINATE YOUR<br><span class="highlight">PLAYOFF POOL</span></h1>
-            <p class="hero-subtitle">
-                Create or join NFL playoff fantasy pools with live scoring, 
-                real-time leaderboards, and competitive action throughout the postseason.
-            </p>
-            <div class="hero-cta">
-                <button class="btn btn-primary" onclick="openModal('signup')">Join a Pool</button>
-                <a href="#pools" class="btn btn-outline">View Active Pools</a>
+            <div class="hero-image">
+                <div class="pool-graphic">
+                    <div class="pool-float" id="secretFloat" title="Just a pool float..."></div>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Stats Bar -->
-    <div class="stats-bar">
-        <div class="stats-container">
-            <div class="stat-item">
-                <div class="stat-number" id="statPools">--</div>
-                <div class="stat-label">Active Pools</div>
+    <section class="services" id="services">
+        <h2 class="section-title">Our Services</h2>
+        <p class="section-subtitle">Comprehensive pool care tailored to your needs</p>
+        <div class="services-grid">
+            <div class="service-card">
+                <div class="service-icon">🧹</div>
+                <h3>Weekly Cleaning</h3>
+                <p>Regular maintenance including skimming, brushing, vacuuming, and chemical balancing to keep your pool pristine.</p>
             </div>
-            <div class="stat-item">
-                <div class="stat-number" id="statEntries">--</div>
-                <div class="stat-label">Total Entries</div>
+            <div class="service-card">
+                <div class="service-icon">🔧</div>
+                <h3>Equipment Repair</h3>
+                <p>Expert repair and maintenance for pumps, filters, heaters, and all pool equipment.</p>
             </div>
-            <div class="stat-item">
-                <div class="stat-number" id="statPrizes">--</div>
-                <div class="stat-label">Prize Money</div>
+            <div class="service-card">
+                <div class="service-icon">💧</div>
+                <h3>Water Testing</h3>
+                <p>Comprehensive water analysis and chemical treatment to ensure safe, balanced pool water.</p>
             </div>
-            <div class="stat-item">
-                <div class="stat-number" id="statTeams">14</div>
-                <div class="stat-label">Playoff Teams</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Active Pools Section -->
-    <section class="pools-section" id="pools">
-        <div class="section-header">
-            <h2>Active Pools</h2>
-            <p>Join an open pool or check the standings of pools in progress</p>
-        </div>
-        <div class="pools-grid" id="poolsGrid">
-            <!-- Pools loaded dynamically from Firebase -->
-            <div class="loading-pools" style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">
-                Loading pools...
+            <div class="service-card">
+                <div class="service-icon">🌿</div>
+                <h3>Opening & Closing</h3>
+                <p>Seasonal pool opening and winterization services to protect your investment year-round.</p>
             </div>
         </div>
     </section>
 
-    <!-- Pool Types Section -->
-    <section class="pool-types-section" id="pool-types">
-        <div class="section-header">
-            <h2>Pool Types</h2>
-            <p>Multiple ways to compete throughout the football season</p>
-        </div>
-        <div class="pool-types-grid">
-            <div class="pool-type-card">
-                <div class="pool-type-icon">🏈</div>
-                <h3>Playoff Fantasy</h3>
-                <p>Draft 14 players from playoff teams. Accumulate points throughout the postseason. Most points wins!</p>
-            </div>
-            <div class="pool-type-card" onclick="window.location.href='betting-pool.html'" style="cursor: pointer;">
-                <div class="pool-type-icon">💰</div>
-                <h3>Betting Pool</h3>
-                <p>Start with fake money and bet on playoff games against the spread or moneyline. Highest bankroll wins!</p>
-            </div>
-            <div class="pool-type-card" onclick="window.location.href='boxes-pool.html'" style="cursor: pointer;">
-                <div class="pool-type-icon">🎲</div>
-                <h3>Super Bowl Boxes</h3>
-                <p>Classic 10x10 grid game. Random numbers assigned after purchase. Win based on score digits.</p>
-            </div>
-            <div class="pool-type-card">
-                <div class="pool-type-icon">🏆</div>
-                <h3>Bracket Challenge</h3>
-                <p>Predict the entire playoff bracket. Points for correct picks with bonuses for upsets.</p>
-                <span class="coming-soon-badge">Coming Soon</span>
-            </div>
-        </div>
-    </section>
-
-    <!-- How It Works -->
-    <section class="how-it-works" id="how-it-works">
-        <div class="section-header">
-            <h2>How It Works</h2>
-            <p>Select a pool type to learn more</p>
-        </div>
-        
-        <!-- Pool Type Tabs -->
-        <div class="how-tabs">
-            <button class="how-tab active" data-pool="fantasy">🏈 Playoff Fantasy</button>
-            <button class="how-tab" data-pool="betting">💰 Betting Pool</button>
-            <button class="how-tab" data-pool="boxes">🎲 Super Bowl Boxes</button>
-        </div>
-        
-        <!-- Playoff Fantasy Content -->
-        <div class="how-content active" id="how-fantasy">
-            <div class="steps-container">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <h3>Join a Pool</h3>
-                    <p>Browse open pools or use an invite link from friends</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <h3>Draft Your Team</h3>
-                    <p>Pick 14 players - one from each of the 14 playoff teams</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <h3>Earn Points</h3>
-                    <p>Your players score points for TDs, yards, FGs, and more throughout the playoffs</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">4</div>
-                    <h3>Win the Pool</h3>
-                    <p>Highest total points at the end of the Super Bowl wins!</p>
+    <section class="testimonials" id="testimonials">
+        <h2 class="section-title">What Our Customers Say</h2>
+        <p class="section-subtitle">Trusted by homeowners across the community</p>
+        <div class="testimonial-grid">
+            <div class="testimonial-card">
+                <p>"Clark's Pool Service has been maintaining our pool for 3 years. Always reliable, always professional. Couldn't ask for better service!"</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">MJ</div>
+                    <div class="author-info">
+                        <strong>Mike Johnson</strong>
+                        <span>Residential Customer</span>
+                    </div>
                 </div>
             </div>
-            <div class="how-cta">
-                <a href="#pools" class="btn btn-primary">View Fantasy Pools</a>
-                <a href="rules.html" class="btn btn-outline">Full Scoring Rules</a>
-            </div>
-        </div>
-        
-        <!-- Betting Pool Content -->
-        <div class="how-content" id="how-betting">
-            <div class="steps-container">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <h3>Join a Pool</h3>
-                    <p>Enter a betting pool and receive your starting bankroll (fake money)</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <h3>Place Your Bets</h3>
-                    <p>Bet on playoff games against the spread or moneyline</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <h3>Track Results</h3>
-                    <p>Win bets to grow your bankroll, lose and it shrinks</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">4</div>
-                    <h3>Top the Leaderboard</h3>
-                    <p>Highest bankroll at the end of the playoffs wins the prize!</p>
+            <div class="testimonial-card">
+                <p>"We manage several properties with pools and Clark's handles all of them flawlessly. They're responsive, thorough, and fairly priced."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">SR</div>
+                    <div class="author-info">
+                        <strong>Sarah Rodriguez</strong>
+                        <span>Property Manager</span>
+                    </div>
                 </div>
             </div>
-            <div class="how-cta">
-                <a href="betting-pool.html" class="btn btn-primary">View Betting Pools</a>
-            </div>
-        </div>
-        
-        <!-- Super Bowl Boxes Content -->
-        <div class="how-content" id="how-boxes">
-            <div class="steps-container">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <h3>Buy Boxes</h3>
-                    <p>Claim squares on the 10x10 grid before the pool locks</p>
+            <div class="testimonial-card">
+                <p>"Fixed our pump issue same day when another company said it would take a week. These guys know their stuff and care about their customers."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">DW</div>
+                    <div class="author-info">
+                        <strong>David Wilson</strong>
+                        <span>Residential Customer</span>
+                    </div>
                 </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <h3>Numbers Drawn</h3>
-                    <p>Random numbers (0-9) are assigned to rows and columns after lock</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <h3>Watch the Game</h3>
-                    <p>Check the last digit of each team's score at each quarter</p>
-                </div>
-                <div class="step">
-                    <div class="step-number">4</div>
-                    <h3>Win Prizes</h3>
-                    <p>If your box matches the score digits at Q1, Half, Q3, or Final - you win!</p>
-                </div>
-            </div>
-            <div class="how-cta">
-                <a href="boxes-pool.html" class="btn btn-primary">View Boxes Pools</a>
             </div>
         </div>
     </section>
 
-    <!-- Footer -->
+    <section class="contact" id="contact">
+        <div class="contact-content">
+            <h2 class="section-title">Get In Touch</h2>
+            <p class="section-subtitle">Ready for a cleaner pool? Contact us today for a free estimate.</p>
+            <div class="contact-info">
+                <div class="contact-item">
+                    <div class="contact-icon">📞</div>
+                    <span>(555) 123-POOL</span>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon">✉️</div>
+                    <span>info@clarkspoolservice.com</span>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon">📍</div>
+                    <span>Serving the Greater Metro Area</span>
+                </div>
+            </div>
+            <a href="mailto:info@clarkspoolservice.com" class="btn btn-primary">Request a Quote</a>
+        </div>
+    </section>
+
     <footer>
         <div class="footer-content">
-            <div class="footer-brand">
-                <a href="/" class="logo">
-                    <div class="logo-icon">GP</div>
-                    <span class="logo-text">Gridiron<span>Pools</span></span>
-                </a>
-                <p>The ultimate platform for NFL playoff fantasy pools. Compete with friends, track live scores, and dominate the postseason.</p>
+            <span><a href="home.html" style="color: inherit; text-decoration: none;">&copy; 2024</a> Clark's Pool Service. All rights reserved.</span>
+            <div class="footer-links">
+                <a href="#services">Services</a>
+                <a href="#testimonials">Reviews</a>
+                <a href="#contact">Contact</a>
+                <a href="#" class="employee-link" id="employeeLogin">Employee Portal</a>
             </div>
-            <div class="footer-column">
-                <h4>Pools</h4>
-                <ul>
-                    <li><a href="#pools">Active Pools</a></li>
-                    <li><a href="#pool-types">Pool Types</a></li>
-                    <li><a href="boxes-pool.html">Super Bowl Boxes</a></li>
-                    <li><a href="betting-pool.html">Betting Pool</a></li>
-                    <li><a href="/rules.html">Scoring Rules</a></li>
-                </ul>
-            </div>
-            <div class="footer-column">
-                <h4>Account</h4>
-                <ul>
-                    <li><a href="#" onclick="openModal('login')">Log In</a></li>
-                    <li><a href="#" onclick="openModal('signup')">Sign Up</a></li>
-                    <li><a href="/my-entries.html">My Entries</a></li>
-                </ul>
-            </div>
-            <div class="footer-column">
-                <h4>Support</h4>
-                <ul>
-                    <li><a href="/faq.html">FAQ</a></li>
-                    <li><a href="/contact.html">Contact Us</a></li>
-                    <li><a href="/privacy.html">Privacy Policy</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <span>&copy; 2025 GridironPools. All rights reserved.</span>
-            <span>Not affiliated with the NFL.</span>
         </div>
     </footer>
 
-    <!-- Login Modal -->
-    <div class="modal-overlay" id="loginModal">
-        <div class="modal">
-            <button class="modal-close" onclick="closeModal('login')">&times;</button>
-            <h2>Welcome Back</h2>
-            <p class="modal-subtitle">Log in to access your pools and entries</p>
-            <div class="auth-error" id="loginError" style="display: none;"></div>
-            <form id="loginForm" onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label for="loginEmail">Email</label>
-                    <input type="email" id="loginEmail" placeholder="you@example.com" required>
-                </div>
-                <div class="form-group">
-                    <label for="loginPassword">Password</label>
-                    <input type="password" id="loginPassword" placeholder="••••••••" required>
-                </div>
-                <button type="submit" class="btn btn-primary" id="loginSubmitBtn">Log In</button>
-            </form>
-            <div class="auth-divider"><span>or</span></div>
-            <button class="btn btn-google" onclick="handleGoogleLogin()">
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/><path d="M9.003 18c2.43 0 4.467-.806 5.956-2.18l-2.909-2.26c-.806.54-1.836.86-3.047.86-2.344 0-4.328-1.584-5.036-3.711H.96v2.332C2.44 15.983 5.485 18 9.003 18z" fill="#34A853"/><path d="M3.964 10.712c-.18-.54-.282-1.117-.282-1.71 0-.593.102-1.17.282-1.71V4.96H.957C.347 6.175 0 7.55 0 9.002c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9.003 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.464.891 11.428 0 9.002 0 5.485 0 2.44 2.017.96 4.958L3.967 7.29c.708-2.127 2.692-3.71 5.036-3.71z" fill="#EA4335"/></svg>
-                Continue with Google
-            </button>
-            <div class="modal-footer">
-                <a href="#" onclick="handleForgotPassword()" style="margin-right: auto; font-size: 0.85rem;">Forgot password?</a>
-                Don't have an account? <a href="#" onclick="switchModal('login', 'signup')">Sign up</a>
-            </div>
+    <!-- Secret access modal -->
+    <div class="secret-modal" id="secretModal">
+        <div class="secret-box">
+            <h3>🏈 Employee Access</h3>
+            <input type="password" id="secretCode" placeholder="Enter access code" autocomplete="off">
+            <button class="btn btn-primary" onclick="checkCode()">Enter</button>
+            <p class="secret-hint">Hint: What do we really service?</p>
         </div>
     </div>
-
-    <!-- Signup Modal -->
-    <div class="modal-overlay" id="signupModal">
-        <div class="modal">
-            <button class="modal-close" onclick="closeModal('signup')">&times;</button>
-            <h2>Join the Action</h2>
-            <p class="modal-subtitle">Create an account to start competing</p>
-            <div class="auth-error" id="signupError" style="display: none;"></div>
-            <form id="signupForm" onsubmit="handleSignup(event)">
-                <div class="form-group">
-                    <label for="signupName">Display Name</label>
-                    <input type="text" id="signupName" placeholder="John D." required>
-                </div>
-                <div class="form-group">
-                    <label for="signupEmail">Email</label>
-                    <input type="email" id="signupEmail" placeholder="you@example.com" required>
-                </div>
-                <div class="form-group">
-                    <label for="signupPassword">Password</label>
-                    <input type="password" id="signupPassword" placeholder="Min. 6 characters" required minlength="6">
-                </div>
-                <button type="submit" class="btn btn-gold" id="signupSubmitBtn">Create Account</button>
-            </form>
-            <div class="auth-divider"><span>or</span></div>
-            <button class="btn btn-google" onclick="handleGoogleLogin()">
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/><path d="M9.003 18c2.43 0 4.467-.806 5.956-2.18l-2.909-2.26c-.806.54-1.836.86-3.047.86-2.344 0-4.328-1.584-5.036-3.711H.96v2.332C2.44 15.983 5.485 18 9.003 18z" fill="#34A853"/><path d="M3.964 10.712c-.18-.54-.282-1.117-.282-1.71 0-.593.102-1.17.282-1.71V4.96H.957C.347 6.175 0 7.55 0 9.002c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9.003 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.464.891 11.428 0 9.002 0 5.485 0 2.44 2.017.96 4.958L3.967 7.29c.708-2.127 2.692-3.71 5.036-3.71z" fill="#EA4335"/></svg>
-                Continue with Google
-            </button>
-            <div class="modal-footer">
-                Already have an account? <a href="#" onclick="switchModal('signup', 'login')">Log in</a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="js/firebase-config.js"></script>
 
     <script>
-        // Modal Functions
-        function openModal(type) {
-            document.getElementById(type + 'Modal').classList.add('active');
-            document.body.style.overflow = 'hidden';
-            // Clear any previous errors
-            hideError(type + 'Error');
-        }
-
-        function closeModal(type) {
-            document.getElementById(type + 'Modal').classList.remove('active');
-            document.body.style.overflow = '';
-        }
-
-        function switchModal(from, to) {
-            closeModal(from);
-            setTimeout(() => openModal(to), 200);
-        }
-
-        // Close modal on overlay click
-        document.querySelectorAll('.modal-overlay').forEach(overlay => {
-            overlay.addEventListener('click', (e) => {
-                if (e.target === overlay) {
-                    overlay.classList.remove('active');
-                    document.body.style.overflow = '';
-                }
-            });
-        });
-
-        // Close modal on escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                document.querySelectorAll('.modal-overlay.active').forEach(modal => {
-                    modal.classList.remove('active');
-                });
-                document.body.style.overflow = '';
+        // Secret entrance #1: Click the pool float 5 times
+        let floatClicks = 0;
+        const secretFloat = document.getElementById('secretFloat');
+        
+        secretFloat.addEventListener('click', () => {
+            floatClicks++;
+            if (floatClicks >= 5) {
+                window.location.href = 'home.html';
+            } else if (floatClicks >= 3) {
+                secretFloat.style.background = '#00d4ff';
             }
         });
 
-        // How It Works Tabs
-        document.querySelectorAll('.how-tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                // Remove active from all tabs
-                document.querySelectorAll('.how-tab').forEach(t => t.classList.remove('active'));
-                // Remove active from all content
-                document.querySelectorAll('.how-content').forEach(c => c.classList.remove('active'));
-                
-                // Add active to clicked tab
-                tab.classList.add('active');
-                // Show corresponding content
-                const poolType = tab.dataset.pool;
-                document.getElementById('how-' + poolType).classList.add('active');
-            });
-        });
-
-        // Error handling
-        function showError(elementId, message) {
-            const errorEl = document.getElementById(elementId);
-            if (errorEl) {
-                errorEl.textContent = message;
-                errorEl.style.display = 'block';
-            }
-        }
-
-        function hideError(elementId) {
-            const errorEl = document.getElementById(elementId);
-            if (errorEl) {
-                errorEl.style.display = 'none';
-            }
-        }
-
-        // Auth Handlers with Firebase
-        async function handleLogin(e) {
+        // Secret entrance #2: Click logo 7 times
+        let logoClicks = 0;
+        const logo = document.getElementById('logo');
+        
+        logo.addEventListener('click', (e) => {
             e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            const submitBtn = document.getElementById('loginSubmitBtn');
-            
-            hideError('loginError');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Logging in...';
-            
-            const result = await signInWithEmail(email, password);
-            
-            if (result.success) {
-                closeModal('login');
-                document.getElementById('loginForm').reset();
-            } else {
-                showError('loginError', result.error);
-            }
-            
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Log In';
-        }
-
-        async function handleSignup(e) {
-            e.preventDefault();
-            const name = document.getElementById('signupName').value;
-            const email = document.getElementById('signupEmail').value;
-            const password = document.getElementById('signupPassword').value;
-            const submitBtn = document.getElementById('signupSubmitBtn');
-            
-            hideError('signupError');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Creating account...';
-            
-            const result = await signUpWithEmail(email, password, name);
-            
-            if (result.success) {
-                closeModal('signup');
-                document.getElementById('signupForm').reset();
-            } else {
-                showError('signupError', result.error);
-            }
-            
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Create Account';
-        }
-
-        async function handleGoogleLogin() {
-            const result = await signInWithGoogle();
-            
-            if (result.success) {
-                closeModal('login');
-                closeModal('signup');
-            } else {
-                // Show error in whichever modal is open
-                const loginModal = document.getElementById('loginModal');
-                if (loginModal.classList.contains('active')) {
-                    showError('loginError', result.error);
-                } else {
-                    showError('signupError', result.error);
-                }
-            }
-        }
-
-        async function handleForgotPassword() {
-            const email = document.getElementById('loginEmail').value;
-            if (!email) {
-                showError('loginError', 'Please enter your email address first');
-                return;
-            }
-            
-            const result = await sendPasswordReset(email);
-            if (result.success) {
-                alert('Password reset email sent! Check your inbox.');
-            } else {
-                showError('loginError', result.error);
-            }
-        }
-
-        async function logout() {
-            await signOut();
-        }
-
-        // Override updateAuthUI from firebase-config.js for this page's specific elements
-        auth.onAuthStateChanged(async (user) => {
-            const authButtons = document.getElementById('authButtons');
-            const userMenu = document.getElementById('userMenu');
-            const userAvatar = document.getElementById('userAvatar');
-            const adminLink = document.getElementById('adminLink');
-            
-            if (user) {
-                // User is logged in
-                if (authButtons) authButtons.style.display = 'none';
-                if (userMenu) userMenu.classList.add('logged-in');
-                
-                const displayName = user.displayName || user.email.split('@')[0];
-                const initials = getUserInitials(displayName);
-                if (userAvatar) userAvatar.textContent = initials;
-                
-                // Check if user is admin
-                const userData = await getCurrentUserData();
-                if (adminLink) {
-                    adminLink.style.display = userData && userData.role === 'admin' ? 'block' : 'none';
-                }
-            } else {
-                // User is logged out
-                if (authButtons) authButtons.style.display = 'flex';
-                if (userMenu) userMenu.classList.remove('logged-in');
-                if (adminLink) adminLink.style.display = 'none';
+            logoClicks++;
+            if (logoClicks >= 3) {
+                window.location.href = 'home.html';
             }
         });
 
-        // Smooth scroll for anchor links
+        // Secret entrance #3: Employee portal with code
+        const employeeLogin = document.getElementById('employeeLogin');
+        const secretModal = document.getElementById('secretModal');
+        const secretCode = document.getElementById('secretCode');
+
+        employeeLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            secretModal.classList.add('active');
+            secretCode.focus();
+        });
+
+        secretModal.addEventListener('click', (e) => {
+            if (e.target === secretModal) {
+                secretModal.classList.remove('active');
+            }
+        });
+
+        secretCode.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkCode();
+            }
+        });
+
+        function checkCode() {
+            const code = secretCode.value.toLowerCase().trim();
+            // Accept various codes
+            const validCodes = ['pools', 'gridiron', 'football', 'nfl', 'touchdown', 'fantasy'];
+            if (validCodes.includes(code)) {
+                window.location.href = 'home.html';
+            } else {
+                secretCode.style.borderColor = '#ff6b6b';
+                secretCode.value = '';
+                setTimeout(() => {
+                    secretCode.style.borderColor = '';
+                }, 1000);
+            }
+        }
+
+        // Smooth scroll
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 const href = this.getAttribute('href');
-                if (href !== '#') {
+                if (href !== '#' && !this.classList.contains('employee-link')) {
                     e.preventDefault();
                     const target = document.querySelector(href);
                     if (target) {
-                        target.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
                 }
             });
         });
-
-        // Animate stats on scroll (removed hardcoded values - now loaded from Firebase)
-        const observerOptions = {
-            threshold: 0.5
-        };
-
-        const statsObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    // Stats are now loaded from Firebase via loadPools()
-                    statsObserver.unobserve(entry.target);
-                }
-            });
-        }, observerOptions);
-
-        const statsBar = document.querySelector('.stats-bar');
-        if (statsBar) {
-            statsObserver.observe(statsBar);
-        }
-
-        // Header scroll effect
-        let lastScroll = 0;
-        window.addEventListener('scroll', () => {
-            const header = document.querySelector('header');
-            const currentScroll = window.pageYOffset;
-            
-            if (currentScroll > 100) {
-                header.style.boxShadow = '0 4px 30px rgba(0,0,0,0.3)';
-            } else {
-                header.style.boxShadow = 'none';
-            }
-            
-            lastScroll = currentScroll;
-        });
-
-        // Load pools from Firebase
-        async function loadPools() {
-            try {
-                const poolsSnapshot = await db.collection('pools')
-                    .orderBy('createdAt', 'desc')
-                    .get();
-                
-                // Filter to open and live pools
-                const pools = poolsSnapshot.docs
-                    .map(doc => ({ id: doc.id, ...doc.data() }))
-                    .filter(pool => pool.status === 'open' || pool.status === 'live');
-                
-                renderPools(pools);
-                updateStats(pools);
-            } catch (error) {
-                console.error('Error loading pools:', error);
-                document.getElementById('poolsGrid').innerHTML = `
-                    <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">
-                        <p>Unable to load pools. Please try again later.</p>
-                    </div>
-                `;
-            }
-        }
-
-        function renderPools(pools) {
-            const grid = document.getElementById('poolsGrid');
-            
-            if (pools.length === 0) {
-                grid.innerHTML = `
-                    <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">
-                        <p style="font-size: 1.25rem; margin-bottom: 1rem;">No active pools yet</p>
-                        <p>Check back soon or create one from the Admin Panel!</p>
-                    </div>
-                `;
-                return;
-            }
-
-            grid.innerHTML = pools.map(pool => {
-                const statusClass = pool.status === 'live' ? 'active' : 'upcoming';
-                const statusText = pool.status === 'live' ? 'Live' : 'Open';
-                const typeLabel = pool.type === 'betting-pool' ? '💰 Betting Pool' : 'NFL Playoff Fantasy';
-                const prizePool = (pool.buyIn || 0) * (pool.entryCount || 0);
-                const maxEntries = pool.maxEntries === 0 ? '∞' : pool.maxEntries;
-                const viewPage = pool.type === 'betting-pool' ? 'betting-pool.html' : 'pool.html';
-                const buttonText = pool.status === 'live' ? 'View Standings' : 'Join Pool';
-                const buttonClass = pool.status === 'live' ? 'btn-outline' : 'btn-primary';
-
-                return `
-                    <div class="pool-card">
-                        <div class="pool-card-header">
-                            <span class="pool-status ${statusClass}">
-                                <span class="status-dot"></span>
-                                ${statusText}
-                            </span>
-                            <div class="pool-type">${typeLabel}</div>
-                            <h3 class="pool-name">${pool.name}</h3>
-                        </div>
-                        <div class="pool-card-body">
-                            <div class="pool-details">
-                                <div class="pool-detail">
-                                    <div class="pool-detail-label">Buy-In</div>
-                                    <div class="pool-detail-value">$${pool.buyIn || 0}</div>
-                                </div>
-                                <div class="pool-detail">
-                                    <div class="pool-detail-label">Entries</div>
-                                    <div class="pool-detail-value">${pool.entryCount || 0}/${maxEntries}</div>
-                                </div>
-                                <div class="pool-detail">
-                                    <div class="pool-detail-label">Prize Pool</div>
-                                    <div class="pool-detail-value">$${prizePool.toLocaleString()}</div>
-                                </div>
-                                <div class="pool-detail">
-                                    <div class="pool-detail-label">Commissioner</div>
-                                    <div class="pool-detail-value">${pool.commissionerName?.split(' ')[0] || 'Admin'}</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="pool-card-footer">
-                            <button class="btn ${buttonClass}" onclick="goToPool('${pool.id}', '${viewPage}')">${buttonText}</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function updateStats(pools) {
-            const totalPools = pools.length;
-            const totalEntries = pools.reduce((sum, p) => sum + (p.entryCount || 0), 0);
-            const totalPrize = pools.reduce((sum, p) => sum + ((p.buyIn || 0) * (p.entryCount || 0)), 0);
-
-            // Update the stats display
-            const statPools = document.getElementById('statPools');
-            const statEntries = document.getElementById('statEntries');
-            const statPrizes = document.getElementById('statPrizes');
-
-            if (statPools) statPools.textContent = totalPools;
-            if (statEntries) statEntries.textContent = totalEntries;
-            if (statPrizes) statPrizes.textContent = '$' + (totalPrize / 1000).toFixed(1) + 'K';
-        }
-
-        function goToPool(poolId, page) {
-            const user = auth.currentUser;
-            if (!user) {
-                openModal('login');
-                return;
-            }
-            window.location.href = `${page}?id=${poolId}`;
-        }
-
-        // Load pools when Firebase is ready
-        if (typeof db !== 'undefined') {
-            loadPools();
-        } else {
-            // Wait for Firebase to initialize
-            window.addEventListener('load', () => {
-                setTimeout(loadPools, 500);
-            });
-        }
     </script>
 </body>
 </html>
