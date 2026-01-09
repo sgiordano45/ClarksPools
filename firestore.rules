@@ -1,0 +1,215 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ============================================
+    // HELPER FUNCTIONS
+    // ============================================
+    
+    // Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Check if the authenticated user is the document owner
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Check if user is an admin
+    function isAdmin() {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Check if user is the pool commissioner
+    function isCommissioner(poolId) {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/pools/$(poolId)) &&
+        get(/databases/$(database)/documents/pools/$(poolId)).data.commissionerId == request.auth.uid;
+    }
+    
+    // ============================================
+    // USERS COLLECTION
+    // ============================================
+    
+    match /users/{userId} {
+      // Users can read their own profile
+      // Admins can read any profile
+      allow read: if isOwner(userId) || isAdmin();
+      
+      // Users can create their own profile on signup
+      allow create: if isOwner(userId) && 
+        request.resource.data.role == 'user'; // Can't self-assign admin
+      
+      // Users can update their own profile (except role)
+      // Admins can update any profile including role
+      allow update: if isOwner(userId) && 
+        request.resource.data.role == resource.data.role || // Can't change own role
+        isAdmin(); // Admins can change anything
+      
+      // Only admins can delete users
+      allow delete: if isAdmin();
+    }
+    
+    // ============================================
+    // POOLS COLLECTION
+    // ============================================
+    
+    match /pools/{poolId} {
+      // Anyone authenticated can read pools (to view available pools)
+      allow read: if isAuthenticated();
+      
+      // Only admins can create pools
+      allow create: if isAdmin() && 
+        request.resource.data.commissionerId == request.auth.uid;
+      
+      // Commissioner or admin can update their pool
+      allow update: if isCommissioner(poolId) || isAdmin();
+      
+      // Commissioner or admin can delete pool
+      allow delete: if isCommissioner(poolId) || isAdmin();
+      
+      // ----------------------------------------
+      // ENTRIES SUBCOLLECTION (Fantasy Pools)
+      // ----------------------------------------
+      
+      match /entries/{entryId} {
+        // Anyone authenticated can read entries (for leaderboard)
+        allow read: if isAuthenticated();
+        
+        // Authenticated users can create entries for themselves
+        allow create: if isAuthenticated() && 
+          request.resource.data.userId == request.auth.uid;
+        
+        // Users can update their own entry (before deadline)
+        // Commissioners/admins can update any entry (for scoring, payment status)
+        allow update: if isOwner(resource.data.userId) || 
+          isCommissioner(poolId) || 
+          isAdmin();
+        
+        // Only commissioner or admin can delete entries
+        allow delete: if isCommissioner(poolId) || isAdmin();
+      }
+      
+      // ----------------------------------------
+      // BANKROLLS SUBCOLLECTION (Betting Pools)
+      // ----------------------------------------
+      
+      match /bankrolls/{oderId} {
+        // Users can read their own bankroll
+        // Commissioners/admins can read all (for leaderboard)
+        allow read: if isOwner(oderId) || 
+          isCommissioner(poolId) || 
+          isAdmin();
+        
+        // Users can create their own bankroll (when joining pool)
+        allow create: if isOwner(oderId);
+        
+        // Users can update their own bankroll (when placing bets)
+        // Commissioners/admins can adjust any bankroll
+        allow update: if isOwner(oderId) || 
+          isCommissioner(poolId) || 
+          isAdmin();
+        
+        // Only commissioner or admin can delete
+        allow delete: if isCommissioner(poolId) || isAdmin();
+      }
+      
+      // ----------------------------------------
+      // BETS SUBCOLLECTION (Betting Pools)
+      // ----------------------------------------
+      
+      match /bets/{betId} {
+        // Users can read their own bets anytime
+        // All bets become readable after lock (handled in app logic)
+        // Commissioners/admins can always read all bets
+        allow read: if isAuthenticated() && (
+          resource.data.userId == request.auth.uid ||
+          isCommissioner(poolId) ||
+          isAdmin()
+        );
+        
+        // Users can create bets for themselves
+        allow create: if isAuthenticated() && 
+          request.resource.data.userId == request.auth.uid;
+        
+        // Users can update their own pending bets (before lock)
+        // Commissioners/admins can update any bet (for settling)
+        allow update: if (
+          isOwner(resource.data.userId) && 
+          resource.data.status == 'pending'
+        ) || isCommissioner(poolId) || isAdmin();
+        
+        // Users can delete their own pending bets
+        // Commissioners/admins can delete any bet
+        allow delete: if (
+          isOwner(resource.data.userId) && 
+          resource.data.status == 'pending'
+        ) || isCommissioner(poolId) || isAdmin();
+      }
+    }
+    
+    // ============================================
+    // TEAMS COLLECTION (Playoff Teams Status)
+    // ============================================
+    
+    match /teams/{teamId} {
+      // Anyone can read team status
+      allow read: if true;
+      
+      // Only admins can update team status (eliminated, etc.)
+      allow write: if isAdmin();
+    }
+    
+    // ============================================
+    // PLAYERS COLLECTION (Player Database)
+    // ============================================
+    
+    match /players/{playerId} {
+      // Anyone can read players
+      allow read: if true;
+      
+      // Only admins can manage players
+      allow write: if isAdmin();
+    }
+    
+    // ============================================
+    // STATS COLLECTION (Player Stats by Week)
+    // ============================================
+    
+    match /stats/{statId} {
+      // Anyone can read stats
+      allow read: if true;
+      
+      // Only admins can enter/update stats
+      allow write: if isAdmin();
+    }
+    
+    // ============================================
+    // GAMES COLLECTION (Game Schedules & Results)
+    // ============================================
+    
+    match /games/{gameId} {
+      // Anyone can read games
+      allow read: if true;
+      
+      // Only admins can manage games (lines, scores, etc.)
+      allow write: if isAdmin();
+    }
+    
+    // ============================================
+    // LINES COLLECTION (Betting Lines)
+    // ============================================
+    
+    match /lines/{lineId} {
+      // Anyone can read lines
+      allow read: if true;
+      
+      // Only admins can set/update lines
+      allow write: if isAdmin();
+    }
+  }
+}

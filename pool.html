@@ -1,0 +1,2195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clarkside Pool 2025 | GridironPools</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto+Condensed:wght@300;400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-dark: #0a1628;
+            --secondary-dark: #132238;
+            --tertiary-dark: #1a2d47;
+            --accent-blue: #00d4ff;
+            --accent-gold: #ffc107;
+            --accent-green: #00c853;
+            --accent-red: #ff5252;
+            --text-primary: #ffffff;
+            --text-secondary: #8ba3c7;
+            --text-muted: #5a7194;
+            --gradient-field: linear-gradient(135deg, #1a472a 0%, #2d5a3d 50%, #1a472a 100%);
+            --card-bg: rgba(255,255,255,0.03);
+            --card-border: rgba(255,255,255,0.08);
+            --glow-blue: 0 0 40px rgba(0,212,255,0.3);
+            --glow-gold: 0 0 30px rgba(255,193,7,0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto Condensed', sans-serif;
+            background: var(--primary-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(10,22,40,0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            background: var(--gradient-field);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.25rem;
+            color: white;
+            border: 2px solid rgba(0,212,255,0.3);
+        }
+
+        .logo-text {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .logo-text span {
+            color: var(--accent-blue);
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-field);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Oswald', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: 2px solid var(--accent-blue);
+        }
+
+        .btn {
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--accent-blue);
+        }
+
+        .btn-outline:hover {
+            background: var(--accent-blue);
+            color: var(--primary-dark);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.75rem;
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 6rem 2rem 4rem;
+        }
+
+        /* Pool Header */
+        .pool-header {
+            background: var(--secondary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .pool-header-top {
+            background: var(--gradient-field);
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pool-header-top::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 20px,
+                    rgba(255,255,255,0.02) 20px,
+                    rgba(255,255,255,0.02) 21px
+                );
+        }
+
+        .pool-header-content {
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .pool-title-section {
+            flex: 1;
+        }
+
+        .pool-type-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(0,0,0,0.3);
+            padding: 0.4rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-gold);
+            margin-bottom: 0.75rem;
+        }
+
+        .pool-name {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.75rem;
+            letter-spacing: 3px;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .pool-commissioner {
+            font-size: 0.95rem;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .pool-status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(0,0,0,0.4);
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            font-family: 'Oswald', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .pool-status-badge.open {
+            color: var(--accent-green);
+            border: 1px solid rgba(0,200,83,0.3);
+        }
+
+        .pool-status-badge.live {
+            color: var(--accent-blue);
+            border: 1px solid rgba(0,212,255,0.3);
+        }
+
+        .pool-status-badge .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .pool-header-stats {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1px;
+            background: var(--card-border);
+        }
+
+        .pool-stat {
+            background: var(--secondary-dark);
+            padding: 1.25rem;
+            text-align: center;
+        }
+
+        .pool-stat-value {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.75rem;
+            color: var(--accent-blue);
+            line-height: 1;
+        }
+
+        .pool-stat-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 0.25rem;
+        }
+
+        /* Tab Navigation */
+        .tab-navigation {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 0;
+        }
+
+        .tab-btn {
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 1rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            color: var(--accent-blue);
+        }
+
+        .tab-btn::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--accent-blue);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .tab-btn.active::after {
+            transform: scaleX(1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Leaderboard */
+        .leaderboard-container {
+            background: var(--secondary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .leaderboard-header {
+            display: grid;
+            grid-template-columns: 60px 1fr 100px 100px 100px 100px 100px 50px;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            background: var(--tertiary-dark);
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+        }
+
+        .leaderboard-row {
+            display: grid;
+            grid-template-columns: 60px 1fr 100px 100px 100px 100px 100px 50px;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--card-border);
+            align-items: center;
+            transition: background 0.2s ease;
+            cursor: pointer;
+        }
+
+        .leaderboard-row:hover {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .leaderboard-row:last-child {
+            border-bottom: none;
+        }
+
+        .leaderboard-row.my-entry {
+            background: rgba(0,212,255,0.05);
+            border-left: 3px solid var(--accent-blue);
+        }
+
+        .rank {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+        }
+
+        .rank-1 { color: var(--accent-gold); }
+        .rank-2 { color: #c0c0c0; }
+        .rank-3 { color: #cd7f32; }
+
+        .entry-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .entry-avatar {
+            width: 36px;
+            height: 36px;
+            background: var(--tertiary-dark);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .entry-name {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .entry-user {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .week-points {
+            font-family: 'Roboto Condensed', sans-serif;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .week-points.active-week {
+            color: var(--accent-green);
+            font-weight: 700;
+        }
+
+        .total-points {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5rem;
+            color: var(--accent-blue);
+            text-align: center;
+        }
+
+        .expand-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.25rem;
+            transition: transform 0.3s ease;
+        }
+
+        .expand-btn.expanded {
+            transform: rotate(180deg);
+        }
+
+        /* Expanded Row Details */
+        .entry-details {
+            display: none;
+            background: var(--tertiary-dark);
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .entry-details.expanded {
+            display: block;
+        }
+
+        .roster-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .roster-player {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: var(--secondary-dark);
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
+        }
+
+        .roster-player.eliminated {
+            opacity: 0.5;
+        }
+
+        .roster-player.eliminated .player-team-logo {
+            filter: grayscale(100%);
+        }
+
+        .player-position {
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--accent-gold);
+            width: 24px;
+        }
+
+        .player-team-logo {
+            width: 28px;
+            height: 28px;
+            background: var(--card-bg);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+        }
+
+        .player-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .player-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .player-team-name {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        .player-points {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.1rem;
+            color: var(--accent-blue);
+        }
+
+        /* Entry Form Tab */
+        .entry-form-container {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 2rem;
+        }
+
+        .roster-builder {
+            background: var(--secondary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .roster-builder h3 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .roster-builder h3 .count {
+            background: var(--accent-blue);
+            color: var(--primary-dark);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        .position-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .position-group-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .position-label {
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-gold);
+        }
+
+        .position-count {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .position-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .player-slot {
+            background: var(--tertiary-dark);
+            border: 2px dashed var(--card-border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .player-slot:hover {
+            border-color: var(--accent-blue);
+            background: rgba(0,212,255,0.05);
+        }
+
+        .player-slot.filled {
+            border-style: solid;
+            border-color: var(--accent-green);
+            background: rgba(0,200,83,0.05);
+        }
+
+        .player-slot.filled:hover {
+            border-color: var(--accent-red);
+            background: rgba(255,82,82,0.05);
+        }
+
+        .slot-placeholder {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .slot-player {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+        }
+
+        .slot-player .player-team-logo {
+            width: 32px;
+            height: 32px;
+        }
+
+        .slot-remove {
+            opacity: 0;
+            color: var(--accent-red);
+            font-size: 1.25rem;
+            transition: opacity 0.2s ease;
+        }
+
+        .player-slot.filled:hover .slot-remove {
+            opacity: 1;
+        }
+
+        /* Team Selector Sidebar */
+        .team-selector {
+            background: var(--secondary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: sticky;
+            top: 6rem;
+            max-height: calc(100vh - 8rem);
+            overflow-y: auto;
+        }
+
+        .team-selector h3 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+
+        .team-search {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--tertiary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .team-search:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .team-search::placeholder {
+            color: var(--text-muted);
+        }
+
+        .teams-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .team-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: var(--tertiary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .team-item:hover {
+            border-color: var(--accent-blue);
+        }
+
+        .team-item.selected {
+            border-color: var(--accent-blue);
+            background: rgba(0,212,255,0.1);
+        }
+
+        .team-item.used {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .team-item .team-logo {
+            width: 32px;
+            height: 32px;
+            background: var(--card-bg);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .team-item .team-name {
+            flex: 1;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .team-item .team-seed {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .team-item.used::after {
+            content: '✓';
+            color: var(--accent-green);
+            font-weight: bold;
+        }
+
+        /* Player Selection Modal */
+        .player-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .player-modal-overlay.active {
+            display: flex;
+        }
+
+        .player-modal {
+            background: var(--secondary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .player-modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .player-modal-header h3 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .player-modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .player-modal-search {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .player-modal-search input {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--tertiary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .player-modal-search input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .player-modal-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .player-option {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .player-option:hover {
+            background: var(--tertiary-dark);
+        }
+
+        .player-option .player-team-logo {
+            width: 40px;
+            height: 40px;
+        }
+
+        .player-option-info {
+            flex: 1;
+        }
+
+        .player-option-name {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .player-option-meta {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Entry Summary */
+        .entry-summary {
+            background: var(--secondary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .entry-summary-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .entry-summary h3 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .tiebreaker-input {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .tiebreaker-input label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .tiebreaker-input input {
+            width: 80px;
+            padding: 0.5rem;
+            background: var(--tertiary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.25rem;
+            text-align: center;
+        }
+
+        .tiebreaker-input input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .submit-entry-btn {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 1rem 2rem;
+            background: var(--accent-gold);
+            color: var(--primary-dark);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--glow-gold);
+        }
+
+        .submit-entry-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 0 50px rgba(255,193,7,0.5);
+        }
+
+        .submit-entry-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Rules Tab */
+        .rules-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .rules-card {
+            background: var(--secondary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .rules-card h3 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            color: var(--accent-blue);
+        }
+
+        .scoring-table {
+            width: 100%;
+        }
+
+        .scoring-table tr {
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .scoring-table tr:last-child {
+            border-bottom: none;
+        }
+
+        .scoring-table td {
+            padding: 0.75rem 0;
+            font-size: 0.95rem;
+        }
+
+        .scoring-table td:last-child {
+            text-align: right;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.1rem;
+            color: var(--accent-gold);
+        }
+
+        .roster-requirements {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .req-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background: var(--tertiary-dark);
+            border-radius: 6px;
+        }
+
+        .req-item .position {
+            font-weight: 600;
+        }
+
+        .req-item .count {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.25rem;
+            color: var(--accent-blue);
+        }
+
+        .important-note {
+            background: rgba(255,193,7,0.1);
+            border: 1px solid rgba(255,193,7,0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: var(--accent-gold);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .pool-header-stats {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .entry-form-container {
+                grid-template-columns: 1fr;
+            }
+
+            .team-selector {
+                position: static;
+                max-height: none;
+            }
+
+            .leaderboard-header,
+            .leaderboard-row {
+                grid-template-columns: 50px 1fr 80px 80px 50px;
+            }
+
+            .leaderboard-header > *:nth-child(3),
+            .leaderboard-header > *:nth-child(4),
+            .leaderboard-header > *:nth-child(5),
+            .leaderboard-row > *:nth-child(3),
+            .leaderboard-row > *:nth-child(4),
+            .leaderboard-row > *:nth-child(5) {
+                display: none;
+            }
+
+            .rules-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .pool-header-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .pool-name {
+                font-size: 2rem;
+            }
+
+            .tab-btn {
+                padding: 0.75rem 1rem;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <a href="index.html" class="logo">
+                <div class="logo-icon">GP</div>
+                <span class="logo-text">Gridiron<span>Pools</span></span>
+            </a>
+            <div class="nav-user" id="navUser">
+                <div class="auth-buttons" id="authButtons" style="display: none;">
+                    <a href="index.html" class="btn btn-outline btn-sm">Log In</a>
+                </div>
+                <div class="user-menu" id="userMenu" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div class="user-avatar" id="userAvatar">--</div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="main-container">
+        <!-- Pool Header -->
+        <div class="pool-header">
+            <div class="pool-header-top">
+                <div class="pool-header-content">
+                    <div class="pool-title-section">
+                        <div class="pool-type-badge">🏈 NFL Playoff Fantasy</div>
+                        <h1 class="pool-name">Clarkside Pool 2025</h1>
+                        <p class="pool-commissioner">Hosted by @Clarkside14</p>
+                    </div>
+                    <div class="pool-status-badge open">
+                        <span class="status-dot"></span>
+                        Entries Open
+                    </div>
+                </div>
+            </div>
+            <div class="pool-header-stats">
+                <div class="pool-stat">
+                    <div class="pool-stat-value">$25</div>
+                    <div class="pool-stat-label">Buy-In</div>
+                </div>
+                <div class="pool-stat">
+                    <div class="pool-stat-value">18</div>
+                    <div class="pool-stat-label">Entries</div>
+                </div>
+                <div class="pool-stat">
+                    <div class="pool-stat-value">$450</div>
+                    <div class="pool-stat-label">Prize Pool</div>
+                </div>
+                <div class="pool-stat">
+                    <div class="pool-stat-value">Jan 11</div>
+                    <div class="pool-stat-label">Deadline</div>
+                </div>
+                <div class="pool-stat">
+                    <div class="pool-stat-value">Wild Card</div>
+                    <div class="pool-stat-label">Current Week</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tab-navigation">
+            <button class="tab-btn active" data-tab="leaderboard">Leaderboard</button>
+            <button class="tab-btn" data-tab="my-entry">My Entry</button>
+            <button class="tab-btn" data-tab="submit">Submit Entry</button>
+            <button class="tab-btn" data-tab="rules">Rules & Scoring</button>
+        </div>
+
+        <!-- Leaderboard Tab -->
+        <div class="tab-content active" id="leaderboard">
+            <div class="leaderboard-container">
+                <div class="leaderboard-header">
+                    <div>Rank</div>
+                    <div>Entry</div>
+                    <div style="text-align:center">WC</div>
+                    <div style="text-align:center">DIV</div>
+                    <div style="text-align:center">CONF</div>
+                    <div style="text-align:center">SB</div>
+                    <div style="text-align:center">Total</div>
+                    <div></div>
+                </div>
+                
+                <!-- Leaderboard Rows -->
+                <div class="leaderboard-row" onclick="toggleDetails(this)">
+                    <div class="rank rank-1">1</div>
+                    <div class="entry-info">
+                        <div class="entry-avatar">MJ</div>
+                        <div>
+                            <div class="entry-name">MJ's Picks</div>
+                            <div class="entry-user">@mjohnson</div>
+                        </div>
+                    </div>
+                    <div class="week-points active-week">87.5</div>
+                    <div class="week-points">—</div>
+                    <div class="week-points">—</div>
+                    <div class="week-points">—</div>
+                    <div class="total-points">87.5</div>
+                    <button class="expand-btn">▼</button>
+                </div>
+                <div class="entry-details">
+                    <div class="roster-grid">
+                        <div class="roster-player">
+                            <span class="player-position">QB</span>
+                            <div class="player-team-logo">BUF</div>
+                            <div class="player-info">
+                                <div class="player-name">Josh Allen</div>
+                                <div class="player-team-name">Bills</div>
+                            </div>
+                            <div class="player-points">32.4</div>
+                        </div>
+                        <div class="roster-player">
+                            <span class="player-position">QB</span>
+                            <div class="player-team-logo">PHI</div>
+                            <div class="player-info">
+                                <div class="player-name">Jalen Hurts</div>
+                                <div class="player-team-name">Eagles</div>
+                            </div>
+                            <div class="player-points">24.1</div>
+                        </div>
+                        <div class="roster-player">
+                            <span class="player-position">RB</span>
+                            <div class="player-team-logo">DET</div>
+                            <div class="player-info">
+                                <div class="player-name">Jahmyr Gibbs</div>
+                                <div class="player-team-name">Lions</div>
+                            </div>
+                            <div class="player-points">18.2</div>
+                        </div>
+                        <div class="roster-player eliminated">
+                            <span class="player-position">RB</span>
+                            <div class="player-team-logo">MIA</div>
+                            <div class="player-info">
+                                <div class="player-name">De'Von Achane</div>
+                                <div class="player-team-name">Dolphins</div>
+                            </div>
+                            <div class="player-points">8.3</div>
+                        </div>
+                        <!-- More players would be listed here -->
+                    </div>
+                </div>
+
+                <div class="leaderboard-row my-entry" onclick="toggleDetails(this)">
+                    <div class="rank rank-2">2</div>
+                    <div class="entry-info">
+                        <div class="entry-avatar">SD</div>
+                        <div>
+                            <div class="entry-name">Stephen's Squad</div>
+                            <div class="entry-user">@stephen</div>
+                        </div>
+                    </div>
+                    <div class="week-points active-week">82.1</div>
+                    <div class="week-points">—</div>
+                    <div class="week-points">—</div>
+                    <div class="week-points">—</div>
+                    <div class="total-points">82.1</div>
+                    <button class="expand-btn">▼</button>
+                </div>
+                <div class="entry-details">
+                    <div class="roster-grid">
+                        <div class="roster-player">
+                            <span class="player-position">QB</span>
+                            <div class="player-team-logo">KC</div>
+                            <div class="player-info">
+                                <div class="player-name">Patrick Mahomes</div>
+                                <div class="player-team-name">Chiefs</div>
+                            </div>
+                            <div class="player-points">28.6</div>
+                        </div>
+                        <div class="roster-player">
+                            <span class="player-position">QB</span>
+                            <div class="player-team-logo">BAL</div>
+                            <div class="player-info">
+                                <div class="player-name">Lamar Jackson</div>
+                                <div class="player-team-name">Ravens</div>
+                            </div>
+                            <div class="player-points">31.2</div>
+                        </div>
+                        <!-- More players -->
+                    </div>
+                </div>
+
+                <div class="leaderboard-row" onclick="toggleDetails(this)">
+                    <div class="rank rank-3">3</div>
+                    <div class="entry-info">
+                        <div class="entry-avatar">TC</div>
+                        <div>
+                            <div class="entry-name">Tom's Team</div>
+                            <div class="entry-user">@tomclark</div>
+                        </div>
+                    </div>
+                    <div class="week-points active-week">79.8</div>
+                    <div class="week-points">—</div>
+                    <div class="week-points">—</div>
+                    <div class="week-points">—</div>
+                    <div class="total-points">79.8</div>
+                    <button class="expand-btn">▼</button>
+                </div>
+                <div class="entry-details">
+                    <div class="roster-grid">
+                        <!-- Player roster here -->
+                    </div>
+                </div>
+
+                <div class="leaderboard-row" onclick="toggleDetails(this)">
+                    <div class="rank">4</div>
+                    <div class="entry-info">
+                        <div class="entry-avatar">JW</div>
+                        <div>
+                            <div class="entry-name">Wildcard Winners</div>
+                            <div class="entry-user">@jwilson</div>
+                        </div>
+                    </div>
+                    <div class="week-points active-week">76.4</div>
+                    <div class="week-points">—</div>
+                    <div class="week-points">—</div>
+                    <div class="week-points">—</div>
+                    <div class="total-points">76.4</div>
+                    <button class="expand-btn">▼</button>
+                </div>
+                <div class="entry-details"></div>
+
+                <div class="leaderboard-row" onclick="toggleDetails(this)">
+                    <div class="rank">5</div>
+                    <div class="entry-info">
+                        <div class="entry-avatar">KL</div>
+                        <div>
+                            <div class="entry-name">Kelly's Killers</div>
+                            <div class="entry-user">@kelly</div>
+                        </div>
+                    </div>
+                    <div class="week-points active-week">71.2</div>
+                    <div class="week-points">—</div>
+                    <div class="week-points">—</div>
+                    <div class="week-points">—</div>
+                    <div class="total-points">71.2</div>
+                    <button class="expand-btn">▼</button>
+                </div>
+                <div class="entry-details"></div>
+            </div>
+        </div>
+
+        <!-- My Entry Tab -->
+        <div class="tab-content" id="my-entry">
+            <div class="leaderboard-container">
+                <div style="padding: 3rem; text-align: center;">
+                    <h3 style="font-family: 'Oswald', sans-serif; font-size: 1.5rem; margin-bottom: 1rem;">Your Entry: Stephen's Squad</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">Tiebreaker: 48 points</p>
+                    <div class="roster-grid" style="max-width: 900px; margin: 0 auto;">
+                        <div class="roster-player">
+                            <span class="player-position">QB</span>
+                            <div class="player-team-logo">KC</div>
+                            <div class="player-info">
+                                <div class="player-name">Patrick Mahomes</div>
+                                <div class="player-team-name">Chiefs</div>
+                            </div>
+                            <div class="player-points">28.6</div>
+                        </div>
+                        <div class="roster-player">
+                            <span class="player-position">QB</span>
+                            <div class="player-team-logo">BAL</div>
+                            <div class="player-info">
+                                <div class="player-name">Lamar Jackson</div>
+                                <div class="player-team-name">Ravens</div>
+                            </div>
+                            <div class="player-points">31.2</div>
+                        </div>
+                        <div class="roster-player">
+                            <span class="player-position">RB</span>
+                            <div class="player-team-logo">DET</div>
+                            <div class="player-info">
+                                <div class="player-name">Jahmyr Gibbs</div>
+                                <div class="player-team-name">Lions</div>
+                            </div>
+                            <div class="player-points">18.2</div>
+                        </div>
+                        <div class="roster-player">
+                            <span class="player-position">RB</span>
+                            <div class="player-team-logo">PHI</div>
+                            <div class="player-info">
+                                <div class="player-name">Saquon Barkley</div>
+                                <div class="player-team-name">Eagles</div>
+                            </div>
+                            <div class="player-points">22.4</div>
+                        </div>
+                        <div class="roster-player">
+                            <span class="player-position">RB</span>
+                            <div class="player-team-logo">GB</div>
+                            <div class="player-info">
+                                <div class="player-name">Josh Jacobs</div>
+                                <div class="player-team-name">Packers</div>
+                            </div>
+                            <div class="player-points">14.8</div>
+                        </div>
+                        <div class="roster-player eliminated">
+                            <span class="player-position">RB</span>
+                            <div class="player-team-logo">DEN</div>
+                            <div class="player-info">
+                                <div class="player-name">Javonte Williams</div>
+                                <div class="player-team-name">Broncos</div>
+                            </div>
+                            <div class="player-points">6.1</div>
+                        </div>
+                        <div class="roster-player">
+                            <span class="player-position">WR</span>
+                            <div class="player-team-logo">MIN</div>
+                            <div class="player-info">
+                                <div class="player-name">Justin Jefferson</div>
+                                <div class="player-team-name">Vikings</div>
+                            </div>
+                            <div class="player-points">19.3</div>
+                        </div>
+                        <div class="roster-player">
+                            <span class="player-position">WR</span>
+                            <div class="player-team-logo">BUF</div>
+                            <div class="player-info">
+                                <div class="player-name">Amari Cooper</div>
+                                <div class="player-team-name">Bills</div>
+                            </div>
+                            <div class="player-points">11.7</div>
+                        </div>
+                        <div class="roster-player">
+                            <span class="player-position">WR</span>
+                            <div class="player-team-logo">HOU</div>
+                            <div class="player-info">
+                                <div class="player-name">Nico Collins</div>
+                                <div class="player-team-name">Texans</div>
+                            </div>
+                            <div class="player-points">15.2</div>
+                        </div>
+                        <div class="roster-player">
+                            <span class="player-position">WR</span>
+                            <div class="player-team-logo">LAR</div>
+                            <div class="player-info">
+                                <div class="player-name">Puka Nacua</div>
+                                <div class="player-team-name">Rams</div>
+                            </div>
+                            <div class="player-points">17.9</div>
+                        </div>
+                        <div class="roster-player">
+                            <span class="player-position">TE</span>
+                            <div class="player-team-logo">PIT</div>
+                            <div class="player-info">
+                                <div class="player-name">Pat Freiermuth</div>
+                                <div class="player-team-name">Steelers</div>
+                            </div>
+                            <div class="player-points">8.4</div>
+                        </div>
+                        <div class="roster-player">
+                            <span class="player-position">TE</span>
+                            <div class="player-team-logo">TB</div>
+                            <div class="player-info">
+                                <div class="player-name">Cade Otton</div>
+                                <div class="player-team-name">Buccaneers</div>
+                            </div>
+                            <div class="player-points">9.2</div>
+                        </div>
+                        <div class="roster-player">
+                            <span class="player-position">K</span>
+                            <div class="player-team-logo">WAS</div>
+                            <div class="player-info">
+                                <div class="player-name">Austin Seibert</div>
+                                <div class="player-team-name">Commanders</div>
+                            </div>
+                            <div class="player-points">7.0</div>
+                        </div>
+                        <div class="roster-player">
+                            <span class="player-position">K</span>
+                            <div class="player-team-logo">LAC</div>
+                            <div class="player-info">
+                                <div class="player-name">Cameron Dicker</div>
+                                <div class="player-team-name">Chargers</div>
+                            </div>
+                            <div class="player-points">5.0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Entry Tab -->
+        <div class="tab-content" id="submit">
+            <div class="entry-form-container">
+                <div class="roster-builder">
+                    <h3>Build Your Roster <span class="count" id="rosterCount">0/14</span></h3>
+
+                    <!-- Quarterbacks -->
+                    <div class="position-group">
+                        <div class="position-group-header">
+                            <span class="position-label">Quarterbacks</span>
+                            <span class="position-count">0/2</span>
+                        </div>
+                        <div class="position-slots">
+                            <div class="player-slot" data-position="QB" data-slot="1" onclick="openPlayerModal('QB', this)">
+                                <span class="slot-placeholder">+ Select QB</span>
+                            </div>
+                            <div class="player-slot" data-position="QB" data-slot="2" onclick="openPlayerModal('QB', this)">
+                                <span class="slot-placeholder">+ Select QB</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Running Backs -->
+                    <div class="position-group">
+                        <div class="position-group-header">
+                            <span class="position-label">Running Backs</span>
+                            <span class="position-count">0/4</span>
+                        </div>
+                        <div class="position-slots">
+                            <div class="player-slot" data-position="RB" data-slot="1" onclick="openPlayerModal('RB', this)">
+                                <span class="slot-placeholder">+ Select RB</span>
+                            </div>
+                            <div class="player-slot" data-position="RB" data-slot="2" onclick="openPlayerModal('RB', this)">
+                                <span class="slot-placeholder">+ Select RB</span>
+                            </div>
+                            <div class="player-slot" data-position="RB" data-slot="3" onclick="openPlayerModal('RB', this)">
+                                <span class="slot-placeholder">+ Select RB</span>
+                            </div>
+                            <div class="player-slot" data-position="RB" data-slot="4" onclick="openPlayerModal('RB', this)">
+                                <span class="slot-placeholder">+ Select RB</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Wide Receivers -->
+                    <div class="position-group">
+                        <div class="position-group-header">
+                            <span class="position-label">Wide Receivers</span>
+                            <span class="position-count">0/4</span>
+                        </div>
+                        <div class="position-slots">
+                            <div class="player-slot" data-position="WR" data-slot="1" onclick="openPlayerModal('WR', this)">
+                                <span class="slot-placeholder">+ Select WR</span>
+                            </div>
+                            <div class="player-slot" data-position="WR" data-slot="2" onclick="openPlayerModal('WR', this)">
+                                <span class="slot-placeholder">+ Select WR</span>
+                            </div>
+                            <div class="player-slot" data-position="WR" data-slot="3" onclick="openPlayerModal('WR', this)">
+                                <span class="slot-placeholder">+ Select WR</span>
+                            </div>
+                            <div class="player-slot" data-position="WR" data-slot="4" onclick="openPlayerModal('WR', this)">
+                                <span class="slot-placeholder">+ Select WR</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tight Ends -->
+                    <div class="position-group">
+                        <div class="position-group-header">
+                            <span class="position-label">Tight Ends</span>
+                            <span class="position-count">0/2</span>
+                        </div>
+                        <div class="position-slots">
+                            <div class="player-slot" data-position="TE" data-slot="1" onclick="openPlayerModal('TE', this)">
+                                <span class="slot-placeholder">+ Select TE</span>
+                            </div>
+                            <div class="player-slot" data-position="TE" data-slot="2" onclick="openPlayerModal('TE', this)">
+                                <span class="slot-placeholder">+ Select TE</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kickers -->
+                    <div class="position-group">
+                        <div class="position-group-header">
+                            <span class="position-label">Kickers</span>
+                            <span class="position-count">0/2</span>
+                        </div>
+                        <div class="position-slots">
+                            <div class="player-slot" data-position="K" data-slot="1" onclick="openPlayerModal('K', this)">
+                                <span class="slot-placeholder">+ Select K</span>
+                            </div>
+                            <div class="player-slot" data-position="K" data-slot="2" onclick="openPlayerModal('K', this)">
+                                <span class="slot-placeholder">+ Select K</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Entry Summary -->
+                    <div class="entry-summary">
+                        <div class="entry-summary-header">
+                            <h3>Submit Your Entry</h3>
+                            <div class="tiebreaker-input">
+                                <label for="tiebreaker">Super Bowl Total Points:</label>
+                                <input type="number" id="tiebreaker" min="0" max="150" placeholder="48">
+                            </div>
+                        </div>
+                        <button class="submit-entry-btn" id="submitBtn" disabled>
+                            Complete Roster to Submit (0/14)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Team Selector -->
+                <div class="team-selector">
+                    <h3>Playoff Teams</h3>
+                    <input type="text" class="team-search" placeholder="Search teams...">
+                    <div class="teams-list">
+                        <div class="team-item" data-team="KC">
+                            <div class="team-logo">KC</div>
+                            <span class="team-name">Chiefs</span>
+                            <span class="team-seed">#1 AFC</span>
+                        </div>
+                        <div class="team-item" data-team="BUF">
+                            <div class="team-logo">BUF</div>
+                            <span class="team-name">Bills</span>
+                            <span class="team-seed">#2 AFC</span>
+                        </div>
+                        <div class="team-item" data-team="BAL">
+                            <div class="team-logo">BAL</div>
+                            <span class="team-name">Ravens</span>
+                            <span class="team-seed">#3 AFC</span>
+                        </div>
+                        <div class="team-item" data-team="HOU">
+                            <div class="team-logo">HOU</div>
+                            <span class="team-name">Texans</span>
+                            <span class="team-seed">#4 AFC</span>
+                        </div>
+                        <div class="team-item" data-team="LAC">
+                            <div class="team-logo">LAC</div>
+                            <span class="team-name">Chargers</span>
+                            <span class="team-seed">#5 AFC</span>
+                        </div>
+                        <div class="team-item" data-team="PIT">
+                            <div class="team-logo">PIT</div>
+                            <span class="team-name">Steelers</span>
+                            <span class="team-seed">#6 AFC</span>
+                        </div>
+                        <div class="team-item" data-team="DEN">
+                            <div class="team-logo">DEN</div>
+                            <span class="team-name">Broncos</span>
+                            <span class="team-seed">#7 AFC</span>
+                        </div>
+                        <div class="team-item" data-team="DET">
+                            <div class="team-logo">DET</div>
+                            <span class="team-name">Lions</span>
+                            <span class="team-seed">#1 NFC</span>
+                        </div>
+                        <div class="team-item" data-team="PHI">
+                            <div class="team-logo">PHI</div>
+                            <span class="team-name">Eagles</span>
+                            <span class="team-seed">#2 NFC</span>
+                        </div>
+                        <div class="team-item" data-team="TB">
+                            <div class="team-logo">TB</div>
+                            <span class="team-name">Buccaneers</span>
+                            <span class="team-seed">#3 NFC</span>
+                        </div>
+                        <div class="team-item" data-team="LAR">
+                            <div class="team-logo">LAR</div>
+                            <span class="team-name">Rams</span>
+                            <span class="team-seed">#4 NFC</span>
+                        </div>
+                        <div class="team-item" data-team="MIN">
+                            <div class="team-logo">MIN</div>
+                            <span class="team-name">Vikings</span>
+                            <span class="team-seed">#5 NFC</span>
+                        </div>
+                        <div class="team-item" data-team="WAS">
+                            <div class="team-logo">WAS</div>
+                            <span class="team-name">Commanders</span>
+                            <span class="team-seed">#6 NFC</span>
+                        </div>
+                        <div class="team-item" data-team="GB">
+                            <div class="team-logo">GB</div>
+                            <span class="team-name">Packers</span>
+                            <span class="team-seed">#7 NFC</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rules Tab -->
+        <div class="tab-content" id="rules">
+            <div class="rules-container">
+                <div class="rules-card">
+                    <h3>Scoring System</h3>
+                    <table class="scoring-table">
+                        <tr>
+                            <td>Touchdown (pass/rush/receive)</td>
+                            <td>6 pts</td>
+                        </tr>
+                        <tr>
+                            <td>Passing Yards (per 25 yds)</td>
+                            <td>1 pt</td>
+                        </tr>
+                        <tr>
+                            <td>Rushing Yards (per 10 yds)</td>
+                            <td>1 pt</td>
+                        </tr>
+                        <tr>
+                            <td>Receiving Yards (per 10 yds)</td>
+                            <td>1 pt</td>
+                        </tr>
+                        <tr>
+                            <td>Reception (PPR)</td>
+                            <td>1 pt</td>
+                        </tr>
+                        <tr>
+                            <td>Field Goal (49 yds or less)</td>
+                            <td>3 pts</td>
+                        </tr>
+                        <tr>
+                            <td>Field Goal (50+ yds)</td>
+                            <td>5 pts</td>
+                        </tr>
+                        <tr>
+                            <td>Extra Point</td>
+                            <td>1 pt</td>
+                        </tr>
+                        <tr>
+                            <td>2-Point Conversion</td>
+                            <td>2 pts</td>
+                        </tr>
+                    </table>
+                    <div class="important-note">
+                        ⚠️ No fractional points. No negative points.
+                    </div>
+                </div>
+
+                <div class="rules-card">
+                    <h3>Roster Requirements</h3>
+                    <div class="roster-requirements">
+                        <div class="req-item">
+                            <span class="position">Quarterbacks</span>
+                            <span class="count">2</span>
+                        </div>
+                        <div class="req-item">
+                            <span class="position">Running Backs</span>
+                            <span class="count">4</span>
+                        </div>
+                        <div class="req-item">
+                            <span class="position">Wide Receivers</span>
+                            <span class="count">4</span>
+                        </div>
+                        <div class="req-item">
+                            <span class="position">Tight Ends</span>
+                            <span class="count">2</span>
+                        </div>
+                        <div class="req-item">
+                            <span class="position">Kickers</span>
+                            <span class="count">2</span>
+                        </div>
+                        <div class="req-item" style="grid-column: span 2; background: var(--accent-blue); color: var(--primary-dark);">
+                            <span class="position" style="font-weight: 700;">TOTAL PLAYERS</span>
+                            <span class="count" style="color: var(--primary-dark);">14</span>
+                        </div>
+                    </div>
+                    <div class="important-note">
+                        ⚠️ You must select exactly ONE player from each of the 14 playoff teams. No duplicates!
+                    </div>
+                </div>
+
+                <div class="rules-card" style="grid-column: span 2;">
+                    <h3>Pool Rules</h3>
+                    <table class="scoring-table">
+                        <tr>
+                            <td>Buy-In</td>
+                            <td>$25</td>
+                        </tr>
+                        <tr>
+                            <td>Entry Deadline</td>
+                            <td>Before first game - Saturday, January 11th</td>
+                        </tr>
+                        <tr>
+                            <td>Multiple Entries</td>
+                            <td>Allowed</td>
+                        </tr>
+                        <tr>
+                            <td>Tiebreaker</td>
+                            <td>Total points scored in Super Bowl</td>
+                        </tr>
+                        <tr>
+                            <td>Payment</td>
+                            <td>Venmo @Clarkside14</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Player Selection Modal -->
+    <div class="player-modal-overlay" id="playerModal">
+        <div class="player-modal">
+            <div class="player-modal-header">
+                <h3>Select <span id="modalPosition">QB</span></h3>
+                <button class="player-modal-close" onclick="closePlayerModal()">&times;</button>
+            </div>
+            <div class="player-modal-search">
+                <input type="text" placeholder="Search players..." id="playerSearch">
+            </div>
+            <div class="player-modal-list" id="playerList">
+                <!-- Players will be populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab Navigation
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Toggle Entry Details
+        function toggleDetails(row) {
+            const details = row.nextElementSibling;
+            const expandBtn = row.querySelector('.expand-btn');
+            
+            if (details.classList.contains('expanded')) {
+                details.classList.remove('expanded');
+                expandBtn.classList.remove('expanded');
+            } else {
+                // Close all other details
+                document.querySelectorAll('.entry-details.expanded').forEach(d => {
+                    d.classList.remove('expanded');
+                    d.previousElementSibling.querySelector('.expand-btn').classList.remove('expanded');
+                });
+                details.classList.add('expanded');
+                expandBtn.classList.add('expanded');
+            }
+        }
+
+        // Player Selection State
+        let selectedRoster = {};
+        let usedTeams = new Set();
+        let currentSlot = null;
+
+        // Sample player data (would come from Firebase)
+        const playersData = {
+            QB: [
+                { name: 'Patrick Mahomes', team: 'KC', teamName: 'Chiefs' },
+                { name: 'Josh Allen', team: 'BUF', teamName: 'Bills' },
+                { name: 'Lamar Jackson', team: 'BAL', teamName: 'Ravens' },
+                { name: 'C.J. Stroud', team: 'HOU', teamName: 'Texans' },
+                { name: 'Justin Herbert', team: 'LAC', teamName: 'Chargers' },
+                { name: 'Russell Wilson', team: 'PIT', teamName: 'Steelers' },
+                { name: 'Bo Nix', team: 'DEN', teamName: 'Broncos' },
+                { name: 'Jared Goff', team: 'DET', teamName: 'Lions' },
+                { name: 'Jalen Hurts', team: 'PHI', teamName: 'Eagles' },
+                { name: 'Baker Mayfield', team: 'TB', teamName: 'Buccaneers' },
+                { name: 'Matthew Stafford', team: 'LAR', teamName: 'Rams' },
+                { name: 'Sam Darnold', team: 'MIN', teamName: 'Vikings' },
+                { name: 'Jayden Daniels', team: 'WAS', teamName: 'Commanders' },
+                { name: 'Jordan Love', team: 'GB', teamName: 'Packers' }
+            ],
+            RB: [
+                { name: 'Isiah Pacheco', team: 'KC', teamName: 'Chiefs' },
+                { name: 'James Cook', team: 'BUF', teamName: 'Bills' },
+                { name: 'Derrick Henry', team: 'BAL', teamName: 'Ravens' },
+                { name: 'Joe Mixon', team: 'HOU', teamName: 'Texans' },
+                { name: 'J.K. Dobbins', team: 'LAC', teamName: 'Chargers' },
+                { name: 'Najee Harris', team: 'PIT', teamName: 'Steelers' },
+                { name: 'Javonte Williams', team: 'DEN', teamName: 'Broncos' },
+                { name: 'Jahmyr Gibbs', team: 'DET', teamName: 'Lions' },
+                { name: 'Saquon Barkley', team: 'PHI', teamName: 'Eagles' },
+                { name: 'Bucky Irving', team: 'TB', teamName: 'Buccaneers' },
+                { name: 'Kyren Williams', team: 'LAR', teamName: 'Rams' },
+                { name: 'Aaron Jones', team: 'MIN', teamName: 'Vikings' },
+                { name: 'Brian Robinson Jr.', team: 'WAS', teamName: 'Commanders' },
+                { name: 'Josh Jacobs', team: 'GB', teamName: 'Packers' }
+            ],
+            WR: [
+                { name: 'Xavier Worthy', team: 'KC', teamName: 'Chiefs' },
+                { name: 'Amari Cooper', team: 'BUF', teamName: 'Bills' },
+                { name: 'Zay Flowers', team: 'BAL', teamName: 'Ravens' },
+                { name: 'Nico Collins', team: 'HOU', teamName: 'Texans' },
+                { name: 'Ladd McConkey', team: 'LAC', teamName: 'Chargers' },
+                { name: 'George Pickens', team: 'PIT', teamName: 'Steelers' },
+                { name: 'Courtland Sutton', team: 'DEN', teamName: 'Broncos' },
+                { name: 'Amon-Ra St. Brown', team: 'DET', teamName: 'Lions' },
+                { name: 'A.J. Brown', team: 'PHI', teamName: 'Eagles' },
+                { name: 'Mike Evans', team: 'TB', teamName: 'Buccaneers' },
+                { name: 'Puka Nacua', team: 'LAR', teamName: 'Rams' },
+                { name: 'Justin Jefferson', team: 'MIN', teamName: 'Vikings' },
+                { name: 'Terry McLaurin', team: 'WAS', teamName: 'Commanders' },
+                { name: 'Jayden Reed', team: 'GB', teamName: 'Packers' }
+            ],
+            TE: [
+                { name: 'Travis Kelce', team: 'KC', teamName: 'Chiefs' },
+                { name: 'Dalton Kincaid', team: 'BUF', teamName: 'Bills' },
+                { name: 'Mark Andrews', team: 'BAL', teamName: 'Ravens' },
+                { name: 'Dalton Schultz', team: 'HOU', teamName: 'Texans' },
+                { name: 'Will Dissly', team: 'LAC', teamName: 'Chargers' },
+                { name: 'Pat Freiermuth', team: 'PIT', teamName: 'Steelers' },
+                { name: 'Adam Trautman', team: 'DEN', teamName: 'Broncos' },
+                { name: 'Sam LaPorta', team: 'DET', teamName: 'Lions' },
+                { name: 'Dallas Goedert', team: 'PHI', teamName: 'Eagles' },
+                { name: 'Cade Otton', team: 'TB', teamName: 'Buccaneers' },
+                { name: 'Tyler Higbee', team: 'LAR', teamName: 'Rams' },
+                { name: 'T.J. Hockenson', team: 'MIN', teamName: 'Vikings' },
+                { name: 'Zach Ertz', team: 'WAS', teamName: 'Commanders' },
+                { name: 'Tucker Kraft', team: 'GB', teamName: 'Packers' }
+            ],
+            K: [
+                { name: 'Harrison Butker', team: 'KC', teamName: 'Chiefs' },
+                { name: 'Tyler Bass', team: 'BUF', teamName: 'Bills' },
+                { name: 'Justin Tucker', team: 'BAL', teamName: 'Ravens' },
+                { name: 'Ka\'imi Fairbairn', team: 'HOU', teamName: 'Texans' },
+                { name: 'Cameron Dicker', team: 'LAC', teamName: 'Chargers' },
+                { name: 'Chris Boswell', team: 'PIT', teamName: 'Steelers' },
+                { name: 'Wil Lutz', team: 'DEN', teamName: 'Broncos' },
+                { name: 'Jake Bates', team: 'DET', teamName: 'Lions' },
+                { name: 'Jake Elliott', team: 'PHI', teamName: 'Eagles' },
+                { name: 'Chase McLaughlin', team: 'TB', teamName: 'Buccaneers' },
+                { name: 'Joshua Karty', team: 'LAR', teamName: 'Rams' },
+                { name: 'Will Reichard', team: 'MIN', teamName: 'Vikings' },
+                { name: 'Austin Seibert', team: 'WAS', teamName: 'Commanders' },
+                { name: 'Brandon McManus', team: 'GB', teamName: 'Packers' }
+            ]
+        };
+
+        // Open Player Modal
+        function openPlayerModal(position, slotElement) {
+            // Check if slot is filled - if so, remove player
+            if (slotElement.classList.contains('filled')) {
+                const playerTeam = slotElement.dataset.team;
+                usedTeams.delete(playerTeam);
+                delete selectedRoster[`${position}-${slotElement.dataset.slot}`];
+                
+                slotElement.classList.remove('filled');
+                slotElement.innerHTML = `<span class="slot-placeholder">+ Select ${position}</span>`;
+                
+                updateTeamsList();
+                updateRosterCount();
+                return;
+            }
+
+            currentSlot = slotElement;
+            document.getElementById('modalPosition').textContent = position;
+            document.getElementById('playerSearch').value = '';
+            
+            populatePlayerList(position);
+            document.getElementById('playerModal').classList.add('active');
+        }
+
+        // Populate Player List
+        function populatePlayerList(position, filter = '') {
+            const list = document.getElementById('playerList');
+            const players = playersData[position] || [];
+            
+            const filteredPlayers = players.filter(p => 
+                p.name.toLowerCase().includes(filter.toLowerCase()) ||
+                p.team.toLowerCase().includes(filter.toLowerCase()) ||
+                p.teamName.toLowerCase().includes(filter.toLowerCase())
+            );
+
+            list.innerHTML = filteredPlayers.map(player => {
+                const isUsed = usedTeams.has(player.team);
+                return `
+                    <div class="player-option ${isUsed ? 'used' : ''}" 
+                         onclick="${isUsed ? '' : `selectPlayer('${player.name}', '${player.team}', '${player.teamName}', '${position}')`}"
+                         style="${isUsed ? 'opacity: 0.4; cursor: not-allowed;' : ''}">
+                        <div class="player-team-logo">${player.team}</div>
+                        <div class="player-option-info">
+                            <div class="player-option-name">${player.name}</div>
+                            <div class="player-option-meta">${player.teamName} ${isUsed ? '(Team Used)' : ''}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Player Search
+        document.getElementById('playerSearch').addEventListener('input', (e) => {
+            const position = document.getElementById('modalPosition').textContent;
+            populatePlayerList(position, e.target.value);
+        });
+
+        // Select Player
+        function selectPlayer(name, team, teamName, position) {
+            if (!currentSlot) return;
+            
+            usedTeams.add(team);
+            selectedRoster[`${position}-${currentSlot.dataset.slot}`] = { name, team, teamName, position };
+            
+            currentSlot.classList.add('filled');
+            currentSlot.dataset.team = team;
+            currentSlot.innerHTML = `
+                <div class="slot-player">
+                    <div class="player-team-logo">${team}</div>
+                    <div class="player-info">
+                        <div class="player-name">${name}</div>
+                        <div class="player-team-name">${teamName}</div>
+                    </div>
+                </div>
+                <span class="slot-remove">✕</span>
+            `;
+            
+            closePlayerModal();
+            updateTeamsList();
+            updateRosterCount();
+        }
+
+        // Close Player Modal
+        function closePlayerModal() {
+            document.getElementById('playerModal').classList.remove('active');
+            currentSlot = null;
+        }
+
+        // Update Teams List
+        function updateTeamsList() {
+            document.querySelectorAll('.team-item').forEach(item => {
+                if (usedTeams.has(item.dataset.team)) {
+                    item.classList.add('used');
+                } else {
+                    item.classList.remove('used');
+                }
+            });
+        }
+
+        // Update Roster Count
+        function updateRosterCount() {
+            const count = Object.keys(selectedRoster).length;
+            document.getElementById('rosterCount').textContent = `${count}/14`;
+            
+            const submitBtn = document.getElementById('submitBtn');
+            if (count === 14) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Entry ($25)';
+            } else {
+                submitBtn.disabled = true;
+                submitBtn.textContent = `Complete Roster to Submit (${count}/14)`;
+            }
+
+            // Update position counts
+            const positions = { QB: 0, RB: 0, WR: 0, TE: 0, K: 0 };
+            Object.values(selectedRoster).forEach(p => {
+                positions[p.position]++;
+            });
+
+            document.querySelectorAll('.position-group').forEach(group => {
+                const pos = group.querySelector('.player-slot').dataset.position;
+                const max = pos === 'QB' || pos === 'TE' || pos === 'K' ? 2 : 4;
+                group.querySelector('.position-count').textContent = `${positions[pos]}/${max}`;
+            });
+        }
+
+        // Team search filter
+        document.querySelector('.team-search').addEventListener('input', (e) => {
+            const filter = e.target.value.toLowerCase();
+            document.querySelectorAll('.team-item').forEach(item => {
+                const name = item.querySelector('.team-name').textContent.toLowerCase();
+                const abbr = item.dataset.team.toLowerCase();
+                item.style.display = name.includes(filter) || abbr.includes(filter) ? 'flex' : 'none';
+            });
+        });
+
+        // Close modal on overlay click
+        document.getElementById('playerModal').addEventListener('click', (e) => {
+            if (e.target.id === 'playerModal') {
+                closePlayerModal();
+            }
+        });
+
+        // Close modal on escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closePlayerModal();
+            }
+        });
+    </script>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+
+    <script>
+        // Pool Firebase Integration
+        let currentPoolId = null;
+        let currentPoolData = null;
+        
+        // Get pool ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        currentPoolId = urlParams.get('id');
+
+        // Auth state listener
+        auth.onAuthStateChanged(async (user) => {
+            const authButtons = document.getElementById('authButtons');
+            const userMenu = document.getElementById('userMenu');
+            const userAvatar = document.getElementById('userAvatar');
+            
+            if (user) {
+                if (authButtons) authButtons.style.display = 'none';
+                if (userMenu) userMenu.style.display = 'flex';
+                
+                const displayName = user.displayName || user.email.split('@')[0];
+                if (userAvatar) userAvatar.textContent = getUserInitials(displayName);
+                
+                // Load pool data if we have an ID
+                if (currentPoolId) {
+                    loadPoolData(currentPoolId);
+                }
+            } else {
+                if (authButtons) authButtons.style.display = 'flex';
+                if (userMenu) userMenu.style.display = 'none';
+            }
+        });
+
+        // Load pool data from Firestore
+        async function loadPoolData(poolId) {
+            try {
+                const poolDoc = await db.collection('pools').doc(poolId).get();
+                if (poolDoc.exists) {
+                    currentPoolData = poolDoc.data();
+                    updatePoolHeader(currentPoolData);
+                    loadLeaderboard(poolId);
+                }
+            } catch (error) {
+                console.error('Error loading pool:', error);
+            }
+        }
+
+        function updatePoolHeader(pool) {
+            // Update pool name if element exists
+            const poolNameEl = document.querySelector('.pool-name');
+            if (poolNameEl && pool.name) {
+                poolNameEl.textContent = pool.name;
+            }
+        }
+
+        // Load leaderboard from Firestore
+        async function loadLeaderboard(poolId) {
+            try {
+                const entriesSnapshot = await db.collection('pools').doc(poolId)
+                    .collection('entries')
+                    .orderBy('totalPoints', 'desc')
+                    .get();
+                
+                const entries = entriesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                // Update leaderboard UI - would need to implement dynamic rendering
+                console.log('Loaded entries:', entries);
+            } catch (error) {
+                console.error('Error loading leaderboard:', error);
+            }
+        }
+
+        // Submit entry to Firestore
+        async function submitEntryToFirestore() {
+            const user = auth.currentUser;
+            if (!user) {
+                alert('Please log in to submit an entry');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            if (!currentPoolId) {
+                alert('Pool ID not found');
+                return;
+            }
+
+            const entryName = document.getElementById('entryName')?.value || user.displayName + "'s Entry";
+            const tiebreaker = parseInt(document.getElementById('tiebreaker')?.value) || 0;
+
+            if (Object.keys(selectedRoster).length !== 14) {
+                alert('Please complete your roster (14 players required)');
+                return;
+            }
+
+            try {
+                const entry = {
+                    entryName: entryName,
+                    userId: user.uid,
+                    userName: user.displayName || user.email,
+                    roster: selectedRoster,
+                    tiebreaker: tiebreaker,
+                    totalPoints: 0,
+                    weekPoints: { wildCard: 0, divisional: 0, conference: 0, superBowl: 0 },
+                    paid: false,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                await db.collection('pools').doc(currentPoolId).collection('entries').add(entry);
+                
+                // Update pool entry count
+                await db.collection('pools').doc(currentPoolId).update({
+                    entryCount: firebase.firestore.FieldValue.increment(1)
+                });
+
+                alert('Entry submitted successfully!');
+                
+                // Switch to leaderboard tab
+                document.querySelector('[data-tab="leaderboard"]').click();
+            } catch (error) {
+                console.error('Error submitting entry:', error);
+                alert('Error submitting entry: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

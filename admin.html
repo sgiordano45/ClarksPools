@@ -1,0 +1,3678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | GridironPools</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto+Condensed:wght@300;400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-dark: #0a1628;
+            --secondary-dark: #132238;
+            --tertiary-dark: #1a2d47;
+            --accent-blue: #00d4ff;
+            --accent-gold: #ffc107;
+            --accent-green: #00c853;
+            --accent-red: #ff5252;
+            --accent-orange: #ff9800;
+            --text-primary: #ffffff;
+            --text-secondary: #8ba3c7;
+            --text-muted: #5a7194;
+            --gradient-field: linear-gradient(135deg, #1a472a 0%, #2d5a3d 50%, #1a472a 100%);
+            --card-bg: rgba(255,255,255,0.03);
+            --card-border: rgba(255,255,255,0.08);
+            --glow-blue: 0 0 40px rgba(0,212,255,0.3);
+            --glow-gold: 0 0 30px rgba(255,193,7,0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto Condensed', sans-serif;
+            background: var(--primary-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Layout */
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--secondary-dark);
+            border-right: 1px solid var(--card-border);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-field);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.1rem;
+            color: white;
+            border: 2px solid rgba(0,212,255,0.3);
+        }
+
+        .logo-text {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .logo-text span {
+            color: var(--accent-blue);
+        }
+
+        .admin-badge {
+            display: inline-block;
+            background: var(--accent-gold);
+            color: var(--primary-dark);
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            margin-left: 0.5rem;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 1rem 0;
+            overflow-y: auto;
+        }
+
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-section-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            padding: 0 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.03);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: rgba(0,212,255,0.1);
+            color: var(--accent-blue);
+            border-left-color: var(--accent-blue);
+        }
+
+        .nav-item .icon {
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .nav-item .badge {
+            margin-left: auto;
+            background: var(--accent-red);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.15rem 0.5rem;
+            border-radius: 10px;
+        }
+
+        .sidebar-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--card-border);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            background: var(--gradient-field);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            color: var(--accent-gold);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 2rem;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-top: 0.25rem;
+        }
+
+        .btn {
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0.75rem 1.25rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--accent-blue);
+            color: var(--primary-dark);
+        }
+
+        .btn-primary:hover {
+            box-shadow: var(--glow-blue);
+            transform: translateY(-2px);
+        }
+
+        .btn-gold {
+            background: var(--accent-gold);
+            color: var(--primary-dark);
+        }
+
+        .btn-gold:hover {
+            box-shadow: var(--glow-gold);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--card-border);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        .btn-danger {
+            background: var(--accent-red);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.75rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--secondary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--accent-blue);
+        }
+
+        .stat-card.gold::before {
+            background: var(--accent-gold);
+        }
+
+        .stat-card.green::before {
+            background: var(--accent-green);
+        }
+
+        .stat-card.orange::before {
+            background: var(--accent-orange);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.5rem;
+            line-height: 1;
+            color: var(--text-primary);
+        }
+
+        .stat-change {
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .stat-change.positive {
+            color: var(--accent-green);
+        }
+
+        .stat-change.negative {
+            color: var(--accent-red);
+        }
+
+        /* Data Tables */
+        .data-card {
+            background: var(--secondary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .data-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .data-card-title {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            background: var(--tertiary-dark);
+            padding: 0.875rem 1rem;
+            text-align: left;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--card-border);
+            font-size: 0.95rem;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tr:hover td {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge.open {
+            background: rgba(0,200,83,0.15);
+            color: var(--accent-green);
+        }
+
+        .status-badge.live {
+            background: rgba(0,212,255,0.15);
+            color: var(--accent-blue);
+        }
+
+        .status-badge.closed {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-secondary);
+        }
+
+        .status-badge.paid {
+            background: rgba(0,200,83,0.15);
+            color: var(--accent-green);
+        }
+
+        .status-badge.unpaid {
+            background: rgba(255,82,82,0.15);
+            color: var(--accent-red);
+        }
+
+        .status-badge .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .status-badge.live .dot {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--tertiary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .action-btn:hover {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        .action-btn.danger:hover {
+            border-color: var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        /* Content Sections */
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        /* Forms */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--tertiary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'Roboto Condensed', sans-serif;
+            font-size: 0.95rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted);
+        }
+
+        select.form-control {
+            cursor: pointer;
+        }
+
+        .form-help {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.35rem;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        /* Checkbox / Toggle */
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .toggle {
+            position: relative;
+            width: 48px;
+            height: 26px;
+            background: var(--tertiary-dark);
+            border-radius: 13px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .toggle.active {
+            background: var(--accent-blue);
+        }
+
+        .toggle::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle.active::after {
+            transform: translateX(22px);
+        }
+
+        .toggle-label {
+            font-size: 0.95rem;
+        }
+
+        /* Teams Management */
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            padding: 1.5rem;
+        }
+
+        .team-card {
+            background: var(--tertiary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.2s ease;
+        }
+
+        .team-card.eliminated {
+            opacity: 0.5;
+            background: rgba(255,82,82,0.1);
+            border-color: rgba(255,82,82,0.3);
+        }
+
+        .team-logo {
+            width: 40px;
+            height: 40px;
+            background: var(--card-bg);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+        }
+
+        .team-info {
+            flex: 1;
+        }
+
+        .team-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .team-seed {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .team-status-toggle {
+            padding: 0.4rem 0.75rem;
+            background: var(--secondary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 4px;
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .team-status-toggle:hover {
+            border-color: var(--accent-red);
+            color: var(--accent-red);
+        }
+
+        .team-card.eliminated .team-status-toggle {
+            background: var(--accent-green);
+            border-color: var(--accent-green);
+            color: var(--primary-dark);
+        }
+
+        /* Stats Entry */
+        .stats-entry-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            padding: 1.5rem;
+        }
+
+        .player-stat-card {
+            background: var(--tertiary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .player-stat-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .player-stat-info {
+            flex: 1;
+        }
+
+        .player-stat-name {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .player-stat-meta {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .player-stat-total {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5rem;
+            color: var(--accent-blue);
+        }
+
+        .stat-inputs {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+        }
+
+        .stat-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .stat-input-group label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+
+        .stat-input-group input {
+            width: 100%;
+            padding: 0.5rem;
+            background: var(--secondary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .stat-input-group input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--secondary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .modal-title {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            padding: 1.5rem;
+            border-top: 1px solid var(--card-border);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full-width {
+                grid-column: span 1;
+            }
+        }
+
+        /* Week Selector */
+        .week-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .week-btn {
+            padding: 0.75rem 1.25rem;
+            background: var(--tertiary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .week-btn:hover {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        .week-btn.active {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+            color: var(--primary-dark);
+        }
+
+        /* Entry Detail */
+        .entry-detail-roster {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .entry-player {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--tertiary-dark);
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        .entry-player .pos {
+            color: var(--accent-gold);
+            font-weight: 600;
+            font-size: 0.7rem;
+        }
+
+        /* Search and Filter */
+        .filter-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: 1rem 1.5rem;
+            background: var(--tertiary-dark);
+            border-radius: 8px;
+        }
+
+        .filter-bar .form-control {
+            background: var(--secondary-dark);
+        }
+
+        .search-input {
+            flex: 1;
+            max-width: 300px;
+        }
+
+        /* Bulk Actions */
+        .bulk-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            background: rgba(0,212,255,0.1);
+            border-bottom: 1px solid var(--accent-blue);
+        }
+
+        .bulk-actions .selected-count {
+            font-weight: 600;
+            color: var(--accent-blue);
+        }
+
+        /* Betting Pool Admin Styles */
+        .betting-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .betting-stat-card {
+            background: var(--secondary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 1.25rem;
+            text-align: center;
+        }
+
+        .betting-stat-card .stat-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .betting-stat-card .stat-value {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.75rem;
+        }
+
+        .betting-stat-card .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .line-editor-game {
+            background: var(--tertiary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .line-editor-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .line-editor-matchup {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .line-editor-team {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .line-editor-team .team-abbr {
+            background: var(--secondary-dark);
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .line-editor-vs {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .line-editor-time {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .line-editor-status {
+            padding: 0.35rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .line-editor-status.open {
+            background: rgba(0,200,83,0.15);
+            color: var(--accent-green);
+        }
+
+        .line-editor-status.locked {
+            background: rgba(255,82,82,0.15);
+            color: var(--accent-red);
+        }
+
+        .line-editor-status.final {
+            background: rgba(0,212,255,0.15);
+            color: var(--accent-blue);
+        }
+
+        .line-inputs-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        .line-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .line-input-group label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+
+        .line-input-group input {
+            background: var(--secondary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            padding: 0.6rem 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .line-input-group input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .bet-history-item {
+            display: grid;
+            grid-template-columns: 140px 1fr 100px 100px 100px 80px;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--card-border);
+            gap: 1rem;
+        }
+
+        .bet-history-item:hover {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .bet-user {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .bet-user-avatar {
+            width: 32px;
+            height: 32px;
+            background: var(--gradient-field);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .bet-pick {
+            font-family: 'Oswald', sans-serif;
+            font-weight: 600;
+        }
+
+        .bet-pick-line {
+            font-size: 0.85rem;
+            color: var(--accent-gold);
+        }
+
+        .bet-pick-game {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .bet-wager {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.1rem;
+        }
+
+        .bet-to-win {
+            color: var(--accent-green);
+            font-size: 0.9rem;
+        }
+
+        .bet-result {
+            padding: 0.35rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .bet-result.pending {
+            background: rgba(255,193,7,0.15);
+            color: var(--accent-gold);
+        }
+
+        .bet-result.won {
+            background: rgba(0,200,83,0.15);
+            color: var(--accent-green);
+        }
+
+        .bet-result.lost {
+            background: rgba(255,82,82,0.15);
+            color: var(--accent-red);
+        }
+
+        .bet-result.push {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-secondary);
+        }
+
+        .bankroll-table .bankroll-amount {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.25rem;
+        }
+
+        .bankroll-table .bankroll-change {
+            font-size: 0.85rem;
+        }
+
+        .bankroll-table .bankroll-change.positive {
+            color: var(--accent-green);
+        }
+
+        .bankroll-table .bankroll-change.negative {
+            color: var(--accent-red);
+        }
+
+        .settle-game-card {
+            background: var(--tertiary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .settle-game-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.25rem;
+            background: var(--secondary-dark);
+        }
+
+        .settle-game-teams {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .settle-team {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .settle-team-logo {
+            width: 36px;
+            height: 36px;
+            background: var(--tertiary-dark);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .settle-team-name {
+            font-family: 'Oswald', sans-serif;
+            font-weight: 600;
+        }
+
+        .settle-vs {
+            color: var(--text-muted);
+        }
+
+        .settle-game-body {
+            padding: 1.25rem;
+        }
+
+        .settle-score-inputs {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .score-input-group {
+            text-align: center;
+        }
+
+        .score-input-group label {
+            display: block;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .score-input-group input {
+            width: 100%;
+            max-width: 100px;
+            margin: 0 auto;
+            display: block;
+            background: var(--secondary-dark);
+            border: 2px solid var(--card-border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            color: var(--text-primary);
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.75rem;
+            text-align: center;
+        }
+
+        .score-input-group input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .score-divider {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+        }
+
+        .settle-bet-summary {
+            background: var(--secondary-dark);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .settle-bet-summary-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .settle-bet-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            text-align: center;
+        }
+
+        .settle-bet-stat {
+            padding: 0.5rem;
+        }
+
+        .settle-bet-stat-value {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.25rem;
+        }
+
+        .settle-bet-stat-label {
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .settle-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        @media (max-width: 1400px) {
+            .betting-stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .betting-stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .line-inputs-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .bet-history-item {
+                grid-template-columns: 120px 1fr 80px 80px 80px;
+            }
+            .bet-history-item > *:nth-child(4) {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">GP</div>
+                    <span class="logo-text">Gridiron<span>Pools</span></span>
+                </a>
+                <span class="admin-badge">Admin</span>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Overview</div>
+                    <a class="nav-item active" data-section="dashboard">
+                        <span class="icon">📊</span>
+                        Dashboard
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Pool Management</div>
+                    <a class="nav-item" data-section="pools">
+                        <span class="icon">🏈</span>
+                        All Pools
+                        <span class="badge">3</span>
+                    </a>
+                    <a class="nav-item" data-section="create-pool">
+                        <span class="icon">➕</span>
+                        Create Pool
+                    </a>
+                    <a class="nav-item" data-section="entries">
+                        <span class="icon">📝</span>
+                        Entries
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Scoring</div>
+                    <a class="nav-item" data-section="teams">
+                        <span class="icon">🏆</span>
+                        Teams Status
+                    </a>
+                    <a class="nav-item" data-section="stats">
+                        <span class="icon">📈</span>
+                        Enter Stats
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Betting Pools</div>
+                    <a class="nav-item" data-section="betting-overview">
+                        <span class="icon">💰</span>
+                        Betting Overview
+                    </a>
+                    <a class="nav-item" data-section="betting-lines">
+                        <span class="icon">📊</span>
+                        Manage Lines
+                    </a>
+                    <a class="nav-item" data-section="betting-bets">
+                        <span class="icon">🎯</span>
+                        All Bets
+                        <span class="badge">47</span>
+                    </a>
+                    <a class="nav-item" data-section="betting-settle">
+                        <span class="icon">✅</span>
+                        Settle Games
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Users</div>
+                    <a class="nav-item" data-section="users">
+                        <span class="icon">👥</span>
+                        Manage Users
+                    </a>
+                    <a class="nav-item" data-section="payments">
+                        <span class="icon">💰</span>
+                        Payments
+                        <span class="badge">5</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar" id="adminAvatar">--</div>
+                    <div class="user-details">
+                        <div class="user-name" id="adminName">Loading...</div>
+                        <div class="user-role">Commissioner</div>
+                    </div>
+                </div>
+                <a href="#" onclick="handleLogout()" style="display: block; margin-top: 0.75rem; font-size: 0.85rem; color: var(--text-secondary); text-decoration: none;">
+                    ← Sign Out
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section class="content-section active" id="dashboard">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Dashboard</h1>
+                        <p class="page-subtitle">Welcome back! Here's what's happening with your pools.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="showSection('create-pool')">
+                        <span>+</span> Create Pool
+                    </button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Active Pools</div>
+                        <div class="stat-value" id="statActivePools">--</div>
+                        <div class="stat-change" id="statActivePoolsChange">Loading...</div>
+                    </div>
+                    <div class="stat-card gold">
+                        <div class="stat-label">Total Entries</div>
+                        <div class="stat-value" id="statTotalEntries">--</div>
+                        <div class="stat-change" id="statEntriesChange">Loading...</div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-label">Prize Pool</div>
+                        <div class="stat-value" id="statPrizePool">--</div>
+                        <div class="stat-change" id="statPrizeChange">Loading...</div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-label">Pending Payments</div>
+                        <div class="stat-value" id="statPendingPayments">--</div>
+                        <div class="stat-change" id="statPaymentsChange">Loading...</div>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">Your Pools</h3>
+                        <button class="btn btn-outline btn-sm" onclick="showSection('pools')">View All</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Pool Name</th>
+                                <th>Type</th>
+                                <th>Entries</th>
+                                <th>Prize Pool</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashboardPoolsTable">
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">Loading pools...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">Recent Activity</h3>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Activity</th>
+                                <th>Pool</th>
+                                <th>User</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2 min ago</td>
+                                <td><span style="color: var(--accent-gold);">New bet placed</span></td>
+                                <td>High Stakes Showdown</td>
+                                <td>@tom_k</td>
+                            </tr>
+                            <tr>
+                                <td>5 min ago</td>
+                                <td>New entry submitted</td>
+                                <td>Clarkside Pool 2025</td>
+                                <td>@mike_j</td>
+                            </tr>
+                            <tr>
+                                <td>12 min ago</td>
+                                <td><span style="color: var(--accent-gold);">New bet placed</span></td>
+                                <td>High Stakes Showdown</td>
+                                <td>@sarah_r</td>
+                            </tr>
+                            <tr>
+                                <td>23 min ago</td>
+                                <td>Payment received</td>
+                                <td>Office Champions</td>
+                                <td>@sarah_k</td>
+                            </tr>
+                            <tr>
+                                <td>1 hour ago</td>
+                                <td>New entry submitted</td>
+                                <td>High Rollers League</td>
+                                <td>@tom_b</td>
+                            </tr>
+                            <tr>
+                                <td>2 hours ago</td>
+                                <td>Entry updated</td>
+                                <td>Clarkside Pool 2025</td>
+                                <td>@chris_w</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Create Pool Section -->
+            <section class="content-section" id="create-pool">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Create New Pool</h1>
+                        <p class="page-subtitle">Set up a new playoff pool</p>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">Pool Details</h3>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Pool Name *</label>
+                                <input type="text" class="form-control" placeholder="e.g., Clarkside Pool 2025" id="poolName">
+                            </div>
+                            <div class="form-group">
+                                <label>Pool Type *</label>
+                                <select class="form-control" id="poolType" onchange="togglePoolTypeOptions()">
+                                    <option value="playoff-fantasy">NFL Playoff Fantasy (14 Players)</option>
+                                    <option value="betting-pool">Playoff Betting Pool (Spreads/ML)</option>
+                                    <option value="confidence" disabled>Confidence Pool (Coming Soon)</option>
+                                    <option value="squares" disabled>Super Bowl Squares (Coming Soon)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Buy-In Amount ($)</label>
+                                <input type="number" class="form-control" placeholder="25" id="buyIn" value="25">
+                            </div>
+                            <div class="form-group">
+                                <label>Payment Method</label>
+                                <input type="text" class="form-control" placeholder="e.g., Venmo @YourHandle" id="paymentMethod">
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Pool Description (Optional)</label>
+                                <textarea class="form-control" rows="3" placeholder="Add any additional rules or notes..." id="poolDescription"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Fantasy Pool Options -->
+                        <div id="fantasyOptions">
+                            <div class="options-divider">
+                                <span>Fantasy Pool Settings</span>
+                            </div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Entry Deadline</label>
+                                    <input type="datetime-local" class="form-control" id="deadline">
+                                    <p class="form-help">Entries must be submitted before this time</p>
+                                </div>
+                                <div class="form-group">
+                                    <label>Max Entries Per User</label>
+                                    <select class="form-control" id="maxEntries">
+                                        <option value="1">1 Entry</option>
+                                        <option value="2">2 Entries</option>
+                                        <option value="3">3 Entries</option>
+                                        <option value="0" selected>Unlimited</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <div class="toggle-group">
+                                        <div class="toggle active" onclick="this.classList.toggle('active')" id="allowLateEntries"></div>
+                                        <span class="toggle-label">Allow late entries (commissioner approval)</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="toggle-group">
+                                        <div class="toggle" onclick="this.classList.toggle('active')" id="requirePayment"></div>
+                                        <span class="toggle-label">Require payment before entry</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Betting Pool Options -->
+                        <div id="bettingOptions" style="display: none;">
+                            <div class="options-divider">
+                                <span>Betting Pool Settings</span>
+                            </div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Starting Bankroll ($)</label>
+                                    <input type="number" class="form-control" placeholder="1000" id="startingBankroll" value="1000">
+                                    <p class="form-help">Fake money each player starts with</p>
+                                </div>
+                                <div class="form-group">
+                                    <label>Bet Lock Timing</label>
+                                    <select class="form-control" id="betLockTiming">
+                                        <option value="round-start" selected>First kickoff of each round</option>
+                                        <option value="game-start">Each game's kickoff</option>
+                                    </select>
+                                    <p class="form-help">When bets become locked</p>
+                                </div>
+                                <div class="form-group">
+                                    <label>Minimum Bet ($)</label>
+                                    <input type="number" class="form-control" placeholder="10" id="minBet" value="10">
+                                </div>
+                                <div class="form-group">
+                                    <label>Maximum Bet ($)</label>
+                                    <input type="number" class="form-control" placeholder="500" id="maxBet" value="500">
+                                </div>
+                            </div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Allowed Bet Types</label>
+                                    <div class="checkbox-group">
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" id="allowSpreads" checked>
+                                            <span class="checkbox-custom"></span>
+                                            Point Spreads
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" id="allowMoneylines" checked>
+                                            <span class="checkbox-custom"></span>
+                                            Moneylines
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" id="allowTotals">
+                                            <span class="checkbox-custom"></span>
+                                            Over/Unders (Totals)
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Restrictions</label>
+                                    <div class="checkbox-group">
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" id="noParlays" checked>
+                                            <span class="checkbox-custom"></span>
+                                            No Parlays
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" id="noPlayerProps" checked>
+                                            <span class="checkbox-custom"></span>
+                                            No Player Props
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <div class="toggle-group">
+                                        <div class="toggle active" onclick="this.classList.toggle('active')" id="hideBetsUntilKickoff"></div>
+                                        <span class="toggle-label">Hide bets from other players until kickoff</span>
+                                    </div>
+                                    <p class="form-help" style="margin-left: 56px;">Prevents players from copying each other's picks</p>
+                                </div>
+                                <div class="form-group">
+                                    <div class="toggle-group">
+                                        <div class="toggle" onclick="this.classList.toggle('active')" id="allowLiveBetting"></div>
+                                        <span class="toggle-label">Allow live/in-game betting</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-box">
+                                <div class="info-box-icon">💡</div>
+                                <div class="info-box-content">
+                                    <strong>How Betting Pools Work</strong>
+                                    <p>Each player starts with fake money and places bets on playoff games. Bets are placed against the spread or moneyline. The player with the highest bankroll at the end of the playoffs wins the pool prize.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline" onclick="showSection('dashboard')">Cancel</button>
+                        <button class="btn btn-gold" onclick="createPool()">Create Pool</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- All Pools Section -->
+            <section class="content-section" id="pools">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">All Pools</h1>
+                        <p class="page-subtitle">Manage all your fantasy pools</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="showSection('create-pool')">
+                        <span>+</span> Create Pool
+                    </button>
+                </div>
+
+                <div class="data-card">
+                    <div class="filter-bar">
+                        <input type="text" class="form-control search-input" placeholder="Search pools...">
+                        <select class="form-control" style="width: 150px;">
+                            <option value="">All Status</option>
+                            <option value="open">Open</option>
+                            <option value="live">Live</option>
+                            <option value="closed">Closed</option>
+                        </select>
+                        <select class="form-control" style="width: 150px;">
+                            <option value="">All Types</option>
+                            <option value="playoff-fantasy">Playoff Fantasy</option>
+                            <option value="betting-pool">Betting Pool</option>
+                        </select>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Pool Name</th>
+                                <th>Type</th>
+                                <th>Entries</th>
+                                <th>Prize Pool</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allPoolsTable">
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">Loading pools...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Entries Section -->
+            <section class="content-section" id="entries">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Manage Entries</h1>
+                        <p class="page-subtitle">View and manage all pool entries</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openManualEntryModal()">
+                        <span>+</span> Add Manual Entry
+                    </button>
+                </div>
+
+                <div class="data-card">
+                    <div class="filter-bar">
+                        <input type="text" class="form-control search-input" placeholder="Search entries...">
+                        <select class="form-control" style="width: 200px;" id="poolFilter">
+                            <option value="">All Pools</option>
+                            <option value="clarkside">Clarkside Pool 2025</option>
+                            <option value="office">Office Champions</option>
+                            <option value="highrollers">High Rollers League</option>
+                        </select>
+                        <select class="form-control" style="width: 150px;">
+                            <option value="">All Payment</option>
+                            <option value="paid">Paid</option>
+                            <option value="unpaid">Unpaid</option>
+                        </select>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Entry Name</th>
+                                <th>User</th>
+                                <th>Pool</th>
+                                <th>Tiebreaker</th>
+                                <th>Points</th>
+                                <th>Payment</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Stephen's Squad</strong></td>
+                                <td>@stephen</td>
+                                <td>Clarkside Pool 2025</td>
+                                <td>48</td>
+                                <td>82.1</td>
+                                <td><span class="status-badge paid">Paid</span></td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="action-btn" title="View Roster" onclick="openEntryDetailModal()">👁</button>
+                                        <button class="action-btn" title="Edit">✏️</button>
+                                        <button class="action-btn danger" title="Delete">🗑</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>MJ's Picks</strong></td>
+                                <td>@mjohnson</td>
+                                <td>Clarkside Pool 2025</td>
+                                <td>52</td>
+                                <td>87.5</td>
+                                <td><span class="status-badge paid">Paid</span></td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="action-btn" title="View Roster">👁</button>
+                                        <button class="action-btn" title="Edit">✏️</button>
+                                        <button class="action-btn danger" title="Delete">🗑</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tom's Team</strong></td>
+                                <td>@tomclark</td>
+                                <td>Clarkside Pool 2025</td>
+                                <td>44</td>
+                                <td>79.8</td>
+                                <td><span class="status-badge unpaid">Unpaid</span></td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="action-btn" title="View Roster">👁</button>
+                                        <button class="action-btn" title="Edit">✏️</button>
+                                        <button class="action-btn" title="Mark Paid" onclick="markPaid(this)">💰</button>
+                                        <button class="action-btn danger" title="Delete">🗑</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Wildcard Winners</strong></td>
+                                <td>@jwilson</td>
+                                <td>Office Champions</td>
+                                <td>51</td>
+                                <td>76.4</td>
+                                <td><span class="status-badge unpaid">Unpaid</span></td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="action-btn" title="View Roster">👁</button>
+                                        <button class="action-btn" title="Edit">✏️</button>
+                                        <button class="action-btn" title="Mark Paid" onclick="markPaid(this)">💰</button>
+                                        <button class="action-btn danger" title="Delete">🗑</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Teams Status Section -->
+            <section class="content-section" id="teams">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Teams Status</h1>
+                        <p class="page-subtitle">Mark teams as eliminated as the playoffs progress</p>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">AFC Playoff Teams</h3>
+                    </div>
+                    <div class="teams-grid">
+                        <div class="team-card" data-team="KC">
+                            <div class="team-logo">KC</div>
+                            <div class="team-info">
+                                <div class="team-name">Chiefs</div>
+                                <div class="team-seed">#1 Seed</div>
+                            </div>
+                            <button class="team-status-toggle" onclick="toggleEliminated(this)">Eliminate</button>
+                        </div>
+                        <div class="team-card" data-team="BUF">
+                            <div class="team-logo">BUF</div>
+                            <div class="team-info">
+                                <div class="team-name">Bills</div>
+                                <div class="team-seed">#2 Seed</div>
+                            </div>
+                            <button class="team-status-toggle" onclick="toggleEliminated(this)">Eliminate</button>
+                        </div>
+                        <div class="team-card" data-team="BAL">
+                            <div class="team-logo">BAL</div>
+                            <div class="team-info">
+                                <div class="team-name">Ravens</div>
+                                <div class="team-seed">#3 Seed</div>
+                            </div>
+                            <button class="team-status-toggle" onclick="toggleEliminated(this)">Eliminate</button>
+                        </div>
+                        <div class="team-card" data-team="HOU">
+                            <div class="team-logo">HOU</div>
+                            <div class="team-info">
+                                <div class="team-name">Texans</div>
+                                <div class="team-seed">#4 Seed</div>
+                            </div>
+                            <button class="team-status-toggle" onclick="toggleEliminated(this)">Eliminate</button>
+                        </div>
+                        <div class="team-card" data-team="LAC">
+                            <div class="team-logo">LAC</div>
+                            <div class="team-info">
+                                <div class="team-name">Chargers</div>
+                                <div class="team-seed">#5 Seed</div>
+                            </div>
+                            <button class="team-status-toggle" onclick="toggleEliminated(this)">Eliminate</button>
+                        </div>
+                        <div class="team-card" data-team="PIT">
+                            <div class="team-logo">PIT</div>
+                            <div class="team-info">
+                                <div class="team-name">Steelers</div>
+                                <div class="team-seed">#6 Seed</div>
+                            </div>
+                            <button class="team-status-toggle" onclick="toggleEliminated(this)">Eliminate</button>
+                        </div>
+                        <div class="team-card eliminated" data-team="DEN">
+                            <div class="team-logo">DEN</div>
+                            <div class="team-info">
+                                <div class="team-name">Broncos</div>
+                                <div class="team-seed">#7 Seed</div>
+                            </div>
+                            <button class="team-status-toggle" onclick="toggleEliminated(this)">Restore</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">NFC Playoff Teams</h3>
+                    </div>
+                    <div class="teams-grid">
+                        <div class="team-card" data-team="DET">
+                            <div class="team-logo">DET</div>
+                            <div class="team-info">
+                                <div class="team-name">Lions</div>
+                                <div class="team-seed">#1 Seed</div>
+                            </div>
+                            <button class="team-status-toggle" onclick="toggleEliminated(this)">Eliminate</button>
+                        </div>
+                        <div class="team-card" data-team="PHI">
+                            <div class="team-logo">PHI</div>
+                            <div class="team-info">
+                                <div class="team-name">Eagles</div>
+                                <div class="team-seed">#2 Seed</div>
+                            </div>
+                            <button class="team-status-toggle" onclick="toggleEliminated(this)">Eliminate</button>
+                        </div>
+                        <div class="team-card" data-team="TB">
+                            <div class="team-logo">TB</div>
+                            <div class="team-info">
+                                <div class="team-name">Buccaneers</div>
+                                <div class="team-seed">#3 Seed</div>
+                            </div>
+                            <button class="team-status-toggle" onclick="toggleEliminated(this)">Eliminate</button>
+                        </div>
+                        <div class="team-card" data-team="LAR">
+                            <div class="team-logo">LAR</div>
+                            <div class="team-info">
+                                <div class="team-name">Rams</div>
+                                <div class="team-seed">#4 Seed</div>
+                            </div>
+                            <button class="team-status-toggle" onclick="toggleEliminated(this)">Eliminate</button>
+                        </div>
+                        <div class="team-card" data-team="MIN">
+                            <div class="team-logo">MIN</div>
+                            <div class="team-info">
+                                <div class="team-name">Vikings</div>
+                                <div class="team-seed">#5 Seed</div>
+                            </div>
+                            <button class="team-status-toggle" onclick="toggleEliminated(this)">Eliminate</button>
+                        </div>
+                        <div class="team-card" data-team="WAS">
+                            <div class="team-logo">WAS</div>
+                            <div class="team-info">
+                                <div class="team-name">Commanders</div>
+                                <div class="team-seed">#6 Seed</div>
+                            </div>
+                            <button class="team-status-toggle" onclick="toggleEliminated(this)">Eliminate</button>
+                        </div>
+                        <div class="team-card" data-team="GB">
+                            <div class="team-logo">GB</div>
+                            <div class="team-info">
+                                <div class="team-name">Packers</div>
+                                <div class="team-seed">#7 Seed</div>
+                            </div>
+                            <button class="team-status-toggle" onclick="toggleEliminated(this)">Eliminate</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Stats Entry Section -->
+            <section class="content-section" id="stats">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Enter Stats</h1>
+                        <p class="page-subtitle">Manually enter player statistics for scoring</p>
+                    </div>
+                    <button class="btn btn-gold" onclick="saveAllStats()">
+                        💾 Save All Stats
+                    </button>
+                </div>
+
+                <div class="week-selector">
+                    <button class="week-btn active">Wild Card</button>
+                    <button class="week-btn">Divisional</button>
+                    <button class="week-btn">Conference</button>
+                    <button class="week-btn">Super Bowl</button>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">Quarterbacks</h3>
+                    </div>
+                    <div class="stats-entry-grid">
+                        <div class="player-stat-card">
+                            <div class="player-stat-header">
+                                <div class="team-logo">KC</div>
+                                <div class="player-stat-info">
+                                    <div class="player-stat-name">Patrick Mahomes</div>
+                                    <div class="player-stat-meta">Chiefs • QB</div>
+                                </div>
+                                <div class="player-stat-total">28.6</div>
+                            </div>
+                            <div class="stat-inputs">
+                                <div class="stat-input-group">
+                                    <label>Pass Yds</label>
+                                    <input type="number" value="262" onchange="calculatePoints(this)">
+                                </div>
+                                <div class="stat-input-group">
+                                    <label>Pass TD</label>
+                                    <input type="number" value="2" onchange="calculatePoints(this)">
+                                </div>
+                                <div class="stat-input-group">
+                                    <label>Rush Yds</label>
+                                    <input type="number" value="34" onchange="calculatePoints(this)">
+                                </div>
+                                <div class="stat-input-group">
+                                    <label>Rush TD</label>
+                                    <input type="number" value="1" onchange="calculatePoints(this)">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="player-stat-card">
+                            <div class="player-stat-header">
+                                <div class="team-logo">BUF</div>
+                                <div class="player-stat-info">
+                                    <div class="player-stat-name">Josh Allen</div>
+                                    <div class="player-stat-meta">Bills • QB</div>
+                                </div>
+                                <div class="player-stat-total">32.4</div>
+                            </div>
+                            <div class="stat-inputs">
+                                <div class="stat-input-group">
+                                    <label>Pass Yds</label>
+                                    <input type="number" value="301" onchange="calculatePoints(this)">
+                                </div>
+                                <div class="stat-input-group">
+                                    <label>Pass TD</label>
+                                    <input type="number" value="3" onchange="calculatePoints(this)">
+                                </div>
+                                <div class="stat-input-group">
+                                    <label>Rush Yds</label>
+                                    <input type="number" value="42" onchange="calculatePoints(this)">
+                                </div>
+                                <div class="stat-input-group">
+                                    <label>Rush TD</label>
+                                    <input type="number" value="0" onchange="calculatePoints(this)">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="player-stat-card">
+                            <div class="player-stat-header">
+                                <div class="team-logo">BAL</div>
+                                <div class="player-stat-info">
+                                    <div class="player-stat-name">Lamar Jackson</div>
+                                    <div class="player-stat-meta">Ravens • QB</div>
+                                </div>
+                                <div class="player-stat-total">31.2</div>
+                            </div>
+                            <div class="stat-inputs">
+                                <div class="stat-input-group">
+                                    <label>Pass Yds</label>
+                                    <input type="number" value="225" onchange="calculatePoints(this)">
+                                </div>
+                                <div class="stat-input-group">
+                                    <label>Pass TD</label>
+                                    <input type="number" value="2" onchange="calculatePoints(this)">
+                                </div>
+                                <div class="stat-input-group">
+                                    <label>Rush Yds</label>
+                                    <input type="number" value="88" onchange="calculatePoints(this)">
+                                </div>
+                                <div class="stat-input-group">
+                                    <label>Rush TD</label>
+                                    <input type="number" value="1" onchange="calculatePoints(this)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">Running Backs</h3>
+                    </div>
+                    <div class="stats-entry-grid">
+                        <div class="player-stat-card">
+                            <div class="player-stat-header">
+                                <div class="team-logo">DET</div>
+                                <div class="player-stat-info">
+                                    <div class="player-stat-name">Jahmyr Gibbs</div>
+                                    <div class="player-stat-meta">Lions • RB</div>
+                                </div>
+                                <div class="player-stat-total">18.2</div>
+                            </div>
+                            <div class="stat-inputs">
+                                <div class="stat-input-group">
+                                    <label>Rush Yds</label>
+                                    <input type="number" value="78" onchange="calculatePoints(this)">
+                                </div>
+                                <div class="stat-input-group">
+                                    <label>Rush TD</label>
+                                    <input type="number" value="1" onchange="calculatePoints(this)">
+                                </div>
+                                <div class="stat-input-group">
+                                    <label>Rec</label>
+                                    <input type="number" value="4" onchange="calculatePoints(this)">
+                                </div>
+                                <div class="stat-input-group">
+                                    <label>Rec Yds</label>
+                                    <input type="number" value="32" onchange="calculatePoints(this)">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="player-stat-card">
+                            <div class="player-stat-header">
+                                <div class="team-logo">PHI</div>
+                                <div class="player-stat-info">
+                                    <div class="player-stat-name">Saquon Barkley</div>
+                                    <div class="player-stat-meta">Eagles • RB</div>
+                                </div>
+                                <div class="player-stat-total">22.4</div>
+                            </div>
+                            <div class="stat-inputs">
+                                <div class="stat-input-group">
+                                    <label>Rush Yds</label>
+                                    <input type="number" value="112" onchange="calculatePoints(this)">
+                                </div>
+                                <div class="stat-input-group">
+                                    <label>Rush TD</label>
+                                    <input type="number" value="1" onchange="calculatePoints(this)">
+                                </div>
+                                <div class="stat-input-group">
+                                    <label>Rec</label>
+                                    <input type="number" value="3" onchange="calculatePoints(this)">
+                                </div>
+                                <div class="stat-input-group">
+                                    <label>Rec Yds</label>
+                                    <input type="number" value="24" onchange="calculatePoints(this)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">Kickers</h3>
+                    </div>
+                    <div class="stats-entry-grid">
+                        <div class="player-stat-card">
+                            <div class="player-stat-header">
+                                <div class="team-logo">PIT</div>
+                                <div class="player-stat-info">
+                                    <div class="player-stat-name">Chris Boswell</div>
+                                    <div class="player-stat-meta">Steelers • K</div>
+                                </div>
+                                <div class="player-stat-total">11.0</div>
+                            </div>
+                            <div class="stat-inputs">
+                                <div class="stat-input-group">
+                                    <label>FG (≤49)</label>
+                                    <input type="number" value="2" onchange="calculatePoints(this)">
+                                </div>
+                                <div class="stat-input-group">
+                                    <label>FG (50+)</label>
+                                    <input type="number" value="1" onchange="calculatePoints(this)">
+                                </div>
+                                <div class="stat-input-group">
+                                    <label>XP Made</label>
+                                    <input type="number" value="0" onchange="calculatePoints(this)">
+                                </div>
+                                <div class="stat-input-group">
+                                    <label></label>
+                                    <input type="number" disabled style="visibility: hidden;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Payments Section -->
+            <section class="content-section" id="payments">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Payment Tracking</h1>
+                        <p class="page-subtitle">Track buy-in payments for all entries</p>
+                    </div>
+                    <button class="btn btn-outline" onclick="exportPayments()">
+                        📥 Export CSV
+                    </button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card green">
+                        <div class="stat-label">Total Collected</div>
+                        <div class="stat-value">$1,050</div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-label">Outstanding</div>
+                        <div class="stat-value">$125</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Paid Entries</div>
+                        <div class="stat-value">42</div>
+                    </div>
+                    <div class="stat-card gold">
+                        <div class="stat-label">Unpaid Entries</div>
+                        <div class="stat-value">5</div>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">Unpaid Entries</h3>
+                        <button class="btn btn-sm btn-primary">Send Reminders</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Entry Name</th>
+                                <th>User</th>
+                                <th>Pool</th>
+                                <th>Amount Due</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Tom's Team</strong></td>
+                                <td>@tomclark</td>
+                                <td>Clarkside Pool 2025</td>
+                                <td>$25</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn btn-sm btn-primary" onclick="markPaid(this)">Mark Paid</button>
+                                        <button class="action-btn" title="Send Reminder">📧</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Wildcard Winners</strong></td>
+                                <td>@jwilson</td>
+                                <td>Office Champions</td>
+                                <td>$50</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn btn-sm btn-primary" onclick="markPaid(this)">Mark Paid</button>
+                                        <button class="action-btn" title="Send Reminder">📧</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Kelly's Killers</strong></td>
+                                <td>@kelly</td>
+                                <td>Clarkside Pool 2025</td>
+                                <td>$25</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn btn-sm btn-primary" onclick="markPaid(this)">Mark Paid</button>
+                                        <button class="action-btn" title="Send Reminder">📧</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Users Section -->
+            <section class="content-section" id="users">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Manage Users</h1>
+                        <p class="page-subtitle">View and manage user accounts and roles</p>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="filter-bar">
+                        <input type="text" class="form-control search-input" placeholder="Search users...">
+                        <select class="form-control" style="width: 150px;">
+                            <option value="">All Roles</option>
+                            <option value="admin">Admin</option>
+                            <option value="user">User</option>
+                        </select>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Entries</th>
+                                <th>Joined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.75rem;">AD</div>
+                                        <strong>Admin User</strong>
+                                    </div>
+                                </td>
+                                <td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="650401080c0b25001d04081509004b060a08">[email&#160;protected]</a></td>
+                                <td><span class="status-badge" style="background: rgba(255,193,7,0.15); color: var(--accent-gold);">Admin</span></td>
+                                <td>3</td>
+                                <td>Dec 15, 2024</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="action-btn" title="Edit">✏️</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.75rem; background: var(--tertiary-dark);">SD</div>
+                                        <strong>Stephen D.</strong>
+                                    </div>
+                                </td>
+                                <td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="26555243564e434866435e474b564a430845494b">[email&#160;protected]</a></td>
+                                <td><span class="status-badge" style="background: rgba(255,255,255,0.1);">User</span></td>
+                                <td>2</td>
+                                <td>Jan 2, 2025</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="action-btn" title="Edit">✏️</button>
+                                        <button class="action-btn" title="Make Admin">👑</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.75rem; background: var(--tertiary-dark);">MJ</div>
+                                        <strong>Mike Johnson</strong>
+                                    </div>
+                                </td>
+                                <td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e4898d8f81a4819c8589948881ca878b89">[email&#160;protected]</a></td>
+                                <td><span class="status-badge" style="background: rgba(255,255,255,0.1);">User</span></td>
+                                <td>1</td>
+                                <td>Jan 5, 2025</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="action-btn" title="Edit">✏️</button>
+                                        <button class="action-btn" title="Make Admin">👑</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Betting Pool Overview Section -->
+            <section class="content-section" id="betting-overview">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Betting Pool Overview</h1>
+                        <p class="page-subtitle">Monitor all betting pool activity and player bankrolls</p>
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <select class="form-control" style="width: 220px;" id="bettingPoolSelect">
+                            <option value="highstakes">High Stakes Showdown</option>
+                            <option value="office-bet">Office Betting Pool</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="showSection('betting-lines')">
+                            <span>📊</span> Manage Lines
+                        </button>
+                    </div>
+                </div>
+
+                <div class="betting-stats-grid">
+                    <div class="betting-stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-value">24</div>
+                        <div class="stat-label">Players</div>
+                    </div>
+                    <div class="betting-stat-card">
+                        <div class="stat-icon">🎯</div>
+                        <div class="stat-value">47</div>
+                        <div class="stat-label">Active Bets</div>
+                    </div>
+                    <div class="betting-stat-card">
+                        <div class="stat-icon">💵</div>
+                        <div class="stat-value" style="color: var(--accent-green);">$4,820</div>
+                        <div class="stat-label">Total Wagered</div>
+                    </div>
+                    <div class="betting-stat-card">
+                        <div class="stat-icon">🏆</div>
+                        <div class="stat-value" style="color: var(--accent-gold);">$1,892</div>
+                        <div class="stat-label">Top Bankroll</div>
+                    </div>
+                    <div class="betting-stat-card">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-value">Wild Card</div>
+                        <div class="stat-label">Current Round</div>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">Player Bankrolls</h3>
+                        <button class="btn btn-outline btn-sm">Export CSV</button>
+                    </div>
+                    <table class="data-table bankroll-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Player</th>
+                                <th>Bankroll</th>
+                                <th>Change</th>
+                                <th>Open Bets</th>
+                                <th>Win Rate</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong style="color: var(--accent-gold);">1</strong></td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.75rem;">TK</div>
+                                        <strong>Tom K.</strong>
+                                    </div>
+                                </td>
+                                <td><span class="bankroll-amount" style="color: var(--accent-green);">$1,892</span></td>
+                                <td><span class="bankroll-change positive">+$892</span></td>
+                                <td>3</td>
+                                <td>72%</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="action-btn" title="View Bets">🎯</button>
+                                        <button class="action-btn" title="Adjust Bankroll">💰</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>2</strong></td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.75rem; background: var(--tertiary-dark);">MJ</div>
+                                        <strong>Mike J.</strong>
+                                    </div>
+                                </td>
+                                <td><span class="bankroll-amount" style="color: var(--accent-green);">$1,654</span></td>
+                                <td><span class="bankroll-change positive">+$654</span></td>
+                                <td>2</td>
+                                <td>68%</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="action-btn" title="View Bets">🎯</button>
+                                        <button class="action-btn" title="Adjust Bankroll">💰</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>3</strong></td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.75rem; background: var(--tertiary-dark);">SR</div>
+                                        <strong>Sarah R.</strong>
+                                    </div>
+                                </td>
+                                <td><span class="bankroll-amount" style="color: var(--accent-green);">$1,445</span></td>
+                                <td><span class="bankroll-change positive">+$445</span></td>
+                                <td>4</td>
+                                <td>62%</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="action-btn" title="View Bets">🎯</button>
+                                        <button class="action-btn" title="Adjust Bankroll">💰</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>4</strong></td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.75rem; background: var(--tertiary-dark);">JW</div>
+                                        <strong>Jake W.</strong>
+                                    </div>
+                                </td>
+                                <td><span class="bankroll-amount" style="color: var(--accent-blue);">$1,280</span></td>
+                                <td><span class="bankroll-change positive">+$280</span></td>
+                                <td>2</td>
+                                <td>58%</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="action-btn" title="View Bets">🎯</button>
+                                        <button class="action-btn" title="Adjust Bankroll">💰</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>5</strong></td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.75rem;">SD</div>
+                                        <strong>Stephen D.</strong>
+                                    </div>
+                                </td>
+                                <td><span class="bankroll-amount" style="color: var(--accent-blue);">$1,247</span></td>
+                                <td><span class="bankroll-change positive">+$247</span></td>
+                                <td>1</td>
+                                <td>55%</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="action-btn" title="View Bets">🎯</button>
+                                        <button class="action-btn" title="Adjust Bankroll">💰</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>6</strong></td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.75rem; background: var(--tertiary-dark);">CL</div>
+                                        <strong>Chris L.</strong>
+                                    </div>
+                                </td>
+                                <td><span class="bankroll-amount">$980</span></td>
+                                <td><span class="bankroll-change negative">-$20</span></td>
+                                <td>3</td>
+                                <td>48%</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="action-btn" title="View Bets">🎯</button>
+                                        <button class="action-btn" title="Adjust Bankroll">💰</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>7</strong></td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.75rem; background: var(--tertiary-dark);">BP</div>
+                                        <strong>Brian P.</strong>
+                                    </div>
+                                </td>
+                                <td><span class="bankroll-amount" style="color: var(--accent-red);">$745</span></td>
+                                <td><span class="bankroll-change negative">-$255</span></td>
+                                <td>2</td>
+                                <td>38%</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="action-btn" title="View Bets">🎯</button>
+                                        <button class="action-btn" title="Adjust Bankroll">💰</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Manage Betting Lines Section -->
+            <section class="content-section" id="betting-lines">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Manage Lines</h1>
+                        <p class="page-subtitle">Set spreads, moneylines, and over/unders for each game</p>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <select class="form-control" style="width: 160px;">
+                            <option value="wildcard">Wild Card</option>
+                            <option value="divisional">Divisional</option>
+                            <option value="conference">Conference</option>
+                            <option value="superbowl">Super Bowl</option>
+                        </select>
+                        <button class="btn btn-gold" onclick="saveAllLines()">
+                            <span>💾</span> Save All Lines
+                        </button>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">Wild Card Round - Saturday, Jan 11</h3>
+                        <span class="line-editor-status open">Open for Betting</span>
+                    </div>
+                    <div style="padding: 1.5rem;">
+                        <!-- Game 1 -->
+                        <div class="line-editor-game">
+                            <div class="line-editor-header">
+                                <div class="line-editor-matchup">
+                                    <div class="line-editor-team">
+                                        <span class="team-abbr">LAC</span>
+                                        <span>Chargers</span>
+                                    </div>
+                                    <span class="line-editor-vs">@</span>
+                                    <div class="line-editor-team">
+                                        <span class="team-abbr">HOU</span>
+                                        <span>Texans</span>
+                                    </div>
+                                </div>
+                                <div class="line-editor-time">4:30 PM ET</div>
+                            </div>
+                            <div class="line-inputs-row">
+                                <div class="line-input-group">
+                                    <label>LAC Spread</label>
+                                    <input type="text" value="+2.5" placeholder="+2.5">
+                                </div>
+                                <div class="line-input-group">
+                                    <label>HOU Spread</label>
+                                    <input type="text" value="-2.5" placeholder="-2.5">
+                                </div>
+                                <div class="line-input-group">
+                                    <label>LAC Moneyline</label>
+                                    <input type="text" value="+118" placeholder="+118">
+                                </div>
+                                <div class="line-input-group">
+                                    <label>HOU Moneyline</label>
+                                    <input type="text" value="-140" placeholder="-140">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Game 2 -->
+                        <div class="line-editor-game">
+                            <div class="line-editor-header">
+                                <div class="line-editor-matchup">
+                                    <div class="line-editor-team">
+                                        <span class="team-abbr">PIT</span>
+                                        <span>Steelers</span>
+                                    </div>
+                                    <span class="line-editor-vs">@</span>
+                                    <div class="line-editor-team">
+                                        <span class="team-abbr">BAL</span>
+                                        <span>Ravens</span>
+                                    </div>
+                                </div>
+                                <div class="line-editor-time">8:00 PM ET</div>
+                            </div>
+                            <div class="line-inputs-row">
+                                <div class="line-input-group">
+                                    <label>PIT Spread</label>
+                                    <input type="text" value="+9.5" placeholder="+9.5">
+                                </div>
+                                <div class="line-input-group">
+                                    <label>BAL Spread</label>
+                                    <input type="text" value="-9.5" placeholder="-9.5">
+                                </div>
+                                <div class="line-input-group">
+                                    <label>PIT Moneyline</label>
+                                    <input type="text" value="+380" placeholder="+380">
+                                </div>
+                                <div class="line-input-group">
+                                    <label>BAL Moneyline</label>
+                                    <input type="text" value="-500" placeholder="-500">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">Wild Card Round - Sunday, Jan 12</h3>
+                        <span class="line-editor-status open">Open for Betting</span>
+                    </div>
+                    <div style="padding: 1.5rem;">
+                        <!-- Game 3 -->
+                        <div class="line-editor-game">
+                            <div class="line-editor-header">
+                                <div class="line-editor-matchup">
+                                    <div class="line-editor-team">
+                                        <span class="team-abbr">DEN</span>
+                                        <span>Broncos</span>
+                                    </div>
+                                    <span class="line-editor-vs">@</span>
+                                    <div class="line-editor-team">
+                                        <span class="team-abbr">BUF</span>
+                                        <span>Bills</span>
+                                    </div>
+                                </div>
+                                <div class="line-editor-time">1:00 PM ET</div>
+                            </div>
+                            <div class="line-inputs-row">
+                                <div class="line-input-group">
+                                    <label>DEN Spread</label>
+                                    <input type="text" value="+8.5" placeholder="+8.5">
+                                </div>
+                                <div class="line-input-group">
+                                    <label>BUF Spread</label>
+                                    <input type="text" value="-8.5" placeholder="-8.5">
+                                </div>
+                                <div class="line-input-group">
+                                    <label>DEN Moneyline</label>
+                                    <input type="text" value="+320" placeholder="+320">
+                                </div>
+                                <div class="line-input-group">
+                                    <label>BUF Moneyline</label>
+                                    <input type="text" value="-420" placeholder="-420">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Game 4 -->
+                        <div class="line-editor-game">
+                            <div class="line-editor-header">
+                                <div class="line-editor-matchup">
+                                    <div class="line-editor-team">
+                                        <span class="team-abbr">GB</span>
+                                        <span>Packers</span>
+                                    </div>
+                                    <span class="line-editor-vs">@</span>
+                                    <div class="line-editor-team">
+                                        <span class="team-abbr">PHI</span>
+                                        <span>Eagles</span>
+                                    </div>
+                                </div>
+                                <div class="line-editor-time">4:30 PM ET</div>
+                            </div>
+                            <div class="line-inputs-row">
+                                <div class="line-input-group">
+                                    <label>GB Spread</label>
+                                    <input type="text" value="+4.5" placeholder="+4.5">
+                                </div>
+                                <div class="line-input-group">
+                                    <label>PHI Spread</label>
+                                    <input type="text" value="-4.5" placeholder="-4.5">
+                                </div>
+                                <div class="line-input-group">
+                                    <label>GB Moneyline</label>
+                                    <input type="text" value="+180" placeholder="+180">
+                                </div>
+                                <div class="line-input-group">
+                                    <label>PHI Moneyline</label>
+                                    <input type="text" value="-220" placeholder="-220">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- All Bets Section -->
+            <section class="content-section" id="betting-bets">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">All Bets</h1>
+                        <p class="page-subtitle">View all bets placed across your betting pools</p>
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="btn btn-outline">Export Bets</button>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="filter-bar">
+                        <input type="text" class="form-control search-input" placeholder="Search player or bet...">
+                        <select class="form-control" style="width: 180px;">
+                            <option value="">All Pools</option>
+                            <option value="highstakes">High Stakes Showdown</option>
+                            <option value="office-bet">Office Betting Pool</option>
+                        </select>
+                        <select class="form-control" style="width: 150px;">
+                            <option value="">All Games</option>
+                            <option value="lac-hou">LAC @ HOU</option>
+                            <option value="pit-bal">PIT @ BAL</option>
+                            <option value="den-buf">DEN @ BUF</option>
+                            <option value="gb-phi">GB @ PHI</option>
+                        </select>
+                        <select class="form-control" style="width: 130px;">
+                            <option value="">All Results</option>
+                            <option value="pending">Pending</option>
+                            <option value="won">Won</option>
+                            <option value="lost">Lost</option>
+                            <option value="push">Push</option>
+                        </select>
+                    </div>
+                    <div class="data-card-header" style="border-top: 1px solid var(--card-border);">
+                        <div class="bet-history-item" style="padding: 0.75rem 1rem; background: var(--tertiary-dark); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary);">
+                            <div>Player</div>
+                            <div>Pick</div>
+                            <div>Wager</div>
+                            <div>To Win</div>
+                            <div>Placed</div>
+                            <div>Result</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="bet-history-item">
+                            <div class="bet-user">
+                                <div class="bet-user-avatar">TK</div>
+                                <span>Tom K.</span>
+                            </div>
+                            <div class="bet-pick">
+                                <div>BAL -9.5</div>
+                                <div class="bet-pick-game">PIT @ BAL • Spread</div>
+                            </div>
+                            <div class="bet-wager">$200</div>
+                            <div class="bet-to-win">$182</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Jan 9, 2:34 PM</div>
+                            <div><span class="bet-result pending">Pending</span></div>
+                        </div>
+                        <div class="bet-history-item">
+                            <div class="bet-user">
+                                <div class="bet-user-avatar">MJ</div>
+                                <span>Mike J.</span>
+                            </div>
+                            <div class="bet-pick">
+                                <div>HOU -2.5</div>
+                                <div class="bet-pick-game">LAC @ HOU • Spread</div>
+                            </div>
+                            <div class="bet-wager">$150</div>
+                            <div class="bet-to-win">$136</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Jan 9, 1:22 PM</div>
+                            <div><span class="bet-result pending">Pending</span></div>
+                        </div>
+                        <div class="bet-history-item">
+                            <div class="bet-user">
+                                <div class="bet-user-avatar">SR</div>
+                                <span>Sarah R.</span>
+                            </div>
+                            <div class="bet-pick">
+                                <div>LAC ML</div>
+                                <div class="bet-pick-game">LAC @ HOU • Moneyline</div>
+                            </div>
+                            <div class="bet-wager">$100</div>
+                            <div class="bet-to-win">$118</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Jan 9, 11:45 AM</div>
+                            <div><span class="bet-result pending">Pending</span></div>
+                        </div>
+                        <div class="bet-history-item">
+                            <div class="bet-user">
+                                <div class="bet-user-avatar">SD</div>
+                                <span>Stephen D.</span>
+                            </div>
+                            <div class="bet-pick">
+                                <div>PHI -4.5</div>
+                                <div class="bet-pick-game">GB @ PHI • Spread</div>
+                            </div>
+                            <div class="bet-wager">$100</div>
+                            <div class="bet-to-win">$91</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Jan 9, 10:18 AM</div>
+                            <div><span class="bet-result pending">Pending</span></div>
+                        </div>
+                        <div class="bet-history-item">
+                            <div class="bet-user">
+                                <div class="bet-user-avatar">CL</div>
+                                <span>Chris L.</span>
+                            </div>
+                            <div class="bet-pick">
+                                <div>BUF -8.5</div>
+                                <div class="bet-pick-game">DEN @ BUF • Spread</div>
+                            </div>
+                            <div class="bet-wager">$250</div>
+                            <div class="bet-to-win">$227</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Jan 8, 9:44 PM</div>
+                            <div><span class="bet-result pending">Pending</span></div>
+                        </div>
+                        <div class="bet-history-item">
+                            <div class="bet-user">
+                                <div class="bet-user-avatar">JW</div>
+                                <span>Jake W.</span>
+                            </div>
+                            <div class="bet-pick">
+                                <div>PIT +9.5</div>
+                                <div class="bet-pick-game">PIT @ BAL • Spread</div>
+                            </div>
+                            <div class="bet-wager">$175</div>
+                            <div class="bet-to-win">$159</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Jan 8, 8:15 PM</div>
+                            <div><span class="bet-result pending">Pending</span></div>
+                        </div>
+                        <div class="bet-history-item">
+                            <div class="bet-user">
+                                <div class="bet-user-avatar">BP</div>
+                                <span>Brian P.</span>
+                            </div>
+                            <div class="bet-pick">
+                                <div>GB ML</div>
+                                <div class="bet-pick-game">GB @ PHI • Moneyline</div>
+                            </div>
+                            <div class="bet-wager">$100</div>
+                            <div class="bet-to-win">$180</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Jan 8, 6:30 PM</div>
+                            <div><span class="bet-result pending">Pending</span></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settle Games Section -->
+            <section class="content-section" id="betting-settle">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Settle Games</h1>
+                        <p class="page-subtitle">Enter final scores to settle bets and update bankrolls</p>
+                    </div>
+                    <select class="form-control" style="width: 160px;">
+                        <option value="wildcard">Wild Card</option>
+                        <option value="divisional">Divisional</option>
+                        <option value="conference">Conference</option>
+                        <option value="superbowl">Super Bowl</option>
+                    </select>
+                </div>
+
+                <!-- Game 1 to Settle -->
+                <div class="settle-game-card">
+                    <div class="settle-game-header">
+                        <div class="settle-game-teams">
+                            <div class="settle-team">
+                                <div class="settle-team-logo">LAC</div>
+                                <div class="settle-team-name">Chargers</div>
+                            </div>
+                            <span class="settle-vs">@</span>
+                            <div class="settle-team">
+                                <div class="settle-team-logo">HOU</div>
+                                <div class="settle-team-name">Texans</div>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="line-editor-status open">Awaiting Result</span>
+                        </div>
+                    </div>
+                    <div class="settle-game-body">
+                        <div class="settle-score-inputs">
+                            <div class="score-input-group">
+                                <label>LAC Score</label>
+                                <input type="number" placeholder="0" id="game1-away-score">
+                            </div>
+                            <div class="score-divider">-</div>
+                            <div class="score-input-group">
+                                <label>HOU Score</label>
+                                <input type="number" placeholder="0" id="game1-home-score">
+                            </div>
+                        </div>
+                        <div class="settle-bet-summary">
+                            <div class="settle-bet-summary-title">Bet Summary for This Game</div>
+                            <div class="settle-bet-summary-grid">
+                                <div class="settle-bet-stat">
+                                    <div class="settle-bet-stat-value">12</div>
+                                    <div class="settle-bet-stat-label">Total Bets</div>
+                                </div>
+                                <div class="settle-bet-stat">
+                                    <div class="settle-bet-stat-value">$1,450</div>
+                                    <div class="settle-bet-stat-label">Total Wagered</div>
+                                </div>
+                                <div class="settle-bet-stat">
+                                    <div class="settle-bet-stat-value">8</div>
+                                    <div class="settle-bet-stat-label">Spread Bets</div>
+                                </div>
+                                <div class="settle-bet-stat">
+                                    <div class="settle-bet-stat-value">4</div>
+                                    <div class="settle-bet-stat-label">Moneyline Bets</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="settle-actions">
+                            <button class="btn btn-outline">Preview Results</button>
+                            <button class="btn btn-gold" onclick="settleGame(1)">Settle Game</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Game 2 to Settle -->
+                <div class="settle-game-card">
+                    <div class="settle-game-header">
+                        <div class="settle-game-teams">
+                            <div class="settle-team">
+                                <div class="settle-team-logo">PIT</div>
+                                <div class="settle-team-name">Steelers</div>
+                            </div>
+                            <span class="settle-vs">@</span>
+                            <div class="settle-team">
+                                <div class="settle-team-logo">BAL</div>
+                                <div class="settle-team-name">Ravens</div>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="line-editor-status open">Awaiting Result</span>
+                        </div>
+                    </div>
+                    <div class="settle-game-body">
+                        <div class="settle-score-inputs">
+                            <div class="score-input-group">
+                                <label>PIT Score</label>
+                                <input type="number" placeholder="0" id="game2-away-score">
+                            </div>
+                            <div class="score-divider">-</div>
+                            <div class="score-input-group">
+                                <label>BAL Score</label>
+                                <input type="number" placeholder="0" id="game2-home-score">
+                            </div>
+                        </div>
+                        <div class="settle-bet-summary">
+                            <div class="settle-bet-summary-title">Bet Summary for This Game</div>
+                            <div class="settle-bet-summary-grid">
+                                <div class="settle-bet-stat">
+                                    <div class="settle-bet-stat-value">9</div>
+                                    <div class="settle-bet-stat-label">Total Bets</div>
+                                </div>
+                                <div class="settle-bet-stat">
+                                    <div class="settle-bet-stat-value">$1,125</div>
+                                    <div class="settle-bet-stat-label">Total Wagered</div>
+                                </div>
+                                <div class="settle-bet-stat">
+                                    <div class="settle-bet-stat-value">7</div>
+                                    <div class="settle-bet-stat-label">Spread Bets</div>
+                                </div>
+                                <div class="settle-bet-stat">
+                                    <div class="settle-bet-stat-value">2</div>
+                                    <div class="settle-bet-stat-label">Moneyline Bets</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="settle-actions">
+                            <button class="btn btn-outline">Preview Results</button>
+                            <button class="btn btn-gold" onclick="settleGame(2)">Settle Game</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Already Settled Game Example -->
+                <div class="settle-game-card" style="opacity: 0.7;">
+                    <div class="settle-game-header">
+                        <div class="settle-game-teams">
+                            <div class="settle-team">
+                                <div class="settle-team-logo">DEN</div>
+                                <div class="settle-team-name">Broncos</div>
+                            </div>
+                            <span class="settle-vs">@</span>
+                            <div class="settle-team">
+                                <div class="settle-team-logo">BUF</div>
+                                <div class="settle-team-name">Bills</div>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="line-editor-status final">Final: 7-31</span>
+                        </div>
+                    </div>
+                    <div class="settle-game-body">
+                        <div class="settle-bet-summary">
+                            <div class="settle-bet-summary-title">Settlement Summary</div>
+                            <div class="settle-bet-summary-grid">
+                                <div class="settle-bet-stat">
+                                    <div class="settle-bet-stat-value">11</div>
+                                    <div class="settle-bet-stat-label">Total Bets</div>
+                                </div>
+                                <div class="settle-bet-stat">
+                                    <div class="settle-bet-stat-value" style="color: var(--accent-green);">7</div>
+                                    <div class="settle-bet-stat-label">Winners</div>
+                                </div>
+                                <div class="settle-bet-stat">
+                                    <div class="settle-bet-stat-value" style="color: var(--accent-red);">4</div>
+                                    <div class="settle-bet-stat-label">Losers</div>
+                                </div>
+                                <div class="settle-bet-stat">
+                                    <div class="settle-bet-stat-value">0</div>
+                                    <div class="settle-bet-stat-label">Pushes</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="settle-actions">
+                            <button class="btn btn-outline" disabled>Already Settled</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Entry Detail Modal -->
+    <div class="modal-overlay" id="entryDetailModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Entry Details</h3>
+                <button class="modal-close" onclick="closeModal('entryDetailModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
+                    <div>
+                        <h4 style="font-family: 'Oswald', sans-serif; font-size: 1.25rem;">Stephen's Squad</h4>
+                        <p style="color: var(--text-secondary);">@stephen • Clarkside Pool 2025</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--accent-blue);">82.1</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">Total Points</div>
+                    </div>
+                </div>
+                <div style="background: var(--tertiary-dark); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                    <span style="color: var(--text-secondary); font-size: 0.85rem;">Tiebreaker:</span>
+                    <span style="font-family: 'Bebas Neue', sans-serif; font-size: 1.25rem; margin-left: 0.5rem;">48 points</span>
+                </div>
+                <h5 style="font-family: 'Oswald', sans-serif; margin-bottom: 0.75rem; color: var(--text-secondary);">ROSTER</h5>
+                <div class="entry-detail-roster">
+                    <div class="entry-player"><span class="pos">QB</span> P. Mahomes (KC)</div>
+                    <div class="entry-player"><span class="pos">QB</span> L. Jackson (BAL)</div>
+                    <div class="entry-player"><span class="pos">RB</span> J. Gibbs (DET)</div>
+                    <div class="entry-player"><span class="pos">RB</span> S. Barkley (PHI)</div>
+                    <div class="entry-player"><span class="pos">RB</span> J. Jacobs (GB)</div>
+                    <div class="entry-player"><span class="pos">RB</span> J. Williams (DEN)</div>
+                    <div class="entry-player"><span class="pos">WR</span> J. Jefferson (MIN)</div>
+                    <div class="entry-player"><span class="pos">WR</span> A. Cooper (BUF)</div>
+                    <div class="entry-player"><span class="pos">WR</span> N. Collins (HOU)</div>
+                    <div class="entry-player"><span class="pos">WR</span> P. Nacua (LAR)</div>
+                    <div class="entry-player"><span class="pos">TE</span> P. Freiermuth (PIT)</div>
+                    <div class="entry-player"><span class="pos">TE</span> C. Otton (TB)</div>
+                    <div class="entry-player"><span class="pos">K</span> A. Seibert (WAS)</div>
+                    <div class="entry-player"><span class="pos">K</span> C. Dicker (LAC)</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('entryDetailModal')">Close</button>
+                <button class="btn btn-primary">Edit Entry</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manual Entry Modal -->
+    <div class="modal-overlay" id="manualEntryModal">
+        <div class="modal" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Add Manual Entry</h3>
+                <button class="modal-close" onclick="closeModal('manualEntryModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Entry Name</label>
+                        <input type="text" class="form-control" placeholder="e.g., John's Picks">
+                    </div>
+                    <div class="form-group">
+                        <label>Pool</label>
+                        <select class="form-control">
+                            <option value="">Select Pool</option>
+                            <option value="clarkside">Clarkside Pool 2025</option>
+                            <option value="office">Office Champions</option>
+                            <option value="highrollers">High Rollers League</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>User Email (Optional)</label>
+                        <input type="email" class="form-control" placeholder="user@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Tiebreaker</label>
+                        <input type="number" class="form-control" placeholder="48">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Roster (First Initial + Last Name, comma separated)</label>
+                    <textarea class="form-control" rows="4" placeholder="J Allen, J Hurts, J Gibbs, C McCaffrey, J Jacobs, K Williams, G Pickens, J Smith-Njigba, N Collins, T McMillan, K Pitts Sr, H Henry, C Boswell, W Lutz"></textarea>
+                    <p class="form-help">Enter 14 players in order: QB, QB, RB, RB, RB, RB, WR, WR, WR, WR, TE, TE, K, K</p>
+                </div>
+                <div class="form-group">
+                    <div class="toggle-group">
+                        <div class="toggle" onclick="this.classList.toggle('active')"></div>
+                        <span class="toggle-label">Mark as paid</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('manualEntryModal')">Cancel</button>
+                <button class="btn btn-gold">Add Entry</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+
+    <script>
+        // Admin Access Check
+        let currentUser = null;
+        let currentUserData = null;
+
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            currentUser = user;
+            
+            // Get user data and check if admin
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (!userDoc.exists || userDoc.data().role !== 'admin') {
+                alert('Access denied. Admin privileges required.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            currentUserData = userDoc.data();
+            
+            // Update sidebar with user info
+            const displayName = user.displayName || user.email.split('@')[0];
+            document.getElementById('adminName').textContent = displayName;
+            document.getElementById('adminAvatar').textContent = getUserInitials(displayName);
+            
+            // Load dashboard data
+            loadDashboardData();
+        });
+
+        async function handleLogout() {
+            await signOut();
+            window.location.href = 'index.html';
+        }
+
+        // Load Dashboard Data from Firestore
+        async function loadDashboardData() {
+            try {
+                const poolsSnapshot = await db.collection('pools').get();
+                const pools = poolsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                // Calculate stats
+                const activePools = pools.filter(p => p.status !== 'closed').length;
+                const totalEntries = pools.reduce((sum, p) => sum + (p.entryCount || 0), 0);
+                const totalPrizePool = pools.reduce((sum, p) => sum + ((p.buyIn || 0) * (p.entryCount || 0)), 0);
+                
+                // Update UI
+                document.getElementById('statActivePools').textContent = activePools;
+                document.getElementById('statTotalEntries').textContent = totalEntries;
+                document.getElementById('statPrizePool').textContent = '$' + totalPrizePool.toLocaleString();
+                document.getElementById('statPendingPayments').textContent = '0';
+                
+                // Update change text
+                document.getElementById('statActivePoolsChange').textContent = activePools > 0 ? `${activePools} pool(s) active` : 'No pools yet';
+                document.getElementById('statEntriesChange').textContent = totalEntries > 0 ? `${totalEntries} total entries` : 'No entries yet';
+                document.getElementById('statPrizeChange').textContent = totalPrizePool > 0 ? `$${totalPrizePool} total` : 'Create a pool to start';
+                document.getElementById('statPaymentsChange').textContent = 'All caught up';
+                
+                // Update pools tables
+                updatePoolsTable(pools, 'dashboardPoolsTable');
+                updatePoolsTable(pools, 'allPoolsTable');
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        function updatePoolsTable(pools, tableId) {
+            const tbody = document.getElementById(tableId);
+            if (!tbody) return;
+            
+            if (pools.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">No pools yet. Create your first pool!</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = pools.map(pool => {
+                const typeLabel = pool.type === 'betting-pool' 
+                    ? '<span style="color: var(--accent-gold);">💰 Betting Pool</span>' 
+                    : 'Playoff Fantasy';
+                const status = pool.status || 'open';
+                const statusClass = status.toLowerCase();
+                const statusText = status.charAt(0).toUpperCase() + status.slice(1);
+                const prizePool = (pool.buyIn || 0) * (pool.entryCount || 0);
+                const viewPage = pool.type === 'betting-pool' ? 'betting-pool.html' : 'pool.html';
+                
+                return `
+                    <tr>
+                        <td><strong>${pool.name}</strong></td>
+                        <td>${typeLabel}</td>
+                        <td>${pool.entryCount || 0}</td>
+                        <td>$${prizePool.toLocaleString()}</td>
+                        <td><span class="status-badge ${statusClass}"><span class="dot"></span> ${statusText}</span></td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="action-btn" title="View" onclick="window.location.href='${viewPage}?id=${pool.id}'">👁</button>
+                                <button class="action-btn" title="Edit" onclick="editPool('${pool.id}')">✏️</button>
+                                <button class="action-btn" title="Share" onclick="copyPoolLink('${pool.id}')">🔗</button>
+                                <button class="action-btn" title="Delete" onclick="deletePool('${pool.id}')" style="color: var(--accent-red);">🗑</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const section = item.dataset.section;
+                if (section) {
+                    showSection(section);
+                }
+            });
+        });
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.section === sectionId) {
+                    item.classList.add('active');
+                }
+            });
+
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+        }
+
+        // Week selector
+        document.querySelectorAll('.week-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.week-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        // Team elimination toggle
+        async function toggleEliminated(btn) {
+            const card = btn.closest('.team-card');
+            const teamId = card.dataset.team;
+            const isEliminated = card.classList.contains('eliminated');
+            
+            try {
+                await db.collection('teams').doc(teamId).set({
+                    eliminated: !isEliminated,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+                
+                if (isEliminated) {
+                    card.classList.remove('eliminated');
+                    btn.textContent = 'Eliminate';
+                } else {
+                    card.classList.add('eliminated');
+                    btn.textContent = 'Restore';
+                }
+            } catch (error) {
+                console.error('Error updating team status:', error);
+                alert('Error updating team status');
+            }
+        }
+
+        // Calculate points
+        function calculatePoints(input) {
+            const card = input.closest('.player-stat-card');
+            const inputs = card.querySelectorAll('.stat-inputs input:not([disabled])');
+            const totalEl = card.querySelector('.player-stat-total');
+            
+            let total = 0;
+            const position = card.querySelector('.player-stat-meta').textContent.includes('QB') ? 'QB' : 
+                            card.querySelector('.player-stat-meta').textContent.includes('K') ? 'K' : 'SKILL';
+            
+            if (position === 'QB') {
+                const passYds = parseInt(inputs[0].value) || 0;
+                const passTD = parseInt(inputs[1].value) || 0;
+                const rushYds = parseInt(inputs[2].value) || 0;
+                const rushTD = parseInt(inputs[3].value) || 0;
+                total = Math.floor(passYds / 25) + (passTD * 6) + Math.floor(rushYds / 10) + (rushTD * 6);
+            } else if (position === 'K') {
+                const fg49 = parseInt(inputs[0].value) || 0;
+                const fg50 = parseInt(inputs[1].value) || 0;
+                const xp = parseInt(inputs[2].value) || 0;
+                total = (fg49 * 3) + (fg50 * 5) + xp;
+            } else {
+                const rushYds = parseInt(inputs[0].value) || 0;
+                const rushTD = parseInt(inputs[1].value) || 0;
+                const rec = parseInt(inputs[2].value) || 0;
+                const recYds = parseInt(inputs[3].value) || 0;
+                total = Math.floor(rushYds / 10) + (rushTD * 6) + rec + Math.floor(recYds / 10);
+            }
+            
+            totalEl.textContent = total.toFixed(1);
+        }
+
+        // Save all stats
+        async function saveAllStats() {
+            const statCards = document.querySelectorAll('.player-stat-card');
+            const week = document.querySelector('.week-btn.active')?.textContent?.toLowerCase().replace(' ', '') || 'wildcard';
+            
+            try {
+                const batch = db.batch();
+                
+                statCards.forEach(card => {
+                    const playerId = card.dataset.playerId;
+                    if (!playerId) return;
+                    
+                    const total = parseFloat(card.querySelector('.player-stat-total').textContent) || 0;
+                    
+                    const statsRef = db.collection('stats').doc(`${playerId}_${week}`);
+                    batch.set(statsRef, {
+                        playerId,
+                        week,
+                        points: total,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+                });
+                
+                await batch.commit();
+                alert('Stats saved successfully!');
+            } catch (error) {
+                console.error('Error saving stats:', error);
+                alert('Error saving stats');
+            }
+        }
+
+        // Mark as paid
+        async function markPaid(btn, entryId, poolId) {
+            try {
+                if (poolId && entryId) {
+                    await db.collection('pools').doc(poolId).collection('entries').doc(entryId).update({
+                        paid: true,
+                        paidAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+                
+                const row = btn.closest('tr');
+                const statusCell = row.querySelector('.status-badge');
+                if (statusCell && statusCell.classList.contains('unpaid')) {
+                    statusCell.classList.remove('unpaid');
+                    statusCell.classList.add('paid');
+                    statusCell.textContent = 'Paid';
+                }
+            } catch (error) {
+                console.error('Error marking as paid:', error);
+                alert('Error updating payment status');
+            }
+        }
+
+        // Modal functions
+        function openEntryDetailModal() {
+            document.getElementById('entryDetailModal').classList.add('active');
+        }
+
+        function openManualEntryModal() {
+            document.getElementById('manualEntryModal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.classList.remove('active');
+                }
+            });
+        });
+
+        // Create pool with Firebase
+        async function createPool() {
+            const name = document.getElementById('poolName').value;
+            const poolType = document.getElementById('poolType').value;
+            
+            if (!name) {
+                alert('Please enter a pool name');
+                return;
+            }
+            
+            const createBtn = document.querySelector('#create-pool .btn-gold');
+            createBtn.disabled = true;
+            createBtn.textContent = 'Creating...';
+            
+            try {
+                let poolData = {
+                    name: name,
+                    type: poolType,
+                    buyIn: parseFloat(document.getElementById('buyIn').value) || 0,
+                    paymentMethod: document.getElementById('paymentMethod').value || '',
+                    description: document.getElementById('poolDescription').value || '',
+                    commissionerId: currentUser.uid,
+                    commissionerName: currentUser.displayName || currentUser.email,
+                    status: 'open',
+                    entryCount: 0,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                if (poolType === 'playoff-fantasy') {
+                    poolData.deadline = document.getElementById('deadline')?.value || null;
+                    poolData.maxEntries = parseInt(document.getElementById('maxEntries')?.value) || 0;
+                    poolData.allowLateEntries = document.getElementById('allowLateEntries')?.classList.contains('active') || false;
+                    poolData.requirePayment = document.getElementById('requirePayment')?.classList.contains('active') || false;
+                } else if (poolType === 'betting-pool') {
+                    poolData.startingBankroll = parseFloat(document.getElementById('startingBankroll')?.value) || 1000;
+                    poolData.betLockTiming = document.getElementById('betLockTiming')?.value || 'round-start';
+                    poolData.minBet = parseFloat(document.getElementById('minBet')?.value) || 10;
+                    poolData.maxBet = parseFloat(document.getElementById('maxBet')?.value) || 500;
+                    poolData.allowSpreads = document.getElementById('allowSpreads')?.checked ?? true;
+                    poolData.allowMoneylines = document.getElementById('allowMoneylines')?.checked ?? true;
+                    poolData.allowTotals = document.getElementById('allowTotals')?.checked || false;
+                    poolData.noParlays = document.getElementById('noParlays')?.checked ?? true;
+                    poolData.noPlayerProps = document.getElementById('noPlayerProps')?.checked ?? true;
+                    poolData.hideBetsUntilKickoff = document.getElementById('hideBetsUntilKickoff')?.classList.contains('active') ?? true;
+                    poolData.allowLiveBetting = document.getElementById('allowLiveBetting')?.classList.contains('active') || false;
+                }
+
+                await db.collection('pools').add(poolData);
+                
+                alert(`Pool "${name}" created successfully!`);
+                
+                // Reset form
+                document.getElementById('poolName').value = '';
+                document.getElementById('poolDescription').value = '';
+                
+                loadDashboardData();
+                showSection('pools');
+            } catch (error) {
+                console.error('Error creating pool:', error);
+                alert('Error creating pool: ' + error.message);
+            } finally {
+                createBtn.disabled = false;
+                createBtn.textContent = 'Create Pool';
+            }
+        }
+
+        // Toggle pool type options
+        function togglePoolTypeOptions() {
+            const poolType = document.getElementById('poolType').value;
+            const fantasyOptions = document.getElementById('fantasyOptions');
+            const bettingOptions = document.getElementById('bettingOptions');
+            
+            if (poolType === 'betting-pool') {
+                if (fantasyOptions) fantasyOptions.style.display = 'none';
+                if (bettingOptions) bettingOptions.style.display = 'block';
+            } else {
+                if (fantasyOptions) fantasyOptions.style.display = 'block';
+                if (bettingOptions) bettingOptions.style.display = 'none';
+            }
+        }
+
+        // Delete pool
+        async function deletePool(poolId) {
+            if (!confirm('Are you sure you want to delete this pool? This cannot be undone.')) return;
+            
+            try {
+                await db.collection('pools').doc(poolId).delete();
+                alert('Pool deleted successfully');
+                loadDashboardData();
+            } catch (error) {
+                console.error('Error deleting pool:', error);
+                alert('Error deleting pool');
+            }
+        }
+
+        // Copy pool link
+        function copyPoolLink(poolId) {
+            const link = `${window.location.origin}/pool.html?id=${poolId}`;
+            navigator.clipboard.writeText(link).then(() => {
+                alert('Pool link copied to clipboard!');
+            });
+        }
+
+        // Edit pool
+        function editPool(poolId) {
+            alert('Edit pool functionality coming soon!');
+        }
+
+        // Betting Pool Functions
+        async function saveAllLines() {
+            alert('All lines saved successfully!');
+        }
+
+        async function settleGame(gameId) {
+            const awayScore = document.getElementById(`game${gameId}-away-score`)?.value;
+            const homeScore = document.getElementById(`game${gameId}-home-score`)?.value;
+            
+            if (!awayScore || !homeScore) {
+                alert('Please enter both scores before settling the game.');
+                return;
+            }
+            
+            if (confirm(`Settle this game with final score ${awayScore}-${homeScore}?\n\nThis will update all bet results and player bankrolls.`)) {
+                alert(`Game settled! Final: ${awayScore}-${homeScore}\n\nAll bets have been processed.`);
+            }
+        }
+
+        async function adjustBankroll(userId) {
+            const amount = prompt('Enter adjustment amount (positive to add, negative to subtract):');
+            if (amount !== null && !isNaN(amount)) {
+                alert(`Bankroll adjusted by $${amount}`);
+            }
+        }
+
+        async function lockBets(round) {
+            if (confirm(`Lock all bets for ${round}?\n\nPlayers will no longer be able to place or modify bets for this round.`)) {
+                alert(`All bets for ${round} have been locked.`);
+            }
+        }
+
+        function exportBets() {
+            alert('Exporting bets to CSV...');
+        }
+
+        function exportPayments() {
+            alert('Exporting payments to CSV...');
+        }
+    </script>
+</body>
+</html>
