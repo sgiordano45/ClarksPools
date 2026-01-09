@@ -1476,14 +1476,50 @@
         // =====================
         async function loadGames(poolId) {
             try {
-                const gamesSnapshot = await db.collection('pools').doc(poolId)
-                    .collection('games')
-                    .orderBy('gameTime', 'asc')
+                // Load from global games collection
+                const gamesSnapshot = await db.collection('games')
+                    .orderBy('gameDateTime', 'asc')
                     .get();
 
                 gamesData = [];
                 gamesSnapshot.forEach(doc => {
-                    gamesData.push({ id: doc.id, ...doc.data() });
+                    const game = doc.data();
+                    
+                    // Transform data to match expected format
+                    const transformedGame = {
+                        id: doc.id,
+                        // Map round names (global uses "wildcard", betting expects "wild-card")
+                        round: game.round === 'wildcard' ? 'wild-card' : 
+                               game.round === 'superbowl' ? 'super-bowl' : game.round,
+                        gameTime: game.gameDateTime,
+                        awayTeam: {
+                            abbr: game.awayTeam,
+                            name: game.awayName || game.awayTeam,
+                            record: ''
+                        },
+                        homeTeam: {
+                            abbr: game.homeTeam,
+                            name: game.homeName || game.homeTeam,
+                            record: ''
+                        },
+                        spread: {
+                            away: game.awaySpread || null,
+                            home: game.homeSpread || null,
+                            awayOdds: '-110',
+                            homeOdds: '-110'
+                        },
+                        moneyline: {
+                            away: game.awayML || null,
+                            home: game.homeML || null
+                        },
+                        total: game.total || null,
+                        status: game.status || 'upcoming',
+                        awayScore: game.awayScore,
+                        homeScore: game.homeScore,
+                        winner: game.winner
+                    };
+                    
+                    gamesData.push(transformedGame);
                 });
 
                 renderRoundSelector();

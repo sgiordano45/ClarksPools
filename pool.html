@@ -1827,89 +1827,63 @@
         let usedTeams = new Set();
         let currentSlot = null;
 
-        // Sample player data (would come from Firebase)
-        const playersData = {
-            QB: [
-                { name: 'Patrick Mahomes', team: 'KC', teamName: 'Chiefs' },
-                { name: 'Josh Allen', team: 'BUF', teamName: 'Bills' },
-                { name: 'Lamar Jackson', team: 'BAL', teamName: 'Ravens' },
-                { name: 'C.J. Stroud', team: 'HOU', teamName: 'Texans' },
-                { name: 'Justin Herbert', team: 'LAC', teamName: 'Chargers' },
-                { name: 'Russell Wilson', team: 'PIT', teamName: 'Steelers' },
-                { name: 'Bo Nix', team: 'DEN', teamName: 'Broncos' },
-                { name: 'Jared Goff', team: 'DET', teamName: 'Lions' },
-                { name: 'Jalen Hurts', team: 'PHI', teamName: 'Eagles' },
-                { name: 'Baker Mayfield', team: 'TB', teamName: 'Buccaneers' },
-                { name: 'Matthew Stafford', team: 'LAR', teamName: 'Rams' },
-                { name: 'Sam Darnold', team: 'MIN', teamName: 'Vikings' },
-                { name: 'Jayden Daniels', team: 'WAS', teamName: 'Commanders' },
-                { name: 'Jordan Love', team: 'GB', teamName: 'Packers' }
-            ],
-            RB: [
-                { name: 'Isiah Pacheco', team: 'KC', teamName: 'Chiefs' },
-                { name: 'James Cook', team: 'BUF', teamName: 'Bills' },
-                { name: 'Derrick Henry', team: 'BAL', teamName: 'Ravens' },
-                { name: 'Joe Mixon', team: 'HOU', teamName: 'Texans' },
-                { name: 'J.K. Dobbins', team: 'LAC', teamName: 'Chargers' },
-                { name: 'Najee Harris', team: 'PIT', teamName: 'Steelers' },
-                { name: 'Javonte Williams', team: 'DEN', teamName: 'Broncos' },
-                { name: 'Jahmyr Gibbs', team: 'DET', teamName: 'Lions' },
-                { name: 'Saquon Barkley', team: 'PHI', teamName: 'Eagles' },
-                { name: 'Bucky Irving', team: 'TB', teamName: 'Buccaneers' },
-                { name: 'Kyren Williams', team: 'LAR', teamName: 'Rams' },
-                { name: 'Aaron Jones', team: 'MIN', teamName: 'Vikings' },
-                { name: 'Brian Robinson Jr.', team: 'WAS', teamName: 'Commanders' },
-                { name: 'Josh Jacobs', team: 'GB', teamName: 'Packers' }
-            ],
-            WR: [
-                { name: 'Xavier Worthy', team: 'KC', teamName: 'Chiefs' },
-                { name: 'Amari Cooper', team: 'BUF', teamName: 'Bills' },
-                { name: 'Zay Flowers', team: 'BAL', teamName: 'Ravens' },
-                { name: 'Nico Collins', team: 'HOU', teamName: 'Texans' },
-                { name: 'Ladd McConkey', team: 'LAC', teamName: 'Chargers' },
-                { name: 'George Pickens', team: 'PIT', teamName: 'Steelers' },
-                { name: 'Courtland Sutton', team: 'DEN', teamName: 'Broncos' },
-                { name: 'Amon-Ra St. Brown', team: 'DET', teamName: 'Lions' },
-                { name: 'A.J. Brown', team: 'PHI', teamName: 'Eagles' },
-                { name: 'Mike Evans', team: 'TB', teamName: 'Buccaneers' },
-                { name: 'Puka Nacua', team: 'LAR', teamName: 'Rams' },
-                { name: 'Justin Jefferson', team: 'MIN', teamName: 'Vikings' },
-                { name: 'Terry McLaurin', team: 'WAS', teamName: 'Commanders' },
-                { name: 'Jayden Reed', team: 'GB', teamName: 'Packers' }
-            ],
-            TE: [
-                { name: 'Travis Kelce', team: 'KC', teamName: 'Chiefs' },
-                { name: 'Dalton Kincaid', team: 'BUF', teamName: 'Bills' },
-                { name: 'Mark Andrews', team: 'BAL', teamName: 'Ravens' },
-                { name: 'Dalton Schultz', team: 'HOU', teamName: 'Texans' },
-                { name: 'Will Dissly', team: 'LAC', teamName: 'Chargers' },
-                { name: 'Pat Freiermuth', team: 'PIT', teamName: 'Steelers' },
-                { name: 'Adam Trautman', team: 'DEN', teamName: 'Broncos' },
-                { name: 'Sam LaPorta', team: 'DET', teamName: 'Lions' },
-                { name: 'Dallas Goedert', team: 'PHI', teamName: 'Eagles' },
-                { name: 'Cade Otton', team: 'TB', teamName: 'Buccaneers' },
-                { name: 'Tyler Higbee', team: 'LAR', teamName: 'Rams' },
-                { name: 'T.J. Hockenson', team: 'MIN', teamName: 'Vikings' },
-                { name: 'Zach Ertz', team: 'WAS', teamName: 'Commanders' },
-                { name: 'Tucker Kraft', team: 'GB', teamName: 'Packers' }
-            ],
-            K: [
-                { name: 'Harrison Butker', team: 'KC', teamName: 'Chiefs' },
-                { name: 'Tyler Bass', team: 'BUF', teamName: 'Bills' },
-                { name: 'Justin Tucker', team: 'BAL', teamName: 'Ravens' },
-                { name: 'Ka\'imi Fairbairn', team: 'HOU', teamName: 'Texans' },
-                { name: 'Cameron Dicker', team: 'LAC', teamName: 'Chargers' },
-                { name: 'Chris Boswell', team: 'PIT', teamName: 'Steelers' },
-                { name: 'Wil Lutz', team: 'DEN', teamName: 'Broncos' },
-                { name: 'Jake Bates', team: 'DET', teamName: 'Lions' },
-                { name: 'Jake Elliott', team: 'PHI', teamName: 'Eagles' },
-                { name: 'Chase McLaughlin', team: 'TB', teamName: 'Buccaneers' },
-                { name: 'Joshua Karty', team: 'LAR', teamName: 'Rams' },
-                { name: 'Will Reichard', team: 'MIN', teamName: 'Vikings' },
-                { name: 'Austin Seibert', team: 'WAS', teamName: 'Commanders' },
-                { name: 'Brandon McManus', team: 'GB', teamName: 'Packers' }
-            ]
+        // Player data (loaded from Firebase)
+        let playersData = {
+            QB: [],
+            RB: [],
+            WR: [],
+            TE: [],
+            K: []
         };
+
+        // Load players from Firebase
+        async function loadPlayers() {
+            try {
+                const snapshot = await db.collection('players')
+                    .where('active', '==', true)
+                    .get();
+                
+                // Reset playersData
+                playersData = { QB: [], RB: [], WR: [], TE: [], K: [] };
+                
+                snapshot.forEach(doc => {
+                    const player = doc.data();
+                    const position = player.position;
+                    if (playersData[position]) {
+                        playersData[position].push({
+                            id: doc.id,
+                            name: player.name,
+                            team: player.team,
+                            teamName: player.teamName || player.team,
+                            totalPoints: player.totalPoints || 0,
+                            stats: player.stats || {}
+                        });
+                    }
+                });
+
+                // Sort each position by totalPoints (highest first)
+                Object.keys(playersData).forEach(pos => {
+                    playersData[pos].sort((a, b) => b.totalPoints - a.totalPoints);
+                });
+
+                console.log('Players loaded:', Object.values(playersData).flat().length);
+            } catch (error) {
+                console.error('Error loading players:', error);
+            }
+        }
+
+        // Load teams status (for elimination tracking)
+        let teamsStatus = {};
+        async function loadTeamsStatus() {
+            try {
+                const snapshot = await db.collection('teams').get();
+                snapshot.forEach(doc => {
+                    teamsStatus[doc.id] = doc.data();
+                });
+            } catch (error) {
+                console.error('Error loading teams:', error);
+            }
+        }
 
         // Open Player Modal
         function openPlayerModal(position, slotElement) {
@@ -1940,6 +1914,11 @@
             const list = document.getElementById('playerList');
             const players = playersData[position] || [];
             
+            if (players.length === 0) {
+                list.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-secondary);">No players loaded. Import players in Admin → Data Manager.</div>';
+                return;
+            }
+            
             const filteredPlayers = players.filter(p => 
                 p.name.toLowerCase().includes(filter.toLowerCase()) ||
                 p.team.toLowerCase().includes(filter.toLowerCase()) ||
@@ -1948,15 +1927,20 @@
 
             list.innerHTML = filteredPlayers.map(player => {
                 const isUsed = usedTeams.has(player.team);
+                const isEliminated = teamsStatus[player.team]?.eliminated || false;
+                const eliminatedClass = isEliminated ? 'eliminated' : '';
+                const points = player.totalPoints || 0;
+                
                 return `
-                    <div class="player-option ${isUsed ? 'used' : ''}" 
+                    <div class="player-option ${isUsed ? 'used' : ''} ${eliminatedClass}" 
                          onclick="${isUsed ? '' : `selectPlayer('${player.name}', '${player.team}', '${player.teamName}', '${position}')`}"
                          style="${isUsed ? 'opacity: 0.4; cursor: not-allowed;' : ''}">
-                        <div class="player-team-logo">${player.team}</div>
+                        <div class="player-team-logo" style="${isEliminated ? 'opacity: 0.5;' : ''}">${player.team}</div>
                         <div class="player-option-info">
-                            <div class="player-option-name">${player.name}</div>
-                            <div class="player-option-meta">${player.teamName} ${isUsed ? '(Team Used)' : ''}</div>
+                            <div class="player-option-name">${player.name} ${isEliminated ? '❌' : ''}</div>
+                            <div class="player-option-meta">${player.teamName} ${isUsed ? '(Team Used)' : ''} ${isEliminated ? '(Eliminated)' : ''}</div>
                         </div>
+                        <div style="font-family: 'Oswald', sans-serif; font-size: 1rem; color: var(--accent-gold); margin-left: auto;">${points} pts</div>
                     </div>
                 `;
             }).join('');
@@ -2082,6 +2066,10 @@
             const authButtons = document.getElementById('authButtons');
             const userMenu = document.getElementById('userMenu');
             const userAvatar = document.getElementById('userAvatar');
+            
+            // Load players and teams data (needed for roster selection)
+            await loadPlayers();
+            await loadTeamsStatus();
             
             if (user) {
                 if (authButtons) authButtons.style.display = 'none';

@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Pools | Gridiron Pools</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto+Condensed:wght@300;400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-dark: #0a1628;
+            --secondary-dark: #132238;
+            --accent-blue: #00d4ff;
+            --accent-gold: #ffc107;
+            --accent-green: #00c853;
+            --accent-red: #ff5252;
+            --text-primary: #ffffff;
+            --text-secondary: #8ba3c7;
+            --gradient-field: linear-gradient(135deg, #1a472a 0%, #2d5a3d 50%, #1a472a 100%);
+            --card-bg: rgba(255,255,255,0.03);
+            --card-border: rgba(255,255,255,0.08);
+            --glow-blue: 0 0 40px rgba(0,212,255,0.3);
+            --glow-gold: 0 0 30px rgba(255,193,7,0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto Condensed', sans-serif;
+            background: var(--primary-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Field pattern background */
+        .field-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 80px,
+                    rgba(255,255,255,0.02) 80px,
+                    rgba(255,255,255,0.02) 82px
+                ),
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 120px,
+                    rgba(255,255,255,0.015) 120px,
+                    rgba(255,255,255,0.015) 122px
+                );
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(10,22,40,0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--gradient-field);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5rem;
+            color: white;
+            box-shadow: var(--glow-blue);
+            border: 2px solid rgba(0,212,255,0.3);
+        }
+
+        .logo-text {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .logo-text span {
+            color: var(--accent-blue);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--accent-blue);
+        }
+
+        .user-menu {
+            position: relative;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-field);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Oswald', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            border: 2px solid var(--accent-blue);
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 0.5rem;
+            background: var(--secondary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            min-width: 180px;
+            display: none;
+            overflow: hidden;
+        }
+
+        .user-dropdown.show {
+            display: block;
+        }
+
+        .user-dropdown a {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .user-dropdown a:hover {
+            background: var(--card-bg);
+            color: var(--text-primary);
+        }
+
+        /* Main Content */
+        main {
+            position: relative;
+            z-index: 1;
+            padding: 7rem 2rem 4rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-family: 'Oswald', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Stats Summary */
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Oswald', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        .stat-value.gold {
+            color: var(--accent-gold);
+        }
+
+        .stat-value.green {
+            color: var(--accent-green);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 0.25rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 0.5rem;
+        }
+
+        .tab {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            color: var(--text-primary);
+            background: var(--card-bg);
+        }
+
+        .tab.active {
+            color: var(--accent-blue);
+            background: rgba(0,212,255,0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Pool Cards */
+        .pools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .pool-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .pool-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-blue);
+            box-shadow: var(--glow-blue);
+        }
+
+        .pool-card-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .pool-info h3 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .pool-type {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .pool-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .pool-status.live {
+            background: rgba(0,200,83,0.2);
+            color: var(--accent-green);
+        }
+
+        .pool-status.open {
+            background: rgba(0,212,255,0.2);
+            color: var(--accent-blue);
+        }
+
+        .pool-status.closed {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-secondary);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .pool-status.live .status-dot {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .pool-card-body {
+            padding: 1.25rem;
+        }
+
+        .pool-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .pool-stat {
+            text-align: center;
+        }
+
+        .pool-stat-value {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .pool-stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .pool-standing {
+            background: rgba(255,193,7,0.1);
+            border: 1px solid rgba(255,193,7,0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .standing-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .standing-value {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+        }
+
+        .standing-rank {
+            display: flex;
+            align-items: baseline;
+            gap: 0.25rem;
+        }
+
+        .standing-rank .ordinal {
+            font-size: 0.9rem;
+        }
+
+        .pool-card-footer {
+            padding: 1rem 1.25rem;
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0.6rem 1.25rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            border: none;
+            flex: 1;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: var(--accent-blue);
+            color: var(--primary-dark);
+        }
+
+        .btn-primary:hover {
+            box-shadow: var(--glow-blue);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--card-border);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        /* Entry Cards (for fantasy pools with multiple entries) */
+        .entries-list {
+            margin-top: 1rem;
+            border-top: 1px solid var(--card-border);
+            padding-top: 1rem;
+        }
+
+        .entry-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .entry-row:last-child {
+            border-bottom: none;
+        }
+
+        .entry-name {
+            font-weight: 500;
+        }
+
+        .entry-stats {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .entry-points {
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        .entry-rank {
+            color: var(--accent-gold);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: var(--card-bg);
+            border: 1px dashed var(--card-border);
+            border-radius: 12px;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            color: var(--text-secondary);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--card-border);
+            border-top-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .pools-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-summary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .tabs {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="field-pattern"></div>
+
+    <header>
+        <nav>
+            <a href="home.html" class="logo">
+                <div class="logo-icon">GP</div>
+                <span class="logo-text">Gridiron<span>Pools</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="home.html">Home</a>
+                <a href="my-pools.html" class="active">My Pools</a>
+            </div>
+            <div class="user-menu">
+                <div class="user-avatar" id="userAvatar" onclick="toggleDropdown()">--</div>
+                <div class="user-dropdown" id="userDropdown">
+                    <a href="my-pools.html">My Pools</a>
+                    <a href="#" id="adminLink" style="display: none;">Admin Panel</a>
+                    <a href="#" onclick="logout()">Log Out</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="page-header">
+            <h1 class="page-title">My Pools</h1>
+            <p class="page-subtitle">Track your entries and standings across all your pools</p>
+        </div>
+
+        <!-- Stats Summary -->
+        <div class="stats-summary" id="statsSummary">
+            <div class="stat-card">
+                <div class="stat-value" id="totalPools">0</div>
+                <div class="stat-label">Active Pools</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalEntries">0</div>
+                <div class="stat-label">Total Entries</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value gold" id="bestRank">--</div>
+                <div class="stat-label">Best Rank</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value green" id="totalWinnings">$0</div>
+                <div class="stat-label">Potential Winnings</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" data-tab="all">All Pools</button>
+            <button class="tab" data-tab="fantasy">Fantasy Pools</button>
+            <button class="tab" data-tab="betting">Betting Pools</button>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content active" id="tab-all">
+            <div class="loading" id="loadingAll">
+                <div class="loading-spinner"></div>
+                <p>Loading your pools...</p>
+            </div>
+            <div class="pools-grid" id="allPoolsGrid"></div>
+        </div>
+
+        <div class="tab-content" id="tab-fantasy">
+            <div class="pools-grid" id="fantasyPoolsGrid"></div>
+        </div>
+
+        <div class="tab-content" id="tab-betting">
+            <div class="pools-grid" id="bettingPoolsGrid"></div>
+        </div>
+    </main>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script>
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+            });
+        });
+
+        // User dropdown
+        function toggleDropdown() {
+            document.getElementById('userDropdown').classList.toggle('show');
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.user-menu')) {
+                document.getElementById('userDropdown').classList.remove('show');
+            }
+        });
+
+        // Auth state
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.href = 'home.html';
+                return;
+            }
+
+            const displayName = user.displayName || user.email.split('@')[0];
+            const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+            document.getElementById('userAvatar').textContent = initials;
+
+            // Check admin
+            const userData = await getCurrentUserData();
+            if (userData && userData.role === 'admin') {
+                document.getElementById('adminLink').style.display = 'block';
+                document.getElementById('adminLink').href = 'admin.html';
+            }
+
+            // Load pools
+            loadMyPools(user.uid);
+        });
+
+        async function logout() {
+            await signOut();
+            window.location.href = 'home.html';
+        }
+
+        async function loadMyPools(userId) {
+            const loadingEl = document.getElementById('loadingAll');
+            const allGrid = document.getElementById('allPoolsGrid');
+            const fantasyGrid = document.getElementById('fantasyPoolsGrid');
+            const bettingGrid = document.getElementById('bettingPoolsGrid');
+
+            try {
+                // Get all pools
+                const poolsSnapshot = await db.collection('pools').get();
+                const pools = poolsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                const myPools = [];
+                let totalEntries = 0;
+                let bestRank = Infinity;
+
+                // Check each pool for user's participation
+                for (const pool of pools) {
+                    if (pool.type === 'betting-pool') {
+                        // Check bankrolls subcollection
+                        const bankrollDoc = await db.collection('pools').doc(pool.id)
+                            .collection('bankrolls').doc(userId).get();
+                        
+                        if (bankrollDoc.exists) {
+                            const bankrollData = bankrollDoc.data();
+                            // Get rank
+                            const allBankrolls = await db.collection('pools').doc(pool.id)
+                                .collection('bankrolls').orderBy('currentBankroll', 'desc').get();
+                            
+                            let rank = 1;
+                            allBankrolls.forEach(doc => {
+                                if (doc.id === userId) return;
+                                if (doc.data().currentBankroll > bankrollData.currentBankroll) rank++;
+                            });
+
+                            myPools.push({
+                                ...pool,
+                                poolType: 'betting',
+                                userBankroll: bankrollData.currentBankroll,
+                                userRank: rank,
+                                totalParticipants: allBankrolls.size
+                            });
+                            totalEntries++;
+                            if (rank < bestRank) bestRank = rank;
+                        }
+                    } else {
+                        // Check entries subcollection for fantasy pools
+                        const entriesSnapshot = await db.collection('pools').doc(pool.id)
+                            .collection('entries').where('userId', '==', userId).get();
+                        
+                        if (!entriesSnapshot.empty) {
+                            const userEntries = entriesSnapshot.docs.map(doc => ({
+                                id: doc.id,
+                                ...doc.data()
+                            }));
+
+                            // Get all entries for ranking
+                            const allEntries = await db.collection('pools').doc(pool.id)
+                                .collection('entries').orderBy('totalPoints', 'desc').get();
+                            
+                            // Calculate ranks for each entry
+                            userEntries.forEach(entry => {
+                                let rank = 1;
+                                allEntries.forEach(doc => {
+                                    if (doc.id === entry.id) return;
+                                    if ((doc.data().totalPoints || 0) > (entry.totalPoints || 0)) rank++;
+                                });
+                                entry.rank = rank;
+                                if (rank < bestRank) bestRank = rank;
+                            });
+
+                            myPools.push({
+                                ...pool,
+                                poolType: 'fantasy',
+                                userEntries,
+                                totalParticipants: allEntries.size
+                            });
+                            totalEntries += userEntries.length;
+                        }
+                    }
+                }
+
+                // Update stats
+                document.getElementById('totalPools').textContent = myPools.length;
+                document.getElementById('totalEntries').textContent = totalEntries;
+                document.getElementById('bestRank').textContent = bestRank === Infinity ? '--' : getOrdinal(bestRank);
+
+                // Render pools
+                loadingEl.style.display = 'none';
+
+                if (myPools.length === 0) {
+                    allGrid.innerHTML = `
+                        <div class="empty-state" style="grid-column: 1/-1;">
+                            <div class="empty-state-icon">🏈</div>
+                            <h3>No Pools Yet</h3>
+                            <p>You haven't joined any pools yet. Browse available pools to get started!</p>
+                            <a href="home.html" class="btn btn-primary">Browse Pools</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Separate by type
+                const fantasyPools = myPools.filter(p => p.poolType === 'fantasy');
+                const bettingPools = myPools.filter(p => p.poolType === 'betting');
+
+                allGrid.innerHTML = myPools.map(renderPoolCard).join('');
+                fantasyGrid.innerHTML = fantasyPools.length ? fantasyPools.map(renderPoolCard).join('') : renderEmptyState('fantasy');
+                bettingGrid.innerHTML = bettingPools.length ? bettingPools.map(renderPoolCard).join('') : renderEmptyState('betting');
+
+            } catch (error) {
+                console.error('Error loading pools:', error);
+                loadingEl.innerHTML = `
+                    <p style="color: var(--accent-red);">Error loading pools. Please try again.</p>
+                `;
+            }
+        }
+
+        function renderPoolCard(pool) {
+            const statusClass = pool.status === 'live' ? 'live' : pool.status === 'open' ? 'open' : 'closed';
+            const statusText = pool.status.charAt(0).toUpperCase() + pool.status.slice(1);
+            const typeIcon = pool.poolType === 'betting' ? '💰' : '🏈';
+            const typeLabel = pool.poolType === 'betting' ? 'Betting Pool' : 'Fantasy Pool';
+            const viewPage = pool.poolType === 'betting' ? 'betting-pool.html' : 'pool.html';
+
+            if (pool.poolType === 'betting') {
+                return `
+                    <div class="pool-card">
+                        <div class="pool-card-header">
+                            <div class="pool-info">
+                                <h3>${pool.name}</h3>
+                                <span class="pool-type">${typeIcon} ${typeLabel}</span>
+                            </div>
+                            <span class="pool-status ${statusClass}">
+                                <span class="status-dot"></span>
+                                ${statusText}
+                            </span>
+                        </div>
+                        <div class="pool-card-body">
+                            <div class="pool-stats">
+                                <div class="pool-stat">
+                                    <div class="pool-stat-value">$${pool.buyIn || 0}</div>
+                                    <div class="pool-stat-label">Buy-In</div>
+                                </div>
+                                <div class="pool-stat">
+                                    <div class="pool-stat-value">${pool.totalParticipants}</div>
+                                    <div class="pool-stat-label">Players</div>
+                                </div>
+                                <div class="pool-stat">
+                                    <div class="pool-stat-value">$${((pool.buyIn || 0) * pool.totalParticipants).toLocaleString()}</div>
+                                    <div class="pool-stat-label">Prize Pool</div>
+                                </div>
+                            </div>
+                            <div class="pool-standing">
+                                <div>
+                                    <div class="standing-label">Your Bankroll</div>
+                                    <div class="standing-value">$${(pool.userBankroll || 0).toLocaleString()}</div>
+                                </div>
+                                <div class="standing-rank">
+                                    <span class="standing-value">${pool.userRank}</span>
+                                    <span class="ordinal">${getOrdinalSuffix(pool.userRank)}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pool-card-footer">
+                            <a href="${viewPage}?id=${pool.id}" class="btn btn-primary">View Pool</a>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Fantasy pool with potentially multiple entries
+                const topEntry = pool.userEntries.reduce((best, entry) => 
+                    (entry.totalPoints || 0) > (best.totalPoints || 0) ? entry : best
+                , pool.userEntries[0]);
+
+                return `
+                    <div class="pool-card">
+                        <div class="pool-card-header">
+                            <div class="pool-info">
+                                <h3>${pool.name}</h3>
+                                <span class="pool-type">${typeIcon} ${typeLabel}</span>
+                            </div>
+                            <span class="pool-status ${statusClass}">
+                                <span class="status-dot"></span>
+                                ${statusText}
+                            </span>
+                        </div>
+                        <div class="pool-card-body">
+                            <div class="pool-stats">
+                                <div class="pool-stat">
+                                    <div class="pool-stat-value">$${pool.buyIn || 0}</div>
+                                    <div class="pool-stat-label">Buy-In</div>
+                                </div>
+                                <div class="pool-stat">
+                                    <div class="pool-stat-value">${pool.userEntries.length}</div>
+                                    <div class="pool-stat-label">My Entries</div>
+                                </div>
+                                <div class="pool-stat">
+                                    <div class="pool-stat-value">${pool.totalParticipants}</div>
+                                    <div class="pool-stat-label">Total Entries</div>
+                                </div>
+                            </div>
+                            <div class="pool-standing">
+                                <div>
+                                    <div class="standing-label">Best Entry Points</div>
+                                    <div class="standing-value">${(topEntry.totalPoints || 0).toFixed(1)}</div>
+                                </div>
+                                <div class="standing-rank">
+                                    <span class="standing-value">${topEntry.rank}</span>
+                                    <span class="ordinal">${getOrdinalSuffix(topEntry.rank)}</span>
+                                </div>
+                            </div>
+                            ${pool.userEntries.length > 1 ? `
+                                <div class="entries-list">
+                                    ${pool.userEntries.map(entry => `
+                                        <div class="entry-row">
+                                            <span class="entry-name">${entry.entryName || 'Entry'}</span>
+                                            <div class="entry-stats">
+                                                <span class="entry-points">${(entry.totalPoints || 0).toFixed(1)} pts</span>
+                                                <span class="entry-rank">${getOrdinal(entry.rank)}</span>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="pool-card-footer">
+                            <a href="${viewPage}?id=${pool.id}" class="btn btn-primary">View Pool</a>
+                            ${pool.status === 'open' ? `<a href="${viewPage}?id=${pool.id}&tab=submit" class="btn btn-outline">Add Entry</a>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderEmptyState(type) {
+            const label = type === 'betting' ? 'betting pools' : 'fantasy pools';
+            return `
+                <div class="empty-state" style="grid-column: 1/-1;">
+                    <div class="empty-state-icon">${type === 'betting' ? '💰' : '🏈'}</div>
+                    <h3>No ${label.charAt(0).toUpperCase() + label.slice(1)}</h3>
+                    <p>You haven't joined any ${label} yet.</p>
+                    <a href="home.html" class="btn btn-primary">Browse Pools</a>
+                </div>
+            `;
+        }
+
+        function getOrdinal(n) {
+            return n + getOrdinalSuffix(n);
+        }
+
+        function getOrdinalSuffix(n) {
+            const s = ['th', 'st', 'nd', 'rd'];
+            const v = n % 100;
+            return s[(v - 20) % 10] || s[v] || s[0];
+        }
+    </script>
+</body>
+</html>

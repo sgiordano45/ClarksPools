@@ -1289,8 +1289,14 @@ header::before {
       
       <div class="games-editor" id="gamesEditor"></div>
       
-      <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem;">
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem; align-items: center;">
         <button class="btn btn-secondary" onclick="addGame()">➕ Add Game</button>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <select id="loadGameSelect" style="padding: 0.5rem; background: var(--secondary-dark); border: 1px solid var(--card-border); border-radius: 4px; color: var(--text-primary); font-size: 0.9rem;">
+            <option value="">-- Load teams from... --</option>
+          </select>
+          <button class="btn btn-secondary" onclick="loadTeamsFromGame()">🏈 Load</button>
+        </div>
         <button class="btn btn-primary" onclick="saveGames()">💾 Save All Games</button>
       </div>
     </div>
@@ -1820,6 +1826,9 @@ header::before {
         if (tab.dataset.tab === 'search') {
           loadUsersForSearch();
         }
+        if (tab.dataset.tab === 'games') {
+          populateGameSelect();
+        }
       });
     });
   }
@@ -1969,6 +1978,93 @@ header::before {
       winners: {}
     });
     renderGamesEditor();
+  };
+
+  // Populate the game selector dropdown with games from the games collection
+  async function populateGameSelect() {
+    const select = document.getElementById('loadGameSelect');
+    if (!select) return;
+    
+    try {
+      const gamesSnapshot = await db.collection('games')
+        .orderBy('gameDateTime', 'asc')
+        .get();
+      
+      select.innerHTML = '<option value="">-- Load teams from... --</option>';
+      
+      const roundLabels = {
+        'wildcard': 'Wild Card',
+        'divisional': 'Divisional',
+        'conference': 'Conference',
+        'superbowl': 'Super Bowl'
+      };
+      
+      gamesSnapshot.forEach(doc => {
+        const game = doc.data();
+        const awayTeam = game.awayName || game.awayTeam || '???';
+        const homeTeam = game.homeName || game.homeTeam || '???';
+        const round = roundLabels[game.round] || game.round;
+        
+        const option = document.createElement('option');
+        option.value = doc.id;
+        option.textContent = `${round}: ${awayTeam} @ ${homeTeam}`;
+        option.dataset.away = awayTeam;
+        option.dataset.home = homeTeam;
+        option.dataset.round = round;
+        select.appendChild(option);
+      });
+      
+      if (gamesSnapshot.empty) {
+        select.innerHTML = '<option value="">No games found - add in Data Manager</option>';
+      }
+      
+    } catch (error) {
+      console.error('Error loading games for selector:', error);
+      select.innerHTML = '<option value="">Error loading games</option>';
+    }
+  }
+
+  // Load teams from selected game into current boxes pool game
+  window.loadTeamsFromGame = async function() {
+    const select = document.getElementById('loadGameSelect');
+    const selectedOption = select.options[select.selectedIndex];
+    
+    if (!select.value) {
+      showToast('Please select a game to load teams from', 'error');
+      return;
+    }
+    
+    const awayTeam = selectedOption.dataset.away;
+    const homeTeam = selectedOption.dataset.home;
+    const round = selectedOption.dataset.round;
+    
+    if (!awayTeam || !homeTeam) {
+      showToast('Selected game has no teams set', 'error');
+      return;
+    }
+    
+    // If no games exist in boxes pool, add one
+    if (!currentPool.games || currentPool.games.length === 0) {
+      currentPool.games = [{
+        label: round,
+        team1: awayTeam,
+        team2: homeTeam,
+        colNumbers: [0,1,2,3,4,5,6,7,8,9],
+        rowNumbers: [0,1,2,3,4,5,6,7,8,9],
+        numbersDrawn: false,
+        winners: {}
+      }];
+    } else {
+      // Update first game with selected teams
+      currentPool.games[0].team1 = awayTeam;
+      currentPool.games[0].team2 = homeTeam;
+      if (!currentPool.games[0].label || currentPool.games[0].label === 'New Game') {
+        currentPool.games[0].label = round;
+      }
+    }
+    
+    renderGamesEditor();
+    showToast(`Loaded: ${awayTeam} vs ${homeTeam}`, 'success');
   };
 
   window.removeGame = function(idx) {

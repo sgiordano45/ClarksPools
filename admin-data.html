@@ -1,0 +1,2123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Manager | Gridiron Pools Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto+Condensed:wght@300;400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-dark: #0a1628;
+            --secondary-dark: #132238;
+            --tertiary-dark: #1a2d47;
+            --accent-blue: #00d4ff;
+            --accent-gold: #ffc107;
+            --accent-green: #00c853;
+            --accent-red: #ff5252;
+            --accent-orange: #ff9800;
+            --text-primary: #ffffff;
+            --text-secondary: #8ba3c7;
+            --text-muted: #5a7194;
+            --gradient-field: linear-gradient(135deg, #1a472a 0%, #2d5a3d 50%, #1a472a 100%);
+            --card-bg: rgba(255,255,255,0.03);
+            --card-border: rgba(255,255,255,0.08);
+            --glow-blue: 0 0 40px rgba(0,212,255,0.3);
+            --glow-gold: 0 0 30px rgba(255,193,7,0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto Condensed', sans-serif;
+            background: var(--primary-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Layout */
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--secondary-dark);
+            border-right: 1px solid var(--card-border);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-field);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.1rem;
+            color: white;
+            border: 2px solid rgba(0,212,255,0.3);
+        }
+
+        .logo-text {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .logo-text span {
+            color: var(--accent-blue);
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 1rem 0;
+            overflow-y: auto;
+        }
+
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-section-title {
+            padding: 0.5rem 1.5rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: var(--card-bg);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: rgba(0,212,255,0.1);
+            color: var(--accent-blue);
+            border-right: 3px solid var(--accent-blue);
+        }
+
+        .nav-item .icon {
+            font-size: 1.1rem;
+        }
+
+        .sidebar-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--card-border);
+        }
+
+        .back-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--accent-blue);
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            margin-left: 260px;
+            padding: 2rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-family: 'Oswald', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        /* Cards */
+        .data-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .data-card-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .data-card-title {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .data-card-body {
+            padding: 1.5rem;
+        }
+
+        /* Buttons */
+        .btn {
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0.6rem 1.25rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--accent-blue);
+            color: var(--primary-dark);
+        }
+
+        .btn-primary:hover {
+            box-shadow: var(--glow-blue);
+        }
+
+        .btn-gold {
+            background: var(--accent-gold);
+            color: var(--primary-dark);
+        }
+
+        .btn-gold:hover {
+            box-shadow: var(--glow-gold);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--card-border);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        .btn-danger {
+            background: var(--accent-red);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.75rem;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--tertiary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        textarea.form-control {
+            min-height: 200px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .form-help {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .form-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .form-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        /* Import Section */
+        .import-area {
+            border: 2px dashed var(--card-border);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .import-area.drag-over {
+            border-color: var(--accent-blue);
+            background: rgba(0,212,255,0.05);
+        }
+
+        .csv-format {
+            background: var(--tertiary-dark);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            white-space: pre;
+            color: var(--accent-green);
+        }
+
+        /* Preview Table */
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .preview-table th,
+        .preview-table td {
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .preview-table th {
+            background: var(--tertiary-dark);
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 0.5px;
+        }
+
+        .preview-table tr:hover td {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .preview-scroll {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        /* Stats Summary */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-box {
+            background: var(--tertiary-dark);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-box-value {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        .stat-box-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        /* Games List */
+        .game-card {
+            background: var(--tertiary-dark);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: grid;
+            grid-template-columns: auto 1fr auto auto;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .game-round {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            padding: 0.25rem 0.5rem;
+            background: var(--card-bg);
+            border-radius: 4px;
+        }
+
+        .game-matchup {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .game-team {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .team-abbr {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            width: 50px;
+        }
+
+        .team-name {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .game-vs {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .game-lines {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+        }
+
+        .game-line {
+            text-align: center;
+        }
+
+        .game-line-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .game-line-value {
+            font-family: 'Oswald', sans-serif;
+            font-weight: 600;
+        }
+
+        .game-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .game-status.upcoming {
+            background: rgba(0,212,255,0.2);
+            color: var(--accent-blue);
+        }
+
+        .game-status.locked {
+            background: rgba(255,152,0,0.2);
+            color: var(--accent-orange);
+        }
+
+        .game-status.final {
+            background: rgba(0,200,83,0.2);
+            color: var(--accent-green);
+        }
+
+        /* Teams Grid */
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .team-card {
+            background: var(--tertiary-dark);
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.2s;
+        }
+
+        .team-card.eliminated {
+            opacity: 0.5;
+        }
+
+        .team-logo {
+            width: 50px;
+            height: 50px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Oswald', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .team-info {
+            flex: 1;
+        }
+
+        .team-card-name {
+            font-family: 'Oswald', sans-serif;
+            font-weight: 600;
+        }
+
+        .team-card-conf {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .team-toggle {
+            width: 44px;
+            height: 24px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .team-toggle.active {
+            background: var(--accent-green);
+        }
+
+        .team-toggle::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: transform 0.2s;
+        }
+
+        .team-toggle.active::after {
+            transform: translateX(20px);
+        }
+
+        /* Alert */
+        .alert {
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .alert-success {
+            background: rgba(0,200,83,0.1);
+            border: 1px solid rgba(0,200,83,0.3);
+            color: var(--accent-green);
+        }
+
+        .alert-error {
+            background: rgba(255,82,82,0.1);
+            border: 1px solid rgba(255,82,82,0.3);
+            color: var(--accent-red);
+        }
+
+        .alert-info {
+            background: rgba(0,212,255,0.1);
+            border: 1px solid rgba(0,212,255,0.3);
+            color: var(--accent-blue);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 0.5rem;
+        }
+
+        .tab {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            color: var(--text-primary);
+            background: var(--card-bg);
+        }
+
+        .tab.active {
+            color: var(--accent-blue);
+            background: rgba(0,212,255,0.1);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--secondary-dark);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--card-border);
+            border-top-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 200px;
+            }
+            main {
+                margin-left: 200px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            main {
+                margin-left: 0;
+            }
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="home.html" class="logo">
+                    <div class="logo-icon">GP</div>
+                    <span class="logo-text">Data<span>Mgr</span></span>
+                </a>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Import Data</div>
+                    <a class="nav-item active" data-section="import-players">
+                        <span class="icon">👥</span>
+                        Import Players
+                    </a>
+                    <a class="nav-item" data-section="import-stats">
+                        <span class="icon">📊</span>
+                        Import Stats
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Game Data</div>
+                    <a class="nav-item" data-section="manage-games">
+                        <span class="icon">🏈</span>
+                        Manage Games
+                    </a>
+                    <a class="nav-item" data-section="teams-status">
+                        <span class="icon">🏆</span>
+                        Teams Status
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">View Data</div>
+                    <a class="nav-item" data-section="view-players">
+                        <span class="icon">📋</span>
+                        View Players
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="admin.html" class="back-link">
+                    ← Back to Admin Panel
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Import Players Section -->
+            <section class="content-section active" id="import-players">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Import Players</h1>
+                        <p class="page-subtitle">Paste your player CSV to import the player database</p>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">CSV Format</h3>
+                    </div>
+                    <div class="data-card-body">
+                        <p style="margin-bottom: 1rem; color: var(--text-secondary);">Your CSV should have these columns (with header row):</p>
+                        <div class="csv-format">name,team,position
+Patrick Mahomes,KC,QB
+Travis Kelce,KC,TE
+Josh Allen,BUF,QB
+Saquon Barkley,PHI,RB</div>
+                        <p class="form-help">Teams: KC, BUF, BAL, HOU, LAC, PIT, DEN, DET, PHI, TB, LAR, MIN, WAS, GB</p>
+                        <p class="form-help">Positions: QB, RB, WR, TE, K</p>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">Paste CSV</h3>
+                    </div>
+                    <div class="data-card-body">
+                        <div class="form-group">
+                            <textarea class="form-control" id="playersCsv" placeholder="Paste your CSV data here..."></textarea>
+                        </div>
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <button class="btn btn-primary" onclick="previewPlayers()">Preview Import</button>
+                            <span id="playersPreviewCount" style="color: var(--text-muted);"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-card" id="playersPreviewCard" style="display: none;">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">Preview</h3>
+                        <button class="btn btn-gold" onclick="importPlayers()">✓ Import Players</button>
+                    </div>
+                    <div class="preview-scroll">
+                        <table class="preview-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Team</th>
+                                    <th>Position</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="playersPreviewBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="playersImportResult"></div>
+            </section>
+
+            <!-- Import Stats Section -->
+            <section class="content-section" id="import-stats">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Import Stats</h1>
+                        <p class="page-subtitle">Paste your master spreadsheet to update player stats</p>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">CSV Format</h3>
+                    </div>
+                    <div class="data-card-body">
+                        <p style="margin-bottom: 1rem; color: var(--text-secondary);">Your spreadsheet should have player info + stat columns per round:</p>
+                        <div class="csv-format" style="font-size: 0.75rem;">name,team,position,WC_passYds,WC_passTD,WC_rushYds,WC_rushTD,WC_rec,WC_recYds,WC_recTD,WC_fg,WC_fg50,WC_xp,WC_2pt,DIV_passYds,...
+Patrick Mahomes,KC,QB,289,2,34,0,0,0,0,0,0,0,0,312,3,...
+Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
+                        <p class="form-help" style="margin-top: 1rem;"><strong>Round prefixes:</strong> WC_ (Wild Card), DIV_ (Divisional), CONF_ (Conference), SB_ (Super Bowl)</p>
+                        <p class="form-help"><strong>Stat columns:</strong> passYds, passTD, rushYds, rushTD, rec, recYds, recTD, fg, fg50, xp, 2pt</p>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">Scoring Rules (Auto-calculated)</h3>
+                    </div>
+                    <div class="data-card-body">
+                        <div class="form-grid-4">
+                            <div class="stat-box">
+                                <div class="stat-box-value">6</div>
+                                <div class="stat-box-label">Per TD</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-box-value">1/25</div>
+                                <div class="stat-box-label">Pass Yards</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-box-value">1/10</div>
+                                <div class="stat-box-label">Rush/Rec Yds</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-box-value">1</div>
+                                <div class="stat-box-label">Per Reception</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-box-value">3</div>
+                                <div class="stat-box-label">FG (≤49)</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-box-value">5</div>
+                                <div class="stat-box-label">FG (50+)</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-box-value">1</div>
+                                <div class="stat-box-label">XP Made</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-box-value">2</div>
+                                <div class="stat-box-label">2-Pt Conv</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">Paste CSV</h3>
+                    </div>
+                    <div class="data-card-body">
+                        <div class="form-group">
+                            <textarea class="form-control" id="statsCsv" placeholder="Paste your master spreadsheet CSV here..."></textarea>
+                        </div>
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <button class="btn btn-primary" onclick="previewStats()">Preview & Calculate</button>
+                            <span id="statsPreviewCount" style="color: var(--text-muted);"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-card" id="statsPreviewCard" style="display: none;">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">Preview - Calculated Points</h3>
+                        <button class="btn btn-gold" onclick="importStats()">✓ Import Stats</button>
+                    </div>
+                    <div class="preview-scroll">
+                        <table class="preview-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Team</th>
+                                    <th>Pos</th>
+                                    <th>WC</th>
+                                    <th>DIV</th>
+                                    <th>CONF</th>
+                                    <th>SB</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="statsPreviewBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="statsImportResult"></div>
+            </section>
+
+            <!-- Manage Games Section -->
+            <section class="content-section" id="manage-games">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Manage Games</h1>
+                        <p class="page-subtitle">Add and manage the 13 playoff games</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="showAddGameModal()">
+                        <span>➕</span> Add Game
+                    </button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-box-value" id="gamesCount">0</div>
+                        <div class="stat-box-label">Total Games</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-box-value" id="gamesUpcoming">0</div>
+                        <div class="stat-box-label">Upcoming</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-box-value" id="gamesLocked">0</div>
+                        <div class="stat-box-label">Locked</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-box-value" id="gamesFinal">0</div>
+                        <div class="stat-box-label">Final</div>
+                    </div>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab active" data-round="all">All Games</button>
+                    <button class="tab" data-round="wildcard">Wild Card</button>
+                    <button class="tab" data-round="divisional">Divisional</button>
+                    <button class="tab" data-round="conference">Conference</button>
+                    <button class="tab" data-round="superbowl">Super Bowl</button>
+                </div>
+
+                <div id="gamesContainer">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>Loading games...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Teams Status Section -->
+            <section class="content-section" id="teams-status">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Teams Status</h1>
+                        <p class="page-subtitle">Track which teams are still in the playoffs</p>
+                    </div>
+                    <button class="btn btn-outline" onclick="resetAllTeams()">Reset All Teams</button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-box-value" id="teamsActive">14</div>
+                        <div class="stat-box-label">Active Teams</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-box-value" id="teamsEliminated">0</div>
+                        <div class="stat-box-label">Eliminated</div>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">AFC</h3>
+                    </div>
+                    <div class="data-card-body">
+                        <div class="teams-grid" id="afcTeams"></div>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">NFC</h3>
+                    </div>
+                    <div class="data-card-body">
+                        <div class="teams-grid" id="nfcTeams"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- View Players Section -->
+            <section class="content-section" id="view-players">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">View Players</h1>
+                        <p class="page-subtitle">View all imported players and their stats</p>
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <select class="form-control" style="width: 140px;" id="viewPlayersTeam" onchange="loadPlayersView()">
+                            <option value="all">All Teams</option>
+                        </select>
+                        <select class="form-control" style="width: 140px;" id="viewPlayersPos" onchange="loadPlayersView()">
+                            <option value="all">All Positions</option>
+                            <option value="QB">QB</option>
+                            <option value="RB">RB</option>
+                            <option value="WR">WR</option>
+                            <option value="TE">TE</option>
+                            <option value="K">K</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-box-value" id="playersCount">0</div>
+                        <div class="stat-box-label">Total Players</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-box-value" id="playersQB">0</div>
+                        <div class="stat-box-label">QBs</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-box-value" id="playersRB">0</div>
+                        <div class="stat-box-label">RBs</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-box-value" id="playersWR">0</div>
+                        <div class="stat-box-label">WRs</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-box-value" id="playersTE">0</div>
+                        <div class="stat-box-label">TEs</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-box-value" id="playersK">0</div>
+                        <div class="stat-box-label">Ks</div>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="preview-scroll">
+                        <table class="preview-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Team</th>
+                                    <th>Pos</th>
+                                    <th>WC</th>
+                                    <th>DIV</th>
+                                    <th>CONF</th>
+                                    <th>SB</th>
+                                    <th>Total</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="playersViewBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Add Game Modal -->
+    <div class="modal-overlay" id="addGameModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Game</h3>
+                <button class="modal-close" onclick="closeModal('addGameModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Round</label>
+                        <select class="form-control" id="newGameRound">
+                            <option value="wildcard">Wild Card</option>
+                            <option value="divisional">Divisional</option>
+                            <option value="conference">Conference</option>
+                            <option value="superbowl">Super Bowl</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Game Date & Time</label>
+                        <input type="datetime-local" class="form-control" id="newGameDateTime">
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Away Team</label>
+                        <select class="form-control" id="newGameAway">
+                            <option value="">Select team...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Home Team</label>
+                        <select class="form-control" id="newGameHome">
+                            <option value="">Select team...</option>
+                        </select>
+                    </div>
+                </div>
+                <hr style="border-color: var(--card-border); margin: 1.5rem 0;">
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">Betting Lines (optional)</p>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Away Spread</label>
+                        <input type="text" class="form-control" id="newGameAwaySpread" placeholder="+2.5">
+                    </div>
+                    <div class="form-group">
+                        <label>Home Spread</label>
+                        <input type="text" class="form-control" id="newGameHomeSpread" placeholder="-2.5">
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Away Moneyline</label>
+                        <input type="text" class="form-control" id="newGameAwayML" placeholder="+120">
+                    </div>
+                    <div class="form-group">
+                        <label>Home Moneyline</label>
+                        <input type="text" class="form-control" id="newGameHomeML" placeholder="-140">
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Over/Under Total</label>
+                        <input type="text" class="form-control" id="newGameTotal" placeholder="45.5">
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select class="form-control" id="newGameStatus">
+                            <option value="upcoming">Upcoming</option>
+                            <option value="locked">Locked</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('addGameModal')">Cancel</button>
+                <button class="btn btn-gold" onclick="saveGame()">Save Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Game Modal -->
+    <div class="modal-overlay" id="editGameModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Game</h3>
+                <button class="modal-close" onclick="closeModal('editGameModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editGameId">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Round</label>
+                        <select class="form-control" id="editGameRound">
+                            <option value="wildcard">Wild Card</option>
+                            <option value="divisional">Divisional</option>
+                            <option value="conference">Conference</option>
+                            <option value="superbowl">Super Bowl</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Game Date & Time</label>
+                        <input type="datetime-local" class="form-control" id="editGameDateTime">
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Away Team</label>
+                        <select class="form-control" id="editGameAway"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Home Team</label>
+                        <select class="form-control" id="editGameHome"></select>
+                    </div>
+                </div>
+                <hr style="border-color: var(--card-border); margin: 1.5rem 0;">
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">Betting Lines</p>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Away Spread</label>
+                        <input type="text" class="form-control" id="editGameAwaySpread">
+                    </div>
+                    <div class="form-group">
+                        <label>Home Spread</label>
+                        <input type="text" class="form-control" id="editGameHomeSpread">
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Away Moneyline</label>
+                        <input type="text" class="form-control" id="editGameAwayML">
+                    </div>
+                    <div class="form-group">
+                        <label>Home Moneyline</label>
+                        <input type="text" class="form-control" id="editGameHomeML">
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Over/Under Total</label>
+                        <input type="text" class="form-control" id="editGameTotal">
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select class="form-control" id="editGameStatus">
+                            <option value="upcoming">Upcoming</option>
+                            <option value="locked">Locked</option>
+                            <option value="final">Final</option>
+                        </select>
+                    </div>
+                </div>
+                <hr style="border-color: var(--card-border); margin: 1.5rem 0;">
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">Final Score (if settled)</p>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Away Score</label>
+                        <input type="number" class="form-control" id="editGameAwayScore" placeholder="--">
+                    </div>
+                    <div class="form-group">
+                        <label>Home Score</label>
+                        <input type="number" class="form-control" id="editGameHomeScore" placeholder="--">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger btn-sm" onclick="deleteGame()" style="margin-right: auto;">Delete</button>
+                <button class="btn btn-outline" onclick="closeModal('editGameModal')">Cancel</button>
+                <button class="btn btn-gold" onclick="updateGame()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <script>
+        // =========================================
+        // TEAMS DATA
+        // =========================================
+        const TEAMS = {
+            KC: { name: 'Chiefs', fullName: 'Kansas City Chiefs', conference: 'AFC', seed: 1 },
+            BUF: { name: 'Bills', fullName: 'Buffalo Bills', conference: 'AFC', seed: 2 },
+            BAL: { name: 'Ravens', fullName: 'Baltimore Ravens', conference: 'AFC', seed: 3 },
+            HOU: { name: 'Texans', fullName: 'Houston Texans', conference: 'AFC', seed: 4 },
+            LAC: { name: 'Chargers', fullName: 'Los Angeles Chargers', conference: 'AFC', seed: 5 },
+            PIT: { name: 'Steelers', fullName: 'Pittsburgh Steelers', conference: 'AFC', seed: 6 },
+            DEN: { name: 'Broncos', fullName: 'Denver Broncos', conference: 'AFC', seed: 7 },
+            DET: { name: 'Lions', fullName: 'Detroit Lions', conference: 'NFC', seed: 1 },
+            PHI: { name: 'Eagles', fullName: 'Philadelphia Eagles', conference: 'NFC', seed: 2 },
+            TB: { name: 'Buccaneers', fullName: 'Tampa Bay Buccaneers', conference: 'NFC', seed: 3 },
+            LAR: { name: 'Rams', fullName: 'Los Angeles Rams', conference: 'NFC', seed: 4 },
+            MIN: { name: 'Vikings', fullName: 'Minnesota Vikings', conference: 'NFC', seed: 5 },
+            WAS: { name: 'Commanders', fullName: 'Washington Commanders', conference: 'NFC', seed: 6 },
+            GB: { name: 'Packers', fullName: 'Green Bay Packers', conference: 'NFC', seed: 7 }
+        };
+
+        const ROUNDS = {
+            wildcard: 'Wild Card',
+            divisional: 'Divisional',
+            conference: 'Conference',
+            superbowl: 'Super Bowl'
+        };
+
+        // =========================================
+        // NAVIGATION
+        // =========================================
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const section = item.dataset.section;
+                if (section) {
+                    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                    document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+                    item.classList.add('active');
+                    document.getElementById(section).classList.add('active');
+                    
+                    // Load data for section
+                    if (section === 'manage-games') loadGames();
+                    if (section === 'teams-status') loadTeamsStatus();
+                    if (section === 'view-players') loadPlayersView();
+                }
+            });
+        });
+
+        // Game round tabs
+        document.querySelectorAll('.tab[data-round]').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab[data-round]').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                loadGames(tab.dataset.round);
+            });
+        });
+
+        // Modal functions
+        function showAddGameModal() {
+            populateTeamSelects();
+            document.getElementById('addGameModal').classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        function populateTeamSelects() {
+            const selects = ['newGameAway', 'newGameHome', 'editGameAway', 'editGameHome'];
+            selects.forEach(id => {
+                const select = document.getElementById(id);
+                if (select) {
+                    const currentValue = select.value;
+                    select.innerHTML = '<option value="">Select team...</option>';
+                    Object.entries(TEAMS).forEach(([abbr, team]) => {
+                        select.innerHTML += `<option value="${abbr}">${abbr} - ${team.name}</option>`;
+                    });
+                    if (currentValue) select.value = currentValue;
+                }
+            });
+            
+            // Also populate View Players team filter
+            const teamFilter = document.getElementById('viewPlayersTeam');
+            if (teamFilter && teamFilter.options.length <= 1) {
+                Object.entries(TEAMS).forEach(([abbr, team]) => {
+                    teamFilter.innerHTML += `<option value="${abbr}">${abbr} - ${team.name}</option>`;
+                });
+            }
+        }
+
+        // =========================================
+        // SCORING CALCULATION
+        // =========================================
+        function calculatePoints(stats) {
+            let points = 0;
+            
+            // Passing: 1 pt per 25 yards (no fractions)
+            points += Math.floor((stats.passYds || 0) / 25);
+            // Passing TDs: 6 pts each
+            points += (stats.passTD || 0) * 6;
+            
+            // Rushing: 1 pt per 10 yards (no fractions)
+            points += Math.floor((stats.rushYds || 0) / 10);
+            // Rushing TDs: 6 pts each
+            points += (stats.rushTD || 0) * 6;
+            
+            // Receiving: 1 pt per 10 yards (no fractions)
+            points += Math.floor((stats.recYds || 0) / 10);
+            // Receiving TDs: 6 pts each
+            points += (stats.recTD || 0) * 6;
+            // PPR: 1 pt per reception
+            points += (stats.rec || 0) * 1;
+            
+            // Kicking: FG ≤49 = 3 pts, FG 50+ = 5 pts
+            points += (stats.fg || 0) * 3;
+            points += (stats.fg50 || 0) * 5;
+            // XP: 1 pt each
+            points += (stats.xp || 0) * 1;
+            
+            // 2-pt conversions: 2 pts each
+            points += (stats['2pt'] || 0) * 2;
+            
+            return points;
+        }
+
+        // =========================================
+        // IMPORT PLAYERS
+        // =========================================
+        let playersToImport = [];
+
+        function previewPlayers() {
+            const csv = document.getElementById('playersCsv').value.trim();
+            if (!csv) {
+                alert('Please paste CSV data first');
+                return;
+            }
+
+            const lines = csv.split('\n');
+            const header = lines[0].toLowerCase().split(',').map(h => h.trim());
+            
+            // Find column indices
+            const nameIdx = header.indexOf('name');
+            const teamIdx = header.indexOf('team');
+            const posIdx = header.indexOf('position') !== -1 ? header.indexOf('position') : header.indexOf('pos');
+            
+            if (nameIdx === -1 || teamIdx === -1 || posIdx === -1) {
+                alert('CSV must have columns: name, team, position');
+                return;
+            }
+
+            playersToImport = [];
+            const tbody = document.getElementById('playersPreviewBody');
+            tbody.innerHTML = '';
+
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                
+                const cols = lines[i].split(',').map(c => c.trim());
+                const name = cols[nameIdx];
+                const team = cols[teamIdx]?.toUpperCase();
+                const position = cols[posIdx]?.toUpperCase();
+                
+                const isValidTeam = TEAMS[team];
+                const isValidPos = ['QB', 'RB', 'WR', 'TE', 'K'].includes(position);
+                const status = isValidTeam && isValidPos ? 'valid' : 'invalid';
+                
+                playersToImport.push({ name, team, position, status });
+                
+                tbody.innerHTML += `
+                    <tr style="${status === 'invalid' ? 'color: var(--accent-red);' : ''}">
+                        <td>${name}</td>
+                        <td>${team} ${!isValidTeam ? '⚠️' : ''}</td>
+                        <td>${position} ${!isValidPos ? '⚠️' : ''}</td>
+                        <td>${status === 'valid' ? '✓' : '⚠️ Invalid'}</td>
+                    </tr>
+                `;
+            }
+
+            document.getElementById('playersPreviewCard').style.display = 'block';
+            document.getElementById('playersPreviewCount').textContent = `${playersToImport.filter(p => p.status === 'valid').length} valid players`;
+        }
+
+        async function importPlayers() {
+            const validPlayers = playersToImport.filter(p => p.status === 'valid');
+            if (validPlayers.length === 0) {
+                alert('No valid players to import');
+                return;
+            }
+
+            if (!confirm(`Import ${validPlayers.length} players? This will add to existing players.`)) {
+                return;
+            }
+
+            const resultDiv = document.getElementById('playersImportResult');
+            resultDiv.innerHTML = '<div class="alert alert-info">Importing players...</div>';
+
+            try {
+                let imported = 0;
+                for (const player of validPlayers) {
+                    await db.collection('players').add({
+                        name: player.name,
+                        team: player.team,
+                        teamName: TEAMS[player.team]?.name || player.team,
+                        position: player.position,
+                        active: true,
+                        stats: {},
+                        totalPoints: 0,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    imported++;
+                }
+
+                resultDiv.innerHTML = `<div class="alert alert-success">✓ Successfully imported ${imported} players!</div>`;
+                document.getElementById('playersCsv').value = '';
+                document.getElementById('playersPreviewCard').style.display = 'none';
+                playersToImport = [];
+
+            } catch (error) {
+                console.error('Import error:', error);
+                resultDiv.innerHTML = `<div class="alert alert-error">Error: ${error.message}</div>`;
+            }
+        }
+
+        // =========================================
+        // IMPORT STATS
+        // =========================================
+        let statsToImport = [];
+
+        function previewStats() {
+            const csv = document.getElementById('statsCsv').value.trim();
+            if (!csv) {
+                alert('Please paste CSV data first');
+                return;
+            }
+
+            const lines = csv.split('\n');
+            const header = lines[0].split(',').map(h => h.trim());
+            
+            // Find base column indices
+            const nameIdx = header.findIndex(h => h.toLowerCase() === 'name');
+            const teamIdx = header.findIndex(h => h.toLowerCase() === 'team');
+            const posIdx = header.findIndex(h => h.toLowerCase() === 'position' || h.toLowerCase() === 'pos');
+            
+            if (nameIdx === -1 || teamIdx === -1) {
+                alert('CSV must have columns: name, team');
+                return;
+            }
+
+            // Find stat columns for each round
+            const rounds = ['WC', 'DIV', 'CONF', 'SB'];
+            const statCols = ['passYds', 'passTD', 'rushYds', 'rushTD', 'rec', 'recYds', 'recTD', 'fg', 'fg50', 'xp', '2pt'];
+            
+            statsToImport = [];
+            const tbody = document.getElementById('statsPreviewBody');
+            tbody.innerHTML = '';
+
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                
+                const cols = lines[i].split(',').map(c => c.trim());
+                const name = cols[nameIdx];
+                const team = cols[teamIdx]?.toUpperCase();
+                const position = posIdx !== -1 ? cols[posIdx]?.toUpperCase() : '';
+                
+                const playerStats = { name, team, position, rounds: {} };
+                
+                // Parse each round's stats
+                rounds.forEach(round => {
+                    const roundStats = {};
+                    statCols.forEach(stat => {
+                        const colName = `${round}_${stat}`;
+                        const colIdx = header.findIndex(h => h === colName || h === colName.toLowerCase());
+                        if (colIdx !== -1 && cols[colIdx]) {
+                            roundStats[stat] = parseInt(cols[colIdx]) || 0;
+                        }
+                    });
+                    
+                    if (Object.keys(roundStats).length > 0) {
+                        roundStats.points = calculatePoints(roundStats);
+                        playerStats.rounds[round] = roundStats;
+                    }
+                });
+
+                // Calculate total points
+                playerStats.totalPoints = Object.values(playerStats.rounds).reduce((sum, r) => sum + (r.points || 0), 0);
+                
+                statsToImport.push(playerStats);
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${name}</td>
+                        <td>${team}</td>
+                        <td>${position}</td>
+                        <td>${playerStats.rounds.WC?.points || '-'}</td>
+                        <td>${playerStats.rounds.DIV?.points || '-'}</td>
+                        <td>${playerStats.rounds.CONF?.points || '-'}</td>
+                        <td>${playerStats.rounds.SB?.points || '-'}</td>
+                        <td style="font-weight: 600; color: var(--accent-gold);">${playerStats.totalPoints}</td>
+                    </tr>
+                `;
+            }
+
+            document.getElementById('statsPreviewCard').style.display = 'block';
+            document.getElementById('statsPreviewCount').textContent = `${statsToImport.length} players parsed`;
+        }
+
+        async function importStats() {
+            if (statsToImport.length === 0) {
+                alert('No stats to import');
+                return;
+            }
+
+            if (!confirm(`Update stats for ${statsToImport.length} players?`)) {
+                return;
+            }
+
+            const resultDiv = document.getElementById('statsImportResult');
+            resultDiv.innerHTML = '<div class="alert alert-info">Importing stats...</div>';
+
+            try {
+                let updated = 0;
+                let notFound = 0;
+
+                for (const playerStats of statsToImport) {
+                    // Find player by name and team
+                    const playersQuery = await db.collection('players')
+                        .where('name', '==', playerStats.name)
+                        .where('team', '==', playerStats.team)
+                        .get();
+                    
+                    if (playersQuery.empty) {
+                        notFound++;
+                        continue;
+                    }
+
+                    const playerDoc = playersQuery.docs[0];
+                    
+                    // Update stats
+                    await playerDoc.ref.update({
+                        stats: playerStats.rounds,
+                        totalPoints: playerStats.totalPoints,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    updated++;
+                }
+
+                let message = `✓ Updated stats for ${updated} players.`;
+                if (notFound > 0) {
+                    message += ` ${notFound} players not found in database.`;
+                }
+                
+                resultDiv.innerHTML = `<div class="alert alert-success">${message}</div>`;
+
+            } catch (error) {
+                console.error('Import error:', error);
+                resultDiv.innerHTML = `<div class="alert alert-error">Error: ${error.message}</div>`;
+            }
+        }
+
+        // =========================================
+        // MANAGE GAMES
+        // =========================================
+        let currentGames = [];
+
+        async function loadGames(roundFilter = 'all') {
+            const container = document.getElementById('gamesContainer');
+            container.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Loading games...</p></div>';
+
+            try {
+                let query = db.collection('games').orderBy('gameDateTime', 'asc');
+                const snapshot = await query.get();
+                
+                currentGames = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                // Filter by round if needed
+                let filteredGames = currentGames;
+                if (roundFilter !== 'all') {
+                    filteredGames = currentGames.filter(g => g.round === roundFilter);
+                }
+
+                // Update stats
+                document.getElementById('gamesCount').textContent = currentGames.length;
+                document.getElementById('gamesUpcoming').textContent = currentGames.filter(g => g.status === 'upcoming').length;
+                document.getElementById('gamesLocked').textContent = currentGames.filter(g => g.status === 'locked').length;
+                document.getElementById('gamesFinal').textContent = currentGames.filter(g => g.status === 'final').length;
+
+                if (filteredGames.length === 0) {
+                    container.innerHTML = `
+                        <div class="data-card">
+                            <div style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                                <p style="font-size: 1.1rem; margin-bottom: 1rem;">🏈 No games found</p>
+                                <p style="font-size: 0.9rem;">Click "Add Game" to add playoff games</p>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = filteredGames.map(game => renderGameCard(game)).join('');
+
+            } catch (error) {
+                console.error('Error loading games:', error);
+                container.innerHTML = '<div class="alert alert-error">Error loading games</div>';
+            }
+        }
+
+        function renderGameCard(game) {
+            const awayTeam = TEAMS[game.awayTeam] || { name: game.awayTeam };
+            const homeTeam = TEAMS[game.homeTeam] || { name: game.homeTeam };
+            const gameDate = game.gameDateTime?.toDate ? game.gameDateTime.toDate() : new Date(game.gameDateTime);
+            const dateStr = gameDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            const timeStr = gameDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+            return `
+                <div class="game-card" onclick="editGame('${game.id}')">
+                    <div>
+                        <div class="game-round">${ROUNDS[game.round] || game.round}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">${dateStr} ${timeStr}</div>
+                    </div>
+                    <div class="game-matchup">
+                        <div class="game-team">
+                            <div class="team-abbr">${game.awayTeam}</div>
+                            <div class="team-name">${awayTeam.name}</div>
+                            ${game.status === 'final' ? `<div style="font-family: Oswald; font-size: 1.25rem; margin-left: 0.5rem;">${game.awayScore || 0}</div>` : ''}
+                        </div>
+                        <div class="game-vs">@</div>
+                        <div class="game-team">
+                            <div class="team-abbr">${game.homeTeam}</div>
+                            <div class="team-name">${homeTeam.name}</div>
+                            ${game.status === 'final' ? `<div style="font-family: Oswald; font-size: 1.25rem; margin-left: 0.5rem;">${game.homeScore || 0}</div>` : ''}
+                        </div>
+                    </div>
+                    <div class="game-lines">
+                        ${game.awaySpread ? `
+                            <div class="game-line">
+                                <div class="game-line-label">Spread</div>
+                                <div class="game-line-value">${game.awaySpread}</div>
+                            </div>
+                        ` : ''}
+                        ${game.total ? `
+                            <div class="game-line">
+                                <div class="game-line-label">O/U</div>
+                                <div class="game-line-value">${game.total}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="game-status ${game.status}">${game.status}</div>
+                </div>
+            `;
+        }
+
+        async function saveGame() {
+            const round = document.getElementById('newGameRound').value;
+            const dateTime = document.getElementById('newGameDateTime').value;
+            const awayTeam = document.getElementById('newGameAway').value;
+            const homeTeam = document.getElementById('newGameHome').value;
+            
+            if (!dateTime || !awayTeam || !homeTeam) {
+                alert('Please fill in round, date/time, and both teams');
+                return;
+            }
+
+            try {
+                await db.collection('games').add({
+                    round,
+                    gameDateTime: new Date(dateTime),
+                    awayTeam,
+                    awayName: TEAMS[awayTeam]?.name || awayTeam,
+                    homeTeam,
+                    homeName: TEAMS[homeTeam]?.name || homeTeam,
+                    awaySpread: document.getElementById('newGameAwaySpread').value || null,
+                    homeSpread: document.getElementById('newGameHomeSpread').value || null,
+                    awayML: document.getElementById('newGameAwayML').value || null,
+                    homeML: document.getElementById('newGameHomeML').value || null,
+                    total: document.getElementById('newGameTotal').value || null,
+                    status: document.getElementById('newGameStatus').value || 'upcoming',
+                    awayScore: null,
+                    homeScore: null,
+                    winner: null,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                closeModal('addGameModal');
+                loadGames();
+                
+                // Clear form
+                document.getElementById('newGameAway').value = '';
+                document.getElementById('newGameHome').value = '';
+                document.getElementById('newGameAwaySpread').value = '';
+                document.getElementById('newGameHomeSpread').value = '';
+                document.getElementById('newGameAwayML').value = '';
+                document.getElementById('newGameHomeML').value = '';
+                document.getElementById('newGameTotal').value = '';
+
+            } catch (error) {
+                console.error('Error saving game:', error);
+                alert('Error saving game: ' + error.message);
+            }
+        }
+
+        function editGame(gameId) {
+            const game = currentGames.find(g => g.id === gameId);
+            if (!game) return;
+
+            populateTeamSelects();
+            
+            document.getElementById('editGameId').value = gameId;
+            document.getElementById('editGameRound').value = game.round;
+            
+            const dt = game.gameDateTime?.toDate ? game.gameDateTime.toDate() : new Date(game.gameDateTime);
+            document.getElementById('editGameDateTime').value = dt.toISOString().slice(0, 16);
+            
+            document.getElementById('editGameAway').value = game.awayTeam;
+            document.getElementById('editGameHome').value = game.homeTeam;
+            document.getElementById('editGameAwaySpread').value = game.awaySpread || '';
+            document.getElementById('editGameHomeSpread').value = game.homeSpread || '';
+            document.getElementById('editGameAwayML').value = game.awayML || '';
+            document.getElementById('editGameHomeML').value = game.homeML || '';
+            document.getElementById('editGameTotal').value = game.total || '';
+            document.getElementById('editGameStatus').value = game.status || 'upcoming';
+            document.getElementById('editGameAwayScore').value = game.awayScore || '';
+            document.getElementById('editGameHomeScore').value = game.homeScore || '';
+
+            document.getElementById('editGameModal').classList.add('active');
+        }
+
+        async function updateGame() {
+            const gameId = document.getElementById('editGameId').value;
+            const awayTeam = document.getElementById('editGameAway').value;
+            const homeTeam = document.getElementById('editGameHome').value;
+            const awayScore = document.getElementById('editGameAwayScore').value;
+            const homeScore = document.getElementById('editGameHomeScore').value;
+            const status = document.getElementById('editGameStatus').value;
+
+            // Determine winner if final
+            let winner = null;
+            if (status === 'final' && awayScore && homeScore) {
+                const away = parseInt(awayScore);
+                const home = parseInt(homeScore);
+                winner = away > home ? awayTeam : homeTeam;
+            }
+
+            try {
+                await db.collection('games').doc(gameId).update({
+                    round: document.getElementById('editGameRound').value,
+                    gameDateTime: new Date(document.getElementById('editGameDateTime').value),
+                    awayTeam,
+                    awayName: TEAMS[awayTeam]?.name || awayTeam,
+                    homeTeam,
+                    homeName: TEAMS[homeTeam]?.name || homeTeam,
+                    awaySpread: document.getElementById('editGameAwaySpread').value || null,
+                    homeSpread: document.getElementById('editGameHomeSpread').value || null,
+                    awayML: document.getElementById('editGameAwayML').value || null,
+                    homeML: document.getElementById('editGameHomeML').value || null,
+                    total: document.getElementById('editGameTotal').value || null,
+                    status,
+                    awayScore: awayScore ? parseInt(awayScore) : null,
+                    homeScore: homeScore ? parseInt(homeScore) : null,
+                    winner,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // If game is final, mark losing team as eliminated
+                if (status === 'final' && winner) {
+                    const loser = winner === awayTeam ? homeTeam : awayTeam;
+                    await updateTeamElimination(loser, true);
+                }
+
+                closeModal('editGameModal');
+                loadGames();
+
+            } catch (error) {
+                console.error('Error updating game:', error);
+                alert('Error updating game: ' + error.message);
+            }
+        }
+
+        async function deleteGame() {
+            const gameId = document.getElementById('editGameId').value;
+            if (!confirm('Delete this game? This cannot be undone.')) return;
+
+            try {
+                await db.collection('games').doc(gameId).delete();
+                closeModal('editGameModal');
+                loadGames();
+            } catch (error) {
+                console.error('Error deleting game:', error);
+                alert('Error deleting game: ' + error.message);
+            }
+        }
+
+        // =========================================
+        // TEAMS STATUS
+        // =========================================
+        let teamsStatus = {};
+
+        async function loadTeamsStatus() {
+            try {
+                const snapshot = await db.collection('teams').get();
+                teamsStatus = {};
+                snapshot.forEach(doc => {
+                    teamsStatus[doc.id] = doc.data();
+                });
+
+                // Initialize any missing teams
+                for (const [abbr, team] of Object.entries(TEAMS)) {
+                    if (!teamsStatus[abbr]) {
+                        teamsStatus[abbr] = { ...team, eliminated: false };
+                    }
+                }
+
+                renderTeamsStatus();
+            } catch (error) {
+                console.error('Error loading teams:', error);
+            }
+        }
+
+        function renderTeamsStatus() {
+            const afcContainer = document.getElementById('afcTeams');
+            const nfcContainer = document.getElementById('nfcTeams');
+            
+            const afcTeams = Object.entries(TEAMS).filter(([_, t]) => t.conference === 'AFC');
+            const nfcTeams = Object.entries(TEAMS).filter(([_, t]) => t.conference === 'NFC');
+
+            let activeCount = 0;
+
+            afcContainer.innerHTML = afcTeams.map(([abbr, team]) => {
+                const status = teamsStatus[abbr] || {};
+                const eliminated = status.eliminated || false;
+                if (!eliminated) activeCount++;
+                return renderTeamCard(abbr, team, eliminated);
+            }).join('');
+
+            nfcContainer.innerHTML = nfcTeams.map(([abbr, team]) => {
+                const status = teamsStatus[abbr] || {};
+                const eliminated = status.eliminated || false;
+                if (!eliminated) activeCount++;
+                return renderTeamCard(abbr, team, eliminated);
+            }).join('');
+
+            document.getElementById('teamsActive').textContent = activeCount;
+            document.getElementById('teamsEliminated').textContent = 14 - activeCount;
+        }
+
+        function renderTeamCard(abbr, team, eliminated) {
+            return `
+                <div class="team-card ${eliminated ? 'eliminated' : ''}">
+                    <div class="team-logo">${abbr}</div>
+                    <div class="team-info">
+                        <div class="team-card-name">${team.name}</div>
+                        <div class="team-card-conf">${team.conference} #${team.seed}</div>
+                    </div>
+                    <div class="team-toggle ${!eliminated ? 'active' : ''}" onclick="toggleTeam('${abbr}', ${!eliminated})"></div>
+                </div>
+            `;
+        }
+
+        async function toggleTeam(abbr, currentlyActive) {
+            await updateTeamElimination(abbr, currentlyActive);
+            loadTeamsStatus();
+        }
+
+        async function updateTeamElimination(abbr, eliminated) {
+            try {
+                const teamRef = db.collection('teams').doc(abbr);
+                const doc = await teamRef.get();
+                
+                if (doc.exists) {
+                    await teamRef.update({ eliminated });
+                } else {
+                    await teamRef.set({
+                        ...TEAMS[abbr],
+                        eliminated
+                    });
+                }
+            } catch (error) {
+                console.error('Error updating team:', error);
+            }
+        }
+
+        async function resetAllTeams() {
+            if (!confirm('Reset all teams to active? This will mark all 14 teams as not eliminated.')) return;
+
+            try {
+                for (const abbr of Object.keys(TEAMS)) {
+                    await updateTeamElimination(abbr, false);
+                }
+                loadTeamsStatus();
+            } catch (error) {
+                console.error('Error resetting teams:', error);
+            }
+        }
+
+        // =========================================
+        // VIEW PLAYERS
+        // =========================================
+        async function loadPlayersView() {
+            const teamFilter = document.getElementById('viewPlayersTeam').value;
+            const posFilter = document.getElementById('viewPlayersPos').value;
+            const tbody = document.getElementById('playersViewBody');
+
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 2rem;">Loading...</td></tr>';
+
+            try {
+                let query = db.collection('players').orderBy('name');
+                const snapshot = await query.get();
+                
+                let players = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                // Apply filters
+                if (teamFilter !== 'all') {
+                    players = players.filter(p => p.team === teamFilter);
+                }
+                if (posFilter !== 'all') {
+                    players = players.filter(p => p.position === posFilter);
+                }
+
+                // Update counts
+                const allPlayers = snapshot.docs.map(doc => doc.data());
+                document.getElementById('playersCount').textContent = allPlayers.length;
+                document.getElementById('playersQB').textContent = allPlayers.filter(p => p.position === 'QB').length;
+                document.getElementById('playersRB').textContent = allPlayers.filter(p => p.position === 'RB').length;
+                document.getElementById('playersWR').textContent = allPlayers.filter(p => p.position === 'WR').length;
+                document.getElementById('playersTE').textContent = allPlayers.filter(p => p.position === 'TE').length;
+                document.getElementById('playersK').textContent = allPlayers.filter(p => p.position === 'K').length;
+
+                if (players.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 2rem; color: var(--text-muted);">No players found</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = players.map(player => {
+                    const stats = player.stats || {};
+                    return `
+                        <tr>
+                            <td>${player.name}</td>
+                            <td>${player.team}</td>
+                            <td>${player.position}</td>
+                            <td>${stats.WC?.points || '-'}</td>
+                            <td>${stats.DIV?.points || '-'}</td>
+                            <td>${stats.CONF?.points || '-'}</td>
+                            <td>${stats.SB?.points || '-'}</td>
+                            <td style="font-weight: 600; color: var(--accent-gold);">${player.totalPoints || 0}</td>
+                            <td>
+                                <button class="btn btn-outline btn-sm" onclick="deletePlayer('${player.id}')">🗑️</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+            } catch (error) {
+                console.error('Error loading players:', error);
+                tbody.innerHTML = '<tr><td colspan="9" style="color: var(--accent-red);">Error loading players</td></tr>';
+            }
+        }
+
+        async function deletePlayer(playerId) {
+            if (!confirm('Delete this player?')) return;
+
+            try {
+                await db.collection('players').doc(playerId).delete();
+                loadPlayersView();
+            } catch (error) {
+                console.error('Error deleting player:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // =========================================
+        // AUTH CHECK
+        // =========================================
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.href = 'home.html';
+                return;
+            }
+
+            // Check if admin
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (!userDoc.exists || userDoc.data().role !== 'admin') {
+                alert('Access denied. Admin privileges required.');
+                window.location.href = 'home.html';
+                return;
+            }
+
+            // Initialize
+            populateTeamSelects();
+        });
+    </script>
+</body>
+</html>
