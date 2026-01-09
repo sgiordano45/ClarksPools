@@ -686,6 +686,61 @@
             line-height: 1.5;
         }
 
+        /* How It Works Tabs */
+        .how-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .how-tab {
+            padding: 0.75rem 1.5rem;
+            border-radius: 30px;
+            border: 2px solid var(--card-border);
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .how-tab:hover {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        .how-tab.active {
+            background: linear-gradient(135deg, var(--accent-blue), #0099cc);
+            border-color: var(--accent-blue);
+            color: var(--primary-dark);
+        }
+
+        .how-content {
+            display: none;
+        }
+
+        .how-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .how-cta {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
         /* Footer */
         footer {
             background: var(--secondary-dark);
@@ -1202,28 +1257,101 @@
     <section class="how-it-works" id="how-it-works">
         <div class="section-header">
             <h2>How It Works</h2>
-            <p>Get started in minutes</p>
+            <p>Select a pool type to learn more</p>
         </div>
-        <div class="steps-container">
-            <div class="step">
-                <div class="step-number">1</div>
-                <h3>Create Account</h3>
-                <p>Sign up with your email to access all pools</p>
+        
+        <!-- Pool Type Tabs -->
+        <div class="how-tabs">
+            <button class="how-tab active" data-pool="fantasy">🏈 Playoff Fantasy</button>
+            <button class="how-tab" data-pool="betting">💰 Betting Pool</button>
+            <button class="how-tab" data-pool="boxes">🎲 Super Bowl Boxes</button>
+        </div>
+        
+        <!-- Playoff Fantasy Content -->
+        <div class="how-content active" id="how-fantasy">
+            <div class="steps-container">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Join a Pool</h3>
+                    <p>Browse open pools or use an invite link from friends</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Draft Your Team</h3>
+                    <p>Pick 14 players - one from each of the 14 playoff teams</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Earn Points</h3>
+                    <p>Your players score points for TDs, yards, FGs, and more throughout the playoffs</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Win the Pool</h3>
+                    <p>Highest total points at the end of the Super Bowl wins!</p>
+                </div>
             </div>
-            <div class="step">
-                <div class="step-number">2</div>
-                <h3>Join a Pool</h3>
-                <p>Browse open pools or use an invite link from friends</p>
+            <div class="how-cta">
+                <a href="#pools" class="btn btn-primary">View Fantasy Pools</a>
+                <a href="rules.html" class="btn btn-outline">Full Scoring Rules</a>
             </div>
-            <div class="step">
-                <div class="step-number">3</div>
-                <h3>Draft Your Team</h3>
-                <p>Pick 14 players, one from each playoff team</p>
+        </div>
+        
+        <!-- Betting Pool Content -->
+        <div class="how-content" id="how-betting">
+            <div class="steps-container">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Join a Pool</h3>
+                    <p>Enter a betting pool and receive your starting bankroll (fake money)</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Place Your Bets</h3>
+                    <p>Bet on playoff games against the spread or moneyline</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Track Results</h3>
+                    <p>Win bets to grow your bankroll, lose and it shrinks</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Top the Leaderboard</h3>
+                    <p>Highest bankroll at the end of the playoffs wins the prize!</p>
+                </div>
             </div>
-            <div class="step">
-                <div class="step-number">4</div>
-                <h3>Watch & Win</h3>
-                <p>Track live scores and climb the leaderboard</p>
+            <div class="how-cta">
+                <a href="betting-pool.html" class="btn btn-primary">View Betting Pools</a>
+            </div>
+        </div>
+        
+        <!-- Super Bowl Boxes Content -->
+        <div class="how-content" id="how-boxes">
+            <div class="steps-container">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Buy Boxes</h3>
+                    <p>Claim squares on the 10x10 grid before the pool locks</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Numbers Drawn</h3>
+                    <p>Random numbers (0-9) are assigned to rows and columns after lock</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Watch the Game</h3>
+                    <p>Check the last digit of each team's score at each quarter</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Win Prizes</h3>
+                    <p>If your box matches the score digits at Q1, Half, Q3, or Final - you win!</p>
+                </div>
+            </div>
+            <div class="how-cta">
+                <a href="boxes-pool.html" class="btn btn-primary">View Boxes Pools</a>
             </div>
         </div>
     </section>
@@ -1377,6 +1505,22 @@
                 });
                 document.body.style.overflow = '';
             }
+        });
+
+        // How It Works Tabs
+        document.querySelectorAll('.how-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active from all tabs
+                document.querySelectorAll('.how-tab').forEach(t => t.classList.remove('active'));
+                // Remove active from all content
+                document.querySelectorAll('.how-content').forEach(c => c.classList.remove('active'));
+                
+                // Add active to clicked tab
+                tab.classList.add('active');
+                // Show corresponding content
+                const poolType = tab.dataset.pool;
+                document.getElementById('how-' + poolType).classList.add('active');
+            });
         });
 
         // Error handling
