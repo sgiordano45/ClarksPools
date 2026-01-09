@@ -36,6 +36,42 @@
             min-height: 100vh;
         }
 
+        /* Loading State */
+        .loading-spinner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--card-border);
+            border-top-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
         /* Header */
         header {
             position: fixed;
@@ -344,6 +380,11 @@
             background: var(--accent-blue);
             border-color: var(--accent-blue);
             color: var(--primary-dark);
+        }
+
+        .round-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .game-card {
@@ -1049,34 +1090,34 @@
                 <div class="pool-header-content">
                     <div class="pool-title-section">
                         <div class="pool-type-badge">💰 Playoff Betting Pool</div>
-                        <h1 class="pool-name">High Stakes Showdown</h1>
-                        <p class="pool-commissioner">Hosted by @Clarkside14 • $1,000 Starting Bankroll</p>
+                        <h1 class="pool-name" id="poolName">Loading...</h1>
+                        <p class="pool-commissioner" id="poolCommissioner">Loading pool details...</p>
                     </div>
                     <div class="lock-timer">
                         <div class="lock-timer-label">Bets Lock In</div>
-                        <div class="lock-timer-time" id="lockTimer">2d 14h 32m</div>
+                        <div class="lock-timer-time" id="lockTimer">--</div>
                     </div>
                 </div>
             </div>
             <div class="pool-header-stats">
                 <div class="pool-stat">
-                    <div class="pool-stat-value">24</div>
+                    <div class="pool-stat-value" id="statPlayers">--</div>
                     <div class="pool-stat-label">Players</div>
                 </div>
                 <div class="pool-stat">
-                    <div class="pool-stat-value green">$1,892</div>
+                    <div class="pool-stat-value green" id="statLeader">$--</div>
                     <div class="pool-stat-label">Leader</div>
                 </div>
                 <div class="pool-stat">
-                    <div class="pool-stat-value gold">$1,247</div>
+                    <div class="pool-stat-value gold" id="statYourBankroll">$--</div>
                     <div class="pool-stat-label">Your Bankroll</div>
                 </div>
                 <div class="pool-stat">
-                    <div class="pool-stat-value">5th</div>
+                    <div class="pool-stat-value" id="statYourRank">--</div>
                     <div class="pool-stat-label">Your Rank</div>
                 </div>
                 <div class="pool-stat">
-                    <div class="pool-stat-value">Wild Card</div>
+                    <div class="pool-stat-value" id="statCurrentRound">--</div>
                     <div class="pool-stat-label">Current Round</div>
                 </div>
             </div>
@@ -1095,240 +1136,15 @@
             <div class="betting-layout">
                 <div class="games-section">
                     <div class="games-header">
-                        <h3 class="games-title">Wild Card Games</h3>
-                        <div class="round-selector">
-                            <button class="round-btn active">Wild Card</button>
-                            <button class="round-btn" disabled>Divisional</button>
-                            <button class="round-btn" disabled>Conference</button>
-                            <button class="round-btn" disabled>Super Bowl</button>
+                        <h3 class="games-title" id="gamesTitle">Games</h3>
+                        <div class="round-selector" id="roundSelector">
+                            <!-- Round buttons populated dynamically -->
                         </div>
                     </div>
-
-                    <!-- Game 1 -->
-                    <div class="game-card">
-                        <div class="game-meta">
-                            <span class="game-datetime">Sat, Jan 11 • 4:30 PM ET</span>
-                            <span class="game-status open">Open</span>
-                        </div>
-                        <div class="game-matchup">
-                            <div class="team-row away">
-                                <div class="team-logo">LAC</div>
-                                <div>
-                                    <div class="team-name">Chargers</div>
-                                    <div class="team-record">11-6</div>
-                                </div>
-                            </div>
-                            <div class="vs-divider">@</div>
-                            <div class="team-row home">
-                                <div class="team-logo">HOU</div>
-                                <div>
-                                    <div class="team-name">Texans</div>
-                                    <div class="team-record">10-7</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="betting-options">
-                            <div class="bet-type-group">
-                                <h4>Spread</h4>
-                                <div class="bet-options-row">
-                                    <div class="bet-option" data-game="1" data-type="spread" data-pick="LAC" data-line="+2.5" data-odds="-110" onclick="selectBet(this)">
-                                        <div class="bet-team">LAC</div>
-                                        <div class="bet-line">+2.5</div>
-                                        <div class="bet-odds">-110</div>
-                                    </div>
-                                    <div class="bet-option" data-game="1" data-type="spread" data-pick="HOU" data-line="-2.5" data-odds="-110" onclick="selectBet(this)">
-                                        <div class="bet-team">HOU</div>
-                                        <div class="bet-line">-2.5</div>
-                                        <div class="bet-odds">-110</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="bet-type-group">
-                                <h4>Moneyline</h4>
-                                <div class="bet-options-row">
-                                    <div class="bet-option" data-game="1" data-type="moneyline" data-pick="LAC" data-line="" data-odds="+118" onclick="selectBet(this)">
-                                        <div class="bet-team">LAC</div>
-                                        <div class="bet-line">ML</div>
-                                        <div class="bet-odds">+118</div>
-                                    </div>
-                                    <div class="bet-option" data-game="1" data-type="moneyline" data-pick="HOU" data-line="" data-odds="-140" onclick="selectBet(this)">
-                                        <div class="bet-team">HOU</div>
-                                        <div class="bet-line">ML</div>
-                                        <div class="bet-odds">-140</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Game 2 -->
-                    <div class="game-card">
-                        <div class="game-meta">
-                            <span class="game-datetime">Sat, Jan 11 • 8:00 PM ET</span>
-                            <span class="game-status open">Open</span>
-                        </div>
-                        <div class="game-matchup">
-                            <div class="team-row away">
-                                <div class="team-logo">PIT</div>
-                                <div>
-                                    <div class="team-name">Steelers</div>
-                                    <div class="team-record">10-7</div>
-                                </div>
-                            </div>
-                            <div class="vs-divider">@</div>
-                            <div class="team-row home">
-                                <div class="team-logo">BAL</div>
-                                <div>
-                                    <div class="team-name">Ravens</div>
-                                    <div class="team-record">12-5</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="betting-options">
-                            <div class="bet-type-group">
-                                <h4>Spread</h4>
-                                <div class="bet-options-row">
-                                    <div class="bet-option" data-game="2" data-type="spread" data-pick="PIT" data-line="+9.5" data-odds="-110" onclick="selectBet(this)">
-                                        <div class="bet-team">PIT</div>
-                                        <div class="bet-line">+9.5</div>
-                                        <div class="bet-odds">-110</div>
-                                    </div>
-                                    <div class="bet-option" data-game="2" data-type="spread" data-pick="BAL" data-line="-9.5" data-odds="-110" onclick="selectBet(this)">
-                                        <div class="bet-team">BAL</div>
-                                        <div class="bet-line">-9.5</div>
-                                        <div class="bet-odds">-110</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="bet-type-group">
-                                <h4>Moneyline</h4>
-                                <div class="bet-options-row">
-                                    <div class="bet-option" data-game="2" data-type="moneyline" data-pick="PIT" data-line="" data-odds="+360" onclick="selectBet(this)">
-                                        <div class="bet-team">PIT</div>
-                                        <div class="bet-line">ML</div>
-                                        <div class="bet-odds">+360</div>
-                                    </div>
-                                    <div class="bet-option" data-game="2" data-type="moneyline" data-pick="BAL" data-line="" data-odds="-480" onclick="selectBet(this)">
-                                        <div class="bet-team">BAL</div>
-                                        <div class="bet-line">ML</div>
-                                        <div class="bet-odds">-480</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Game 3 -->
-                    <div class="game-card">
-                        <div class="game-meta">
-                            <span class="game-datetime">Sun, Jan 12 • 1:00 PM ET</span>
-                            <span class="game-status open">Open</span>
-                        </div>
-                        <div class="game-matchup">
-                            <div class="team-row away">
-                                <div class="team-logo">DEN</div>
-                                <div>
-                                    <div class="team-name">Broncos</div>
-                                    <div class="team-record">10-7</div>
-                                </div>
-                            </div>
-                            <div class="vs-divider">@</div>
-                            <div class="team-row home">
-                                <div class="team-logo">BUF</div>
-                                <div>
-                                    <div class="team-name">Bills</div>
-                                    <div class="team-record">13-4</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="betting-options">
-                            <div class="bet-type-group">
-                                <h4>Spread</h4>
-                                <div class="bet-options-row">
-                                    <div class="bet-option" data-game="3" data-type="spread" data-pick="DEN" data-line="+8.5" data-odds="-110" onclick="selectBet(this)">
-                                        <div class="bet-team">DEN</div>
-                                        <div class="bet-line">+8.5</div>
-                                        <div class="bet-odds">-110</div>
-                                    </div>
-                                    <div class="bet-option" data-game="3" data-type="spread" data-pick="BUF" data-line="-8.5" data-odds="-110" onclick="selectBet(this)">
-                                        <div class="bet-team">BUF</div>
-                                        <div class="bet-line">-8.5</div>
-                                        <div class="bet-odds">-110</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="bet-type-group">
-                                <h4>Moneyline</h4>
-                                <div class="bet-options-row">
-                                    <div class="bet-option" data-game="3" data-type="moneyline" data-pick="DEN" data-line="" data-odds="+310" onclick="selectBet(this)">
-                                        <div class="bet-team">DEN</div>
-                                        <div class="bet-line">ML</div>
-                                        <div class="bet-odds">+310</div>
-                                    </div>
-                                    <div class="bet-option" data-game="3" data-type="moneyline" data-pick="BUF" data-line="" data-odds="-400" onclick="selectBet(this)">
-                                        <div class="bet-team">BUF</div>
-                                        <div class="bet-line">ML</div>
-                                        <div class="bet-odds">-400</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Game 4 -->
-                    <div class="game-card">
-                        <div class="game-meta">
-                            <span class="game-datetime">Sun, Jan 12 • 4:30 PM ET</span>
-                            <span class="game-status open">Open</span>
-                        </div>
-                        <div class="game-matchup">
-                            <div class="team-row away">
-                                <div class="team-logo">GB</div>
-                                <div>
-                                    <div class="team-name">Packers</div>
-                                    <div class="team-record">11-6</div>
-                                </div>
-                            </div>
-                            <div class="vs-divider">@</div>
-                            <div class="team-row home">
-                                <div class="team-logo">PHI</div>
-                                <div>
-                                    <div class="team-name">Eagles</div>
-                                    <div class="team-record">14-3</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="betting-options">
-                            <div class="bet-type-group">
-                                <h4>Spread</h4>
-                                <div class="bet-options-row">
-                                    <div class="bet-option" data-game="4" data-type="spread" data-pick="GB" data-line="+4.5" data-odds="-110" onclick="selectBet(this)">
-                                        <div class="bet-team">GB</div>
-                                        <div class="bet-line">+4.5</div>
-                                        <div class="bet-odds">-110</div>
-                                    </div>
-                                    <div class="bet-option" data-game="4" data-type="spread" data-pick="PHI" data-line="-4.5" data-odds="-110" onclick="selectBet(this)">
-                                        <div class="bet-team">PHI</div>
-                                        <div class="bet-line">-4.5</div>
-                                        <div class="bet-odds">-110</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="bet-type-group">
-                                <h4>Moneyline</h4>
-                                <div class="bet-options-row">
-                                    <div class="bet-option" data-game="4" data-type="moneyline" data-pick="GB" data-line="" data-odds="+175" onclick="selectBet(this)">
-                                        <div class="bet-team">GB</div>
-                                        <div class="bet-line">ML</div>
-                                        <div class="bet-odds">+175</div>
-                                    </div>
-                                    <div class="bet-option" data-game="4" data-type="moneyline" data-pick="PHI" data-line="" data-odds="-210" onclick="selectBet(this)">
-                                        <div class="bet-team">PHI</div>
-                                        <div class="bet-line">ML</div>
-                                        <div class="bet-odds">-210</div>
-                                    </div>
-                                </div>
-                            </div>
+                    <div id="gamesContainer">
+                        <div class="loading-spinner">
+                            <div class="spinner"></div>
+                            <p>Loading games...</p>
                         </div>
                     </div>
                 </div>
@@ -1365,67 +1181,15 @@
         <!-- My Bets Tab -->
         <div class="tab-content" id="my-bets">
             <div class="bets-filter">
-                <button class="filter-btn active">All Bets</button>
-                <button class="filter-btn">Pending</button>
-                <button class="filter-btn">Won</button>
-                <button class="filter-btn">Lost</button>
+                <button class="filter-btn active" data-filter="all">All Bets</button>
+                <button class="filter-btn" data-filter="pending">Pending</button>
+                <button class="filter-btn" data-filter="won">Won</button>
+                <button class="filter-btn" data-filter="lost">Lost</button>
             </div>
-            <div class="bet-history-card">
-                <div class="bet-history-item">
-                    <div class="bet-history-info">
-                        <h4>Bills -8.5</h4>
-                        <div class="bet-history-meta">
-                            <span>Spread • BUF vs DEN</span>
-                            <span>Wagered: $150</span>
-                            <span>Odds: -110</span>
-                        </div>
-                    </div>
-                    <div class="bet-history-result">
-                        <div class="bet-result-badge pending">Pending</div>
-                        <div class="bet-payout">To Win: $136</div>
-                    </div>
-                </div>
-                <div class="bet-history-item">
-                    <div class="bet-history-info">
-                        <h4>Ravens ML</h4>
-                        <div class="bet-history-meta">
-                            <span>Moneyline • BAL vs PIT</span>
-                            <span>Wagered: $200</span>
-                            <span>Odds: -480</span>
-                        </div>
-                    </div>
-                    <div class="bet-history-result">
-                        <div class="bet-result-badge pending">Pending</div>
-                        <div class="bet-payout">To Win: $42</div>
-                    </div>
-                </div>
-                <div class="bet-history-item">
-                    <div class="bet-history-info">
-                        <h4>Chiefs -3.5</h4>
-                        <div class="bet-history-meta">
-                            <span>Spread • KC vs MIA</span>
-                            <span>Wagered: $100</span>
-                            <span>Odds: -110</span>
-                        </div>
-                    </div>
-                    <div class="bet-history-result">
-                        <div class="bet-result-badge won">Won</div>
-                        <div class="bet-payout positive">+$91</div>
-                    </div>
-                </div>
-                <div class="bet-history-item">
-                    <div class="bet-history-info">
-                        <h4>Dolphins ML</h4>
-                        <div class="bet-history-meta">
-                            <span>Moneyline • KC vs MIA</span>
-                            <span>Wagered: $50</span>
-                            <span>Odds: +145</span>
-                        </div>
-                    </div>
-                    <div class="bet-history-result">
-                        <div class="bet-result-badge lost">Lost</div>
-                        <div class="bet-payout negative">-$50</div>
-                    </div>
+            <div class="bet-history-card" id="myBetsContainer">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>Loading your bets...</p>
                 </div>
             </div>
         </div>
@@ -1441,104 +1205,22 @@
                     <div style="text-align:center">ROI</div>
                     <div style="text-align:center">Bankroll</div>
                 </div>
-                <div class="leaderboard-row">
-                    <div class="rank rank-1">1</div>
-                    <div class="entry-info">
-                        <div class="entry-avatar">MJ</div>
-                        <div class="entry-name">Mike J.</div>
+                <div id="leaderboardContainer">
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                        <p>Loading leaderboard...</p>
                     </div>
-                    <div class="stat-value">8-2</div>
-                    <div class="stat-value positive">80%</div>
-                    <div class="stat-value positive">+89%</div>
-                    <div class="bankroll-value">$1,892</div>
-                </div>
-                <div class="leaderboard-row">
-                    <div class="rank rank-2">2</div>
-                    <div class="entry-info">
-                        <div class="entry-avatar">TC</div>
-                        <div class="entry-name">Tom C.</div>
-                    </div>
-                    <div class="stat-value">7-3</div>
-                    <div class="stat-value positive">70%</div>
-                    <div class="stat-value positive">+65%</div>
-                    <div class="bankroll-value">$1,654</div>
-                </div>
-                <div class="leaderboard-row">
-                    <div class="rank rank-3">3</div>
-                    <div class="entry-info">
-                        <div class="entry-avatar">KL</div>
-                        <div class="entry-name">Kelly L.</div>
-                    </div>
-                    <div class="stat-value">6-4</div>
-                    <div class="stat-value positive">60%</div>
-                    <div class="stat-value positive">+43%</div>
-                    <div class="bankroll-value">$1,432</div>
-                </div>
-                <div class="leaderboard-row">
-                    <div class="rank">4</div>
-                    <div class="entry-info">
-                        <div class="entry-avatar">JW</div>
-                        <div class="entry-name">Jake W.</div>
-                    </div>
-                    <div class="stat-value">5-3</div>
-                    <div class="stat-value positive">63%</div>
-                    <div class="stat-value positive">+31%</div>
-                    <div class="bankroll-value">$1,312</div>
-                </div>
-                <div class="leaderboard-row my-entry">
-                    <div class="rank">5</div>
-                    <div class="entry-info">
-                        <div class="entry-avatar">SD</div>
-                        <div class="entry-name">Stephen D.</div>
-                    </div>
-                    <div class="stat-value">5-4</div>
-                    <div class="stat-value positive">56%</div>
-                    <div class="stat-value positive">+25%</div>
-                    <div class="bankroll-value">$1,247</div>
-                </div>
-                <div class="leaderboard-row">
-                    <div class="rank">6</div>
-                    <div class="entry-info">
-                        <div class="entry-avatar">RB</div>
-                        <div class="entry-name">Rob B.</div>
-                    </div>
-                    <div class="stat-value">4-5</div>
-                    <div class="stat-value">44%</div>
-                    <div class="stat-value positive">+8%</div>
-                    <div class="bankroll-value">$1,082</div>
-                </div>
-                <div class="leaderboard-row">
-                    <div class="rank">7</div>
-                    <div class="entry-info">
-                        <div class="entry-avatar">AP</div>
-                        <div class="entry-name">Alex P.</div>
-                    </div>
-                    <div class="stat-value">4-6</div>
-                    <div class="stat-value">40%</div>
-                    <div class="stat-value negative">-12%</div>
-                    <div class="bankroll-value">$876</div>
-                </div>
-                <div class="leaderboard-row">
-                    <div class="rank">8</div>
-                    <div class="entry-info">
-                        <div class="entry-avatar">DM</div>
-                        <div class="entry-name">Dan M.</div>
-                    </div>
-                    <div class="stat-value">3-7</div>
-                    <div class="stat-value negative">30%</div>
-                    <div class="stat-value negative">-28%</div>
-                    <div class="bankroll-value">$721</div>
                 </div>
             </div>
         </div>
 
         <!-- Rules Tab -->
         <div class="tab-content" id="rules">
-            <div class="rules-grid">
+            <div class="rules-grid" id="rulesContainer">
                 <div class="rules-card">
                     <h3>Starting Bankroll</h3>
                     <ul>
-                        <li>Everyone starts with $1,000 in fake money</li>
+                        <li>Everyone starts with <span id="ruleStartingBankroll">$1,000</span> in fake money</li>
                         <li>Goal is to have the highest bankroll at the end of the playoffs</li>
                         <li>No real money is wagered on individual bets</li>
                         <li>Pool buy-in is separate from betting bankroll</li>
@@ -1557,8 +1239,8 @@
                 <div class="rules-card">
                     <h3>Betting Limits</h3>
                     <ul>
-                        <li>Minimum bet: $10</li>
-                        <li>Maximum bet: $500 per wager</li>
+                        <li>Minimum bet: <span id="ruleMinBet">$10</span></li>
+                        <li>Maximum bet: <span id="ruleMaxBet">$500</span> per wager</li>
                         <li>No limit on number of bets per round</li>
                         <li>Cannot bet more than your current bankroll</li>
                     </ul>
@@ -1599,8 +1281,66 @@
         </div>
     </main>
 
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+
     <script>
+        // =====================
+        // State Management
+        // =====================
+        let currentPoolId = null;
+        let currentPoolData = null;
+        let userBankrollData = null;
+        let gamesData = [];
+        let leaderboardData = [];
+        let myBetsData = [];
+        let betSlip = [];
+        let userBankroll = 0;
+        let currentRound = 'wild-card';
+        let currentBetFilter = 'all';
+
+        // Get pool ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        currentPoolId = urlParams.get('id');
+
+        // =====================
+        // Utility Functions
+        // =====================
+        function getUserInitials(name) {
+            if (!name) return '??';
+            return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+        }
+
+        function formatDate(date) {
+            const options = { weekday: 'short', month: 'short', day: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        function formatTime(date) {
+            return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+        }
+
+        function calculatePayout(wager, oddsStr) {
+            const odds = parseInt(oddsStr);
+            if (odds > 0) {
+                return Math.round(wager * (odds / 100));
+            } else {
+                return Math.round(wager * (100 / Math.abs(odds)));
+            }
+        }
+
+        function getOrdinalSuffix(n) {
+            const s = ['th', 'st', 'nd', 'rd'];
+            const v = n % 100;
+            return n + (s[(v - 20) % 10] || s[v] || s[0]);
+        }
+
+        // =====================
         // Tab Navigation
+        // =====================
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -1610,19 +1350,487 @@
             });
         });
 
-        // Filter buttons
+        // Filter buttons for My Bets
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 btn.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
+                currentBetFilter = btn.dataset.filter;
+                renderMyBets();
             });
         });
 
-        // Bet Slip State
-        let betSlip = [];
-        let userBankroll = 1000; // Will be updated from Firebase
+        // =====================
+        // Firebase Auth Listener
+        // =====================
+        auth.onAuthStateChanged(async (user) => {
+            const authButtons = document.getElementById('authButtons');
+            const userLoggedIn = document.getElementById('userLoggedIn');
+            const userAvatar = document.getElementById('userAvatar');
 
+            if (user) {
+                if (authButtons) authButtons.style.display = 'none';
+                if (userLoggedIn) userLoggedIn.style.display = 'flex';
+
+                const displayName = user.displayName || user.email.split('@')[0];
+                if (userAvatar) userAvatar.textContent = getUserInitials(displayName);
+
+                // Load all data
+                if (currentPoolId) {
+                    await loadPoolData(currentPoolId);
+                    await loadUserBankroll(currentPoolId, user.uid);
+                    await loadGames(currentPoolId);
+                    await loadLeaderboard(currentPoolId);
+                    await loadMyBets(currentPoolId, user.uid);
+                } else {
+                    showError('No pool ID provided. Please access this page from a valid pool link.');
+                }
+            } else {
+                if (authButtons) authButtons.style.display = 'flex';
+                if (userLoggedIn) userLoggedIn.style.display = 'none';
+                // Redirect to login
+                window.location.href = 'index.html';
+            }
+        });
+
+        // =====================
+        // Load Pool Data
+        // =====================
+        async function loadPoolData(poolId) {
+            try {
+                const poolDoc = await db.collection('pools').doc(poolId).get();
+                if (poolDoc.exists) {
+                    currentPoolData = poolDoc.data();
+                    renderPoolHeader(currentPoolData);
+                } else {
+                    showError('Pool not found.');
+                }
+            } catch (error) {
+                console.error('Error loading pool:', error);
+                showError('Error loading pool data.');
+            }
+        }
+
+        function renderPoolHeader(pool) {
+            document.getElementById('poolName').textContent = pool.name || 'Unnamed Pool';
+            document.getElementById('poolCommissioner').textContent = 
+                `Hosted by ${pool.commissionerName || 'Unknown'} • $${(pool.startingBankroll || 1000).toLocaleString()} Starting Bankroll`;
+            
+            // Update rules with pool settings
+            document.getElementById('ruleStartingBankroll').textContent = '$' + (pool.startingBankroll || 1000).toLocaleString();
+            document.getElementById('ruleMinBet').textContent = '$' + (pool.minBet || 10);
+            document.getElementById('ruleMaxBet').textContent = '$' + (pool.maxBet || 500);
+            
+            // Update current round
+            document.getElementById('statCurrentRound').textContent = pool.currentRound || 'Wild Card';
+            currentRound = pool.currentRound?.toLowerCase().replace(' ', '-') || 'wild-card';
+            
+            // Update lock timer
+            if (pool.lockTime) {
+                updateTimer(pool.lockTime.toDate());
+            }
+        }
+
+        // =====================
+        // Load User Bankroll
+        // =====================
+        async function loadUserBankroll(poolId, userId) {
+            try {
+                const bankrollDoc = await db.collection('pools').doc(poolId)
+                    .collection('bankrolls').doc(userId).get();
+
+                if (bankrollDoc.exists) {
+                    userBankrollData = bankrollDoc.data();
+                    userBankroll = userBankrollData.currentBankroll;
+                    document.getElementById('userBankroll').textContent = '$' + userBankroll.toLocaleString();
+                    document.getElementById('statYourBankroll').textContent = '$' + userBankroll.toLocaleString();
+                } else if (currentPoolData) {
+                    // Initialize bankroll for new user
+                    const startingBankroll = currentPoolData.startingBankroll || 1000;
+                    const user = auth.currentUser;
+                    
+                    await db.collection('pools').doc(poolId)
+                        .collection('bankrolls').doc(userId).set({
+                            userId: userId,
+                            userName: user.displayName || user.email,
+                            currentBankroll: startingBankroll,
+                            startingBankroll: startingBankroll,
+                            totalWagered: 0,
+                            totalWon: 0,
+                            totalLost: 0,
+                            record: { wins: 0, losses: 0, pushes: 0 },
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+
+                    userBankroll = startingBankroll;
+                    document.getElementById('userBankroll').textContent = '$' + startingBankroll.toLocaleString();
+                    document.getElementById('statYourBankroll').textContent = '$' + startingBankroll.toLocaleString();
+                }
+            } catch (error) {
+                console.error('Error loading bankroll:', error);
+            }
+        }
+
+        // =====================
+        // Load Games
+        // =====================
+        async function loadGames(poolId) {
+            try {
+                const gamesSnapshot = await db.collection('pools').doc(poolId)
+                    .collection('games')
+                    .orderBy('gameTime', 'asc')
+                    .get();
+
+                gamesData = [];
+                gamesSnapshot.forEach(doc => {
+                    gamesData.push({ id: doc.id, ...doc.data() });
+                });
+
+                renderRoundSelector();
+                renderGames();
+            } catch (error) {
+                console.error('Error loading games:', error);
+                document.getElementById('gamesContainer').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <p>Error loading games. Please try again.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderRoundSelector() {
+            const rounds = [...new Set(gamesData.map(g => g.round))];
+            const roundLabels = {
+                'wild-card': 'Wild Card',
+                'divisional': 'Divisional',
+                'conference': 'Conference',
+                'super-bowl': 'Super Bowl'
+            };
+
+            const selector = document.getElementById('roundSelector');
+            selector.innerHTML = '';
+
+            const allRounds = ['wild-card', 'divisional', 'conference', 'super-bowl'];
+            allRounds.forEach(round => {
+                const hasGames = rounds.includes(round);
+                const btn = document.createElement('button');
+                btn.className = `round-btn ${round === currentRound ? 'active' : ''}`;
+                btn.textContent = roundLabels[round] || round;
+                btn.disabled = !hasGames;
+                btn.onclick = () => {
+                    if (hasGames) {
+                        currentRound = round;
+                        document.querySelectorAll('.round-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        renderGames();
+                    }
+                };
+                selector.appendChild(btn);
+            });
+        }
+
+        function renderGames() {
+            const container = document.getElementById('gamesContainer');
+            const roundGames = gamesData.filter(g => g.round === currentRound);
+
+            if (roundGames.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🏈</div>
+                        <p>No games available for this round yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const roundLabels = {
+                'wild-card': 'Wild Card',
+                'divisional': 'Divisional',
+                'conference': 'Conference',
+                'super-bowl': 'Super Bowl'
+            };
+            document.getElementById('gamesTitle').textContent = (roundLabels[currentRound] || currentRound) + ' Games';
+
+            let html = '';
+            roundGames.forEach(game => {
+                const gameTime = game.gameTime?.toDate() || new Date();
+                const isLocked = new Date() > gameTime;
+                const statusClass = isLocked ? 'locked' : 'open';
+                const statusText = isLocked ? 'Locked' : 'Open';
+
+                html += `
+                    <div class="game-card" data-game-id="${game.id}">
+                        <div class="game-meta">
+                            <span class="game-datetime">${formatDate(gameTime)} • ${formatTime(gameTime)}</span>
+                            <span class="game-status ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="game-matchup">
+                            <div class="team-row away">
+                                <div class="team-logo">${game.awayTeam?.abbr || '???'}</div>
+                                <div>
+                                    <div class="team-name">${game.awayTeam?.name || 'Away Team'}</div>
+                                    <div class="team-record">${game.awayTeam?.record || ''}</div>
+                                </div>
+                            </div>
+                            <div class="vs-divider">@</div>
+                            <div class="team-row home">
+                                <div class="team-logo">${game.homeTeam?.abbr || '???'}</div>
+                                <div>
+                                    <div class="team-name">${game.homeTeam?.name || 'Home Team'}</div>
+                                    <div class="team-record">${game.homeTeam?.record || ''}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="betting-options">
+                            <div class="bet-type-group">
+                                <h4>Spread</h4>
+                                <div class="bet-options-row">
+                                    <div class="bet-option ${isLocked ? 'disabled' : ''}" 
+                                         data-game="${game.id}" 
+                                         data-type="spread" 
+                                         data-pick="${game.awayTeam?.abbr}" 
+                                         data-line="${game.spread?.away || ''}" 
+                                         data-odds="${game.spread?.awayOdds || '-110'}" 
+                                         onclick="selectBet(this)">
+                                        <div class="bet-team">${game.awayTeam?.abbr || '???'}</div>
+                                        <div class="bet-line">${game.spread?.away || 'N/A'}</div>
+                                        <div class="bet-odds">${game.spread?.awayOdds || '-110'}</div>
+                                    </div>
+                                    <div class="bet-option ${isLocked ? 'disabled' : ''}" 
+                                         data-game="${game.id}" 
+                                         data-type="spread" 
+                                         data-pick="${game.homeTeam?.abbr}" 
+                                         data-line="${game.spread?.home || ''}" 
+                                         data-odds="${game.spread?.homeOdds || '-110'}" 
+                                         onclick="selectBet(this)">
+                                        <div class="bet-team">${game.homeTeam?.abbr || '???'}</div>
+                                        <div class="bet-line">${game.spread?.home || 'N/A'}</div>
+                                        <div class="bet-odds">${game.spread?.homeOdds || '-110'}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bet-type-group">
+                                <h4>Moneyline</h4>
+                                <div class="bet-options-row">
+                                    <div class="bet-option ${isLocked ? 'disabled' : ''}" 
+                                         data-game="${game.id}" 
+                                         data-type="moneyline" 
+                                         data-pick="${game.awayTeam?.abbr}" 
+                                         data-line="" 
+                                         data-odds="${game.moneyline?.away || '+100'}" 
+                                         onclick="selectBet(this)">
+                                        <div class="bet-team">${game.awayTeam?.abbr || '???'}</div>
+                                        <div class="bet-line">ML</div>
+                                        <div class="bet-odds">${game.moneyline?.away || '+100'}</div>
+                                    </div>
+                                    <div class="bet-option ${isLocked ? 'disabled' : ''}" 
+                                         data-game="${game.id}" 
+                                         data-type="moneyline" 
+                                         data-pick="${game.homeTeam?.abbr}" 
+                                         data-line="" 
+                                         data-odds="${game.moneyline?.home || '-100'}" 
+                                         onclick="selectBet(this)">
+                                        <div class="bet-team">${game.homeTeam?.abbr || '???'}</div>
+                                        <div class="bet-line">ML</div>
+                                        <div class="bet-odds">${game.moneyline?.home || '-100'}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // =====================
+        // Load Leaderboard
+        // =====================
+        async function loadLeaderboard(poolId) {
+            try {
+                const bankrollsSnapshot = await db.collection('pools').doc(poolId)
+                    .collection('bankrolls')
+                    .orderBy('currentBankroll', 'desc')
+                    .get();
+
+                leaderboardData = [];
+                bankrollsSnapshot.forEach(doc => {
+                    leaderboardData.push({ id: doc.id, ...doc.data() });
+                });
+
+                renderLeaderboard();
+                updatePoolStats();
+            } catch (error) {
+                console.error('Error loading leaderboard:', error);
+                document.getElementById('leaderboardContainer').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <p>Error loading leaderboard.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderLeaderboard() {
+            const container = document.getElementById('leaderboardContainer');
+            const currentUserId = auth.currentUser?.uid;
+
+            if (leaderboardData.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">👥</div>
+                        <p>No players in this pool yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            leaderboardData.forEach((player, index) => {
+                const rank = index + 1;
+                const isCurrentUser = player.id === currentUserId;
+                const record = player.record || { wins: 0, losses: 0, pushes: 0 };
+                const totalBets = record.wins + record.losses;
+                const winPct = totalBets > 0 ? Math.round((record.wins / totalBets) * 100) : 0;
+                const startingBankroll = player.startingBankroll || currentPoolData?.startingBankroll || 1000;
+                const roi = Math.round(((player.currentBankroll - startingBankroll) / startingBankroll) * 100);
+                const roiClass = roi >= 0 ? 'positive' : 'negative';
+                const winPctClass = winPct >= 50 ? 'positive' : (totalBets > 0 ? 'negative' : '');
+
+                let rankClass = '';
+                if (rank === 1) rankClass = 'rank-1';
+                else if (rank === 2) rankClass = 'rank-2';
+                else if (rank === 3) rankClass = 'rank-3';
+
+                html += `
+                    <div class="leaderboard-row ${isCurrentUser ? 'my-entry' : ''}">
+                        <div class="rank ${rankClass}">${rank}</div>
+                        <div class="entry-info">
+                            <div class="entry-avatar">${getUserInitials(player.userName)}</div>
+                            <div class="entry-name">${player.userName || 'Unknown'}</div>
+                        </div>
+                        <div class="stat-value">${record.wins}-${record.losses}${record.pushes > 0 ? '-' + record.pushes : ''}</div>
+                        <div class="stat-value ${winPctClass}">${winPct}%</div>
+                        <div class="stat-value ${roiClass}">${roi >= 0 ? '+' : ''}${roi}%</div>
+                        <div class="bankroll-value">$${player.currentBankroll?.toLocaleString() || '0'}</div>
+                    </div>
+                `;
+
+                // Update user's rank in stats
+                if (isCurrentUser) {
+                    document.getElementById('statYourRank').textContent = getOrdinalSuffix(rank);
+                }
+            });
+
+            container.innerHTML = html;
+        }
+
+        function updatePoolStats() {
+            document.getElementById('statPlayers').textContent = leaderboardData.length;
+            if (leaderboardData.length > 0) {
+                document.getElementById('statLeader').textContent = '$' + leaderboardData[0].currentBankroll?.toLocaleString();
+            }
+        }
+
+        // =====================
+        // Load My Bets
+        // =====================
+        async function loadMyBets(poolId, userId) {
+            try {
+                const betsSnapshot = await db.collection('pools').doc(poolId)
+                    .collection('bets')
+                    .where('userId', '==', userId)
+                    .orderBy('createdAt', 'desc')
+                    .get();
+
+                myBetsData = [];
+                betsSnapshot.forEach(doc => {
+                    myBetsData.push({ id: doc.id, ...doc.data() });
+                });
+
+                renderMyBets();
+            } catch (error) {
+                console.error('Error loading bets:', error);
+                document.getElementById('myBetsContainer').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <p>Error loading your bets.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderMyBets() {
+            const container = document.getElementById('myBetsContainer');
+            
+            let filteredBets = myBetsData;
+            if (currentBetFilter !== 'all') {
+                filteredBets = myBetsData.filter(bet => bet.status === currentBetFilter);
+            }
+
+            if (filteredBets.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🎯</div>
+                        <p>${currentBetFilter === 'all' ? 'You haven\'t placed any bets yet.' : `No ${currentBetFilter} bets.`}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            filteredBets.forEach(bet => {
+                const lineDisplay = bet.line ? bet.line : 'ML';
+                const statusClass = bet.status || 'pending';
+                
+                let payoutDisplay = '';
+                let payoutClass = '';
+                
+                if (bet.status === 'won') {
+                    payoutDisplay = '+$' + (bet.payout || 0);
+                    payoutClass = 'positive';
+                } else if (bet.status === 'lost') {
+                    payoutDisplay = '-$' + bet.wager;
+                    payoutClass = 'negative';
+                } else if (bet.status === 'push') {
+                    payoutDisplay = '$0';
+                } else {
+                    payoutDisplay = 'To Win: $' + calculatePayout(bet.wager, bet.odds);
+                }
+
+                // Find game info
+                const game = gamesData.find(g => g.id === bet.gameId);
+                const matchup = game ? `${game.awayTeam?.abbr} @ ${game.homeTeam?.abbr}` : bet.gameId;
+
+                html += `
+                    <div class="bet-history-item">
+                        <div class="bet-history-info">
+                            <h4>${bet.pick} ${lineDisplay}</h4>
+                            <div class="bet-history-meta">
+                                <span>${bet.type} • ${matchup}</span>
+                                <span>Wagered: $${bet.wager}</span>
+                                <span>Odds: ${bet.odds}</span>
+                            </div>
+                        </div>
+                        <div class="bet-history-result">
+                            <div class="bet-result-badge ${statusClass}">${bet.status || 'Pending'}</div>
+                            <div class="bet-payout ${payoutClass}">${payoutDisplay}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // =====================
+        // Bet Slip Functions
+        // =====================
         function selectBet(element) {
+            if (element.classList.contains('disabled')) return;
+
             const game = element.dataset.game;
             const type = element.dataset.type;
             const pick = element.dataset.pick;
@@ -1631,7 +1839,7 @@
 
             // Check if this exact bet is already selected
             const existingIndex = betSlip.findIndex(b => b.game === game && b.type === type && b.pick === pick);
-            
+
             if (existingIndex > -1) {
                 // Remove bet
                 betSlip.splice(existingIndex, 1);
@@ -1641,7 +1849,8 @@
                 const sameGameTypeIndex = betSlip.findIndex(b => b.game === game && b.type === type);
                 if (sameGameTypeIndex > -1) {
                     const oldPick = betSlip[sameGameTypeIndex].pick;
-                    document.querySelector(`[data-game="${game}"][data-type="${type}"][data-pick="${oldPick}"]`).classList.remove('selected');
+                    const oldEl = document.querySelector(`[data-game="${game}"][data-type="${type}"][data-pick="${oldPick}"]`);
+                    if (oldEl) oldEl.classList.remove('selected');
                     betSlip.splice(sameGameTypeIndex, 1);
                 }
 
@@ -1675,18 +1884,17 @@
             betSlip.forEach((bet, index) => {
                 const toWin = calculatePayout(bet.wager, bet.odds);
                 const lineDisplay = bet.line ? bet.line : 'ML';
-                const matchups = {
-                    '1': 'LAC @ HOU',
-                    '2': 'PIT @ BAL',
-                    '3': 'DEN @ BUF',
-                    '4': 'GB @ PHI'
-                };
+                
+                // Find game for matchup display
+                const game = gamesData.find(g => g.id === bet.game);
+                const matchup = game ? `${game.awayTeam?.abbr} @ ${game.homeTeam?.abbr}` : bet.game;
+
                 html += `
                     <div class="bet-slip-item">
                         <div class="bet-slip-item-header">
                             <div>
                                 <div class="bet-slip-pick">${bet.pick} ${lineDisplay}</div>
-                                <div class="bet-slip-matchup">${matchups[bet.game]}</div>
+                                <div class="bet-slip-matchup">${matchup}</div>
                             </div>
                             <button class="bet-slip-remove" onclick="removeBet(${index})">×</button>
                         </div>
@@ -1697,7 +1905,8 @@
                         <div class="bet-slip-wager">
                             <div class="wager-input-wrapper">
                                 <input type="number" class="wager-input" value="${bet.wager}" 
-                                    min="10" max="500" onchange="updateWager(${index}, this.value)">
+                                    min="${currentPoolData?.minBet || 10}" max="${currentPoolData?.maxBet || 500}" 
+                                    onchange="updateWager(${index}, this.value)">
                             </div>
                             <div class="to-win">
                                 <div class="to-win-label">To Win</div>
@@ -1722,7 +1931,7 @@
             document.getElementById('totalPayout').textContent = '$' + Math.round(totalPayout);
 
             footer.style.display = 'block';
-            
+
             // Disable button if over bankroll
             const btn = document.getElementById('placeBetsBtn');
             if (totalWager > userBankroll) {
@@ -1736,164 +1945,25 @@
 
         function removeBet(index) {
             const bet = betSlip[index];
-            document.querySelector(`[data-game="${bet.game}"][data-type="${bet.type}"][data-pick="${bet.pick}"]`).classList.remove('selected');
+            const el = document.querySelector(`[data-game="${bet.game}"][data-type="${bet.type}"][data-pick="${bet.pick}"]`);
+            if (el) el.classList.remove('selected');
             betSlip.splice(index, 1);
             updateBetSlip();
         }
 
         function updateWager(index, value) {
-            let wager = parseInt(value) || 10;
-            wager = Math.max(10, Math.min(500, wager));
+            const minBet = currentPoolData?.minBet || 10;
+            const maxBet = currentPoolData?.maxBet || 500;
+            let wager = parseInt(value) || minBet;
+            wager = Math.max(minBet, Math.min(maxBet, wager));
             betSlip[index].wager = wager;
             updateBetSlip();
         }
 
-        function calculatePayout(wager, oddsStr) {
-            const odds = parseInt(oddsStr);
-            if (odds > 0) {
-                return Math.round(wager * (odds / 100));
-            } else {
-                return Math.round(wager * (100 / Math.abs(odds)));
-            }
-        }
-
-        function placeBets() {
-            if (betSlip.length === 0) return;
-            
-            // Use Firebase if available, otherwise show demo message
-            if (typeof placeBetsToFirebase === 'function' && auth && auth.currentUser) {
-                placeBetsToFirebase();
-            } else {
-                alert(`Bets placed successfully!\n\n${betSlip.length} bet(s) submitted.\n\nYour bets will be hidden from other players until kickoff of the first game.`);
-                
-                // Clear selections
-                document.querySelectorAll('.bet-option.selected').forEach(el => el.classList.remove('selected'));
-                betSlip = [];
-                updateBetSlip();
-            }
-        }
-
-        // Countdown timer
-        function updateTimer() {
-            const lockDate = new Date('2025-01-11T16:30:00-05:00');
-            const now = new Date();
-            const diff = lockDate - now;
-
-            if (diff <= 0) {
-                document.getElementById('lockTimer').textContent = 'LOCKED';
-                return;
-            }
-
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-
-            document.getElementById('lockTimer').textContent = `${days}d ${hours}h ${minutes}m`;
-        }
-
-        setInterval(updateTimer, 60000);
-        updateTimer();
-    </script>
-
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="js/firebase-config.js"></script>
-
-    <script>
-        // Betting Pool Firebase Integration
-        let currentPoolId = null;
-        let currentPoolData = null;
-        let userBankrollData = null;
-        
-        // Get pool ID from URL
-        const urlParams = new URLSearchParams(window.location.search);
-        currentPoolId = urlParams.get('id');
-
-        // Auth state listener
-        auth.onAuthStateChanged(async (user) => {
-            const authButtons = document.getElementById('authButtons');
-            const userLoggedIn = document.getElementById('userLoggedIn');
-            const userAvatar = document.getElementById('userAvatar');
-            const userBankrollEl = document.getElementById('userBankroll');
-            
-            if (user) {
-                if (authButtons) authButtons.style.display = 'none';
-                if (userLoggedIn) userLoggedIn.style.display = 'flex';
-                
-                const displayName = user.displayName || user.email.split('@')[0];
-                if (userAvatar) userAvatar.textContent = getUserInitials(displayName);
-                
-                // Load pool and bankroll data
-                if (currentPoolId) {
-                    await loadPoolData(currentPoolId);
-                    await loadUserBankroll(currentPoolId, user.uid);
-                }
-            } else {
-                if (authButtons) authButtons.style.display = 'flex';
-                if (userLoggedIn) userLoggedIn.style.display = 'none';
-            }
-        });
-
-        // Load pool data from Firestore
-        async function loadPoolData(poolId) {
-            try {
-                const poolDoc = await db.collection('pools').doc(poolId).get();
-                if (poolDoc.exists) {
-                    currentPoolData = poolDoc.data();
-                    updatePoolHeader(currentPoolData);
-                }
-            } catch (error) {
-                console.error('Error loading pool:', error);
-            }
-        }
-
-        function updatePoolHeader(pool) {
-            const poolNameEl = document.querySelector('.pool-name');
-            if (poolNameEl && pool.name) {
-                poolNameEl.textContent = pool.name;
-            }
-        }
-
-        // Load user's bankroll
-        async function loadUserBankroll(poolId, oderId) {
-            try {
-                const bankrollDoc = await db.collection('pools').doc(poolId)
-                    .collection('bankrolls').doc(oderId).get();
-                
-                if (bankrollDoc.exists) {
-                    userBankrollData = bankrollDoc.data();
-                    document.getElementById('userBankroll').textContent = 
-                        '$' + userBankrollData.currentBankroll.toLocaleString();
-                    // Update the global variable for bet slip validation
-                    userBankroll = userBankrollData.currentBankroll;
-                } else if (currentPoolData) {
-                    // Initialize bankroll for new user
-                    const startingBankroll = currentPoolData.startingBankroll || 1000;
-                    await db.collection('pools').doc(poolId)
-                        .collection('bankrolls').doc(oderId).set({
-                            oderId: oderId,
-                            userName: auth.currentUser.displayName || auth.currentUser.email,
-                            currentBankroll: startingBankroll,
-                            startingBankroll: startingBankroll,
-                            totalWagered: 0,
-                            totalWon: 0,
-                            totalLost: 0,
-                            record: { wins: 0, losses: 0, pushes: 0 },
-                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                    
-                    document.getElementById('userBankroll').textContent = '$' + startingBankroll.toLocaleString();
-                    userBankroll = startingBankroll;
-                }
-            } catch (error) {
-                console.error('Error loading bankroll:', error);
-            }
-        }
-
-        // Override placeBets to save to Firebase
-        async function placeBetsToFirebase() {
+        // =====================
+        // Place Bets to Firebase
+        // =====================
+        async function placeBets() {
             const user = auth.currentUser;
             if (!user) {
                 alert('Please log in to place bets');
@@ -1915,9 +1985,9 @@
                 betSlip.forEach(bet => {
                     const betRef = db.collection('pools').doc(currentPoolId)
                         .collection('bets').doc();
-                    
+
                     batch.set(betRef, {
-                        oderId: user.uid,
+                        userId: user.uid,
                         userName: user.displayName || user.email,
                         gameId: bet.game,
                         type: bet.type,
@@ -1930,35 +2000,79 @@
                         payout: 0,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
-                    
+
                     totalWager += bet.wager;
                 });
 
                 // Update bankroll
                 const bankrollRef = db.collection('pools').doc(currentPoolId)
                     .collection('bankrolls').doc(user.uid);
-                
+
                 batch.update(bankrollRef, {
                     currentBankroll: firebase.firestore.FieldValue.increment(-totalWager),
                     totalWagered: firebase.firestore.FieldValue.increment(totalWager)
                 });
 
                 await batch.commit();
-                
+
                 // Update local bankroll
                 userBankroll -= totalWager;
                 document.getElementById('userBankroll').textContent = '$' + userBankroll.toLocaleString();
+                document.getElementById('statYourBankroll').textContent = '$' + userBankroll.toLocaleString();
 
                 alert(`Bets placed successfully!\n\n${betSlip.length} bet(s) submitted.\n\nYour bets will be hidden from other players until kickoff.`);
-                
+
                 // Clear selections
                 document.querySelectorAll('.bet-option.selected').forEach(el => el.classList.remove('selected'));
                 betSlip = [];
                 updateBetSlip();
+
+                // Reload my bets
+                await loadMyBets(currentPoolId, user.uid);
+                await loadLeaderboard(currentPoolId);
+
             } catch (error) {
                 console.error('Error placing bets:', error);
                 alert('Error placing bets: ' + error.message);
             }
+        }
+
+        // =====================
+        // Timer Function
+        // =====================
+        function updateTimer(lockDate) {
+            function tick() {
+                const now = new Date();
+                const diff = lockDate - now;
+
+                if (diff <= 0) {
+                    document.getElementById('lockTimer').textContent = 'LOCKED';
+                    return;
+                }
+
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+                document.getElementById('lockTimer').textContent = `${days}d ${hours}h ${minutes}m`;
+            }
+
+            tick();
+            setInterval(tick, 60000);
+        }
+
+        // =====================
+        // Error Display
+        // =====================
+        function showError(message) {
+            document.getElementById('poolName').textContent = 'Error';
+            document.getElementById('poolCommissioner').textContent = message;
+            document.getElementById('gamesContainer').innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">⚠️</div>
+                    <p>${message}</p>
+                </div>
+            `;
         }
     </script>
 </body>
