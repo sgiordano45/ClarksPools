@@ -1572,8 +1572,8 @@
                                 <select class="form-control" id="poolType" onchange="togglePoolTypeOptions()">
                                     <option value="playoff-fantasy">NFL Playoff Fantasy (14 Players)</option>
                                     <option value="betting-pool">Playoff Betting Pool (Spreads/ML)</option>
+                                    <option value="boxes-pool">Super Bowl Boxes (10x10 Grid)</option>
                                     <option value="confidence" disabled>Confidence Pool (Coming Soon)</option>
-                                    <option value="squares" disabled>Super Bowl Squares (Coming Soon)</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -1711,6 +1711,55 @@
                                 <div class="info-box-content">
                                     <strong>How Betting Pools Work</strong>
                                     <p>Each player starts with fake money and places bets on playoff games. Bets are placed against the spread or moneyline. The player with the highest bankroll at the end of the playoffs wins the pool prize.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Boxes Pool Options -->
+                        <div id="boxesOptions" style="display: none;">
+                            <div class="options-divider">
+                                <span>Super Bowl Boxes Settings</span>
+                            </div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Cost Per Box ($)</label>
+                                    <input type="number" class="form-control" placeholder="10" id="costPerBox" value="10">
+                                    <p class="form-help">Price for each square on the 10x10 grid</p>
+                                </div>
+                                <div class="form-group">
+                                    <label>Max Boxes Per Person</label>
+                                    <select class="form-control" id="maxBoxesPerPerson">
+                                        <option value="5">5 Boxes</option>
+                                        <option value="10" selected>10 Boxes</option>
+                                        <option value="20">20 Boxes</option>
+                                        <option value="0">Unlimited</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Payout Structure</label>
+                                    <select class="form-control" id="payoutStructure">
+                                        <option value="standard" selected>Standard (20% per quarter, 40% final)</option>
+                                        <option value="equal">Equal (25% each quarter)</option>
+                                        <option value="escalating">Escalating (10%, 15%, 25%, 50%)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Game</label>
+                                    <select class="form-control" id="boxesGame">
+                                        <option value="super-bowl" selected>Super Bowl</option>
+                                        <option value="conference-championship">Conference Championship</option>
+                                        <option value="custom">Custom Game</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="info-box">
+                                <div class="info-box-icon">🎲</div>
+                                <div class="info-box-content">
+                                    <strong>How Super Bowl Boxes Work</strong>
+                                    <p>Players claim squares on a 10x10 grid. Once the pool is locked, random numbers (0-9) are assigned to rows and columns. Winners are determined by matching the last digit of each team's score at the end of each quarter.</p>
                                 </div>
                             </div>
                         </div>
@@ -3110,6 +3159,43 @@
             createBtn.textContent = 'Creating...';
             
             try {
+                // Handle boxes-pool separately - uses boxesPools collection
+                if (poolType === 'boxes-pool') {
+                    const boxesPoolData = {
+                        name: name,
+                        costPerBox: parseFloat(document.getElementById('costPerBox')?.value) || 10,
+                        description: document.getElementById('poolDescription').value || '',
+                        maxBoxesPerPerson: parseInt(document.getElementById('maxBoxesPerPerson')?.value) || 0,
+                        payoutStructure: document.getElementById('payoutStructure')?.value || 'standard',
+                        game: document.getElementById('boxesGame')?.value || 'super-bowl',
+                        paymentMethod: document.getElementById('paymentMethod').value || '',
+                        games: [],
+                        entries: {},
+                        locked: false,
+                        createdBy: currentUser.uid,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+                    
+                    const docRef = await db.collection('boxesPools').add(boxesPoolData);
+                    
+                    alert(`Boxes Pool "${name}" created successfully! Go to Super Bowl Boxes page to manage it.`);
+                    
+                    // Reset form
+                    document.getElementById('poolName').value = '';
+                    document.getElementById('poolDescription').value = '';
+                    
+                    // Redirect to boxes pool page
+                    if (confirm('Would you like to go to the Boxes Pool page now?')) {
+                        window.location.href = 'boxes-pool.html';
+                    } else {
+                        showSection('dashboard');
+                    }
+                    
+                    return;
+                }
+                
+                // Regular pools (fantasy and betting) - uses pools collection
                 let poolData = {
                     name: name,
                     type: poolType,
@@ -3167,13 +3253,20 @@
             const poolType = document.getElementById('poolType').value;
             const fantasyOptions = document.getElementById('fantasyOptions');
             const bettingOptions = document.getElementById('bettingOptions');
+            const boxesOptions = document.getElementById('boxesOptions');
             
-            if (poolType === 'betting-pool') {
-                if (fantasyOptions) fantasyOptions.style.display = 'none';
-                if (bettingOptions) bettingOptions.style.display = 'block';
-            } else {
+            // Hide all options first
+            if (fantasyOptions) fantasyOptions.style.display = 'none';
+            if (bettingOptions) bettingOptions.style.display = 'none';
+            if (boxesOptions) boxesOptions.style.display = 'none';
+            
+            // Show relevant options
+            if (poolType === 'playoff-fantasy') {
                 if (fantasyOptions) fantasyOptions.style.display = 'block';
-                if (bettingOptions) bettingOptions.style.display = 'none';
+            } else if (poolType === 'betting-pool') {
+                if (bettingOptions) bettingOptions.style.display = 'block';
+            } else if (poolType === 'boxes-pool') {
+                if (boxesOptions) boxesOptions.style.display = 'block';
             }
         }
 
