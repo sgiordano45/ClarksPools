@@ -1133,15 +1133,15 @@
     <div class="stats-bar">
         <div class="stats-container">
             <div class="stat-item">
-                <div class="stat-number" id="statPools">12</div>
+                <div class="stat-number" id="statPools">--</div>
                 <div class="stat-label">Active Pools</div>
             </div>
             <div class="stat-item">
-                <div class="stat-number" id="statEntries">248</div>
+                <div class="stat-number" id="statEntries">--</div>
                 <div class="stat-label">Total Entries</div>
             </div>
             <div class="stat-item">
-                <div class="stat-number" id="statPrizes">$6.2K</div>
+                <div class="stat-number" id="statPrizes">--</div>
                 <div class="stat-label">Prize Money</div>
             </div>
             <div class="stat-item">
@@ -1157,110 +1157,10 @@
             <h2>Active Pools</h2>
             <p>Join an open pool or check the standings of pools in progress</p>
         </div>
-        <div class="pools-grid">
-            <!-- Pool Card 1 -->
-            <div class="pool-card">
-                <div class="pool-card-header">
-                    <span class="pool-status upcoming">
-                        <span class="status-dot"></span>
-                        Open
-                    </span>
-                    <div class="pool-type">NFL Playoff Fantasy</div>
-                    <h3 class="pool-name">Clarkside Pool 2025</h3>
-                </div>
-                <div class="pool-card-body">
-                    <div class="pool-details">
-                        <div class="pool-detail">
-                            <div class="pool-detail-label">Buy-In</div>
-                            <div class="pool-detail-value">$25</div>
-                        </div>
-                        <div class="pool-detail">
-                            <div class="pool-detail-label">Entries</div>
-                            <div class="pool-detail-value">18/∞</div>
-                        </div>
-                        <div class="pool-detail">
-                            <div class="pool-detail-label">Deadline</div>
-                            <div class="pool-detail-value">Jan 11</div>
-                        </div>
-                        <div class="pool-detail">
-                            <div class="pool-detail-label">Format</div>
-                            <div class="pool-detail-value">14-Player</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="pool-card-footer">
-                    <button class="btn btn-primary" onclick="openModal('login')">Join Pool</button>
-                </div>
-            </div>
-
-            <!-- Pool Card 2 -->
-            <div class="pool-card">
-                <div class="pool-card-header">
-                    <span class="pool-status active">
-                        <span class="status-dot"></span>
-                        Live
-                    </span>
-                    <div class="pool-type">NFL Playoff Fantasy</div>
-                    <h3 class="pool-name">Office Champions</h3>
-                </div>
-                <div class="pool-card-body">
-                    <div class="pool-details">
-                        <div class="pool-detail">
-                            <div class="pool-detail-label">Buy-In</div>
-                            <div class="pool-detail-value">$50</div>
-                        </div>
-                        <div class="pool-detail">
-                            <div class="pool-detail-label">Entries</div>
-                            <div class="pool-detail-value">24</div>
-                        </div>
-                        <div class="pool-detail">
-                            <div class="pool-detail-label">Week</div>
-                            <div class="pool-detail-value">Wild Card</div>
-                        </div>
-                        <div class="pool-detail">
-                            <div class="pool-detail-label">Prize Pool</div>
-                            <div class="pool-detail-value">$1,200</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="pool-card-footer">
-                    <button class="btn btn-outline" onclick="openModal('login')">View Standings</button>
-                </div>
-            </div>
-
-            <!-- Pool Card 3 -->
-            <div class="pool-card">
-                <div class="pool-card-header">
-                    <span class="pool-status upcoming">
-                        <span class="status-dot"></span>
-                        Open
-                    </span>
-                    <div class="pool-type">NFL Playoff Fantasy</div>
-                    <h3 class="pool-name">High Rollers League</h3>
-                </div>
-                <div class="pool-card-body">
-                    <div class="pool-details">
-                        <div class="pool-detail">
-                            <div class="pool-detail-label">Buy-In</div>
-                            <div class="pool-detail-value">$100</div>
-                        </div>
-                        <div class="pool-detail">
-                            <div class="pool-detail-label">Entries</div>
-                            <div class="pool-detail-value">8/20</div>
-                        </div>
-                        <div class="pool-detail">
-                            <div class="pool-detail-label">Deadline</div>
-                            <div class="pool-detail-value">Jan 11</div>
-                        </div>
-                        <div class="pool-detail">
-                            <div class="pool-detail-label">Max Entries</div>
-                            <div class="pool-detail-value">1 per user</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="pool-card-footer">
-                    <button class="btn btn-primary" onclick="openModal('login')">Join Pool</button>
-                </div>
+        <div class="pools-grid" id="poolsGrid">
+            <!-- Pools loaded dynamically from Firebase -->
+            <div class="loading-pools" style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">
+                Loading pools...
             </div>
         </div>
     </section>
@@ -1623,7 +1523,7 @@
             });
         });
 
-        // Animate stats on scroll
+        // Animate stats on scroll (removed hardcoded values - now loaded from Firebase)
         const observerOptions = {
             threshold: 0.5
         };
@@ -1631,7 +1531,7 @@
         const statsObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    animateStats();
+                    // Stats are now loaded from Firebase via loadPools()
                     statsObserver.unobserve(entry.target);
                 }
             });
@@ -1640,41 +1540,6 @@
         const statsBar = document.querySelector('.stats-bar');
         if (statsBar) {
             statsObserver.observe(statsBar);
-        }
-
-        function animateStats() {
-            const stats = [
-                { el: 'statPools', target: 12, suffix: '' },
-                { el: 'statEntries', target: 248, suffix: '' },
-                { el: 'statPrizes', target: 6.2, suffix: 'K', prefix: '$' },
-                { el: 'statTeams', target: 14, suffix: '' }
-            ];
-
-            stats.forEach(stat => {
-                const element = document.getElementById(stat.el);
-                const duration = 1500;
-                const start = 0;
-                const startTime = performance.now();
-
-                function update(currentTime) {
-                    const elapsed = currentTime - startTime;
-                    const progress = Math.min(elapsed / duration, 1);
-                    const easeOut = 1 - Math.pow(1 - progress, 3);
-                    const current = start + (stat.target - start) * easeOut;
-                    
-                    if (stat.suffix === 'K') {
-                        element.textContent = (stat.prefix || '') + current.toFixed(1) + stat.suffix;
-                    } else {
-                        element.textContent = (stat.prefix || '') + Math.floor(current) + stat.suffix;
-                    }
-
-                    if (progress < 1) {
-                        requestAnimationFrame(update);
-                    }
-                }
-
-                requestAnimationFrame(update);
-            });
         }
 
         // Header scroll effect
@@ -1691,6 +1556,125 @@
             
             lastScroll = currentScroll;
         });
+
+        // Load pools from Firebase
+        async function loadPools() {
+            try {
+                const poolsSnapshot = await db.collection('pools')
+                    .orderBy('createdAt', 'desc')
+                    .get();
+                
+                // Filter to open and live pools
+                const pools = poolsSnapshot.docs
+                    .map(doc => ({ id: doc.id, ...doc.data() }))
+                    .filter(pool => pool.status === 'open' || pool.status === 'live');
+                
+                renderPools(pools);
+                updateStats(pools);
+            } catch (error) {
+                console.error('Error loading pools:', error);
+                document.getElementById('poolsGrid').innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">
+                        <p>Unable to load pools. Please try again later.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderPools(pools) {
+            const grid = document.getElementById('poolsGrid');
+            
+            if (pools.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">
+                        <p style="font-size: 1.25rem; margin-bottom: 1rem;">No active pools yet</p>
+                        <p>Check back soon or create one from the Admin Panel!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = pools.map(pool => {
+                const statusClass = pool.status === 'live' ? 'active' : 'upcoming';
+                const statusText = pool.status === 'live' ? 'Live' : 'Open';
+                const typeLabel = pool.type === 'betting-pool' ? '💰 Betting Pool' : 'NFL Playoff Fantasy';
+                const prizePool = (pool.buyIn || 0) * (pool.entryCount || 0);
+                const maxEntries = pool.maxEntries === 0 ? '∞' : pool.maxEntries;
+                const viewPage = pool.type === 'betting-pool' ? 'betting-pool.html' : 'pool.html';
+                const buttonText = pool.status === 'live' ? 'View Standings' : 'Join Pool';
+                const buttonClass = pool.status === 'live' ? 'btn-outline' : 'btn-primary';
+
+                return `
+                    <div class="pool-card">
+                        <div class="pool-card-header">
+                            <span class="pool-status ${statusClass}">
+                                <span class="status-dot"></span>
+                                ${statusText}
+                            </span>
+                            <div class="pool-type">${typeLabel}</div>
+                            <h3 class="pool-name">${pool.name}</h3>
+                        </div>
+                        <div class="pool-card-body">
+                            <div class="pool-details">
+                                <div class="pool-detail">
+                                    <div class="pool-detail-label">Buy-In</div>
+                                    <div class="pool-detail-value">$${pool.buyIn || 0}</div>
+                                </div>
+                                <div class="pool-detail">
+                                    <div class="pool-detail-label">Entries</div>
+                                    <div class="pool-detail-value">${pool.entryCount || 0}/${maxEntries}</div>
+                                </div>
+                                <div class="pool-detail">
+                                    <div class="pool-detail-label">Prize Pool</div>
+                                    <div class="pool-detail-value">$${prizePool.toLocaleString()}</div>
+                                </div>
+                                <div class="pool-detail">
+                                    <div class="pool-detail-label">Commissioner</div>
+                                    <div class="pool-detail-value">${pool.commissionerName?.split(' ')[0] || 'Admin'}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pool-card-footer">
+                            <button class="btn ${buttonClass}" onclick="goToPool('${pool.id}', '${viewPage}')">${buttonText}</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateStats(pools) {
+            const totalPools = pools.length;
+            const totalEntries = pools.reduce((sum, p) => sum + (p.entryCount || 0), 0);
+            const totalPrize = pools.reduce((sum, p) => sum + ((p.buyIn || 0) * (p.entryCount || 0)), 0);
+
+            // Update the stats display
+            const statPools = document.getElementById('statPools');
+            const statEntries = document.getElementById('statEntries');
+            const statPrizes = document.getElementById('statPrizes');
+
+            if (statPools) statPools.textContent = totalPools;
+            if (statEntries) statEntries.textContent = totalEntries;
+            if (statPrizes) statPrizes.textContent = '$' + (totalPrize / 1000).toFixed(1) + 'K';
+        }
+
+        function goToPool(poolId, page) {
+            const user = auth.currentUser;
+            if (!user) {
+                openModal('login');
+                return;
+            }
+            window.location.href = `${page}?id=${poolId}`;
+        }
+
+        // Load pools when Firebase is ready
+        if (typeof db !== 'undefined') {
+            loadPools();
+        } else {
+            // Wait for Firebase to initialize
+            window.addEventListener('load', () => {
+                setTimeout(loadPools, 500);
+            });
+        }
     </script>
 </body>
 </html>
