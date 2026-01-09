@@ -1410,14 +1410,19 @@ header::before {
 <!-- Toast Container -->
 <div class="toast-container" id="toastContainer"></div>
 
-<!-- Firebase -->
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+<!-- Firebase Config -->
 <script src="js/firebase-config.js"></script>
 
 <script>
   // State
   let currentUser = null;
   let userProfile = null;
-  let isAdmin = false;
+  let isUserAdmin = false;
   let currentPool = null;
   let selectedGameIndex = 0;
   let pendingBoxClaim = null;
@@ -1456,14 +1461,14 @@ header::before {
 
   function checkAdminStatus() {
     if (!userProfile) {
-      isAdmin = false;
+      isUserAdmin = false;
       return;
     }
     
     const userRole = (userProfile.role || '').toLowerCase();
-    isAdmin = userProfile.isAdmin === true || userRole === 'admin';
+    isUserAdmin = userProfile.isAdmin === true || userRole === 'admin';
     
-    if (isAdmin) {
+    if (isUserAdmin) {
       document.getElementById('adminBadge').style.display = 'inline-block';
       document.getElementById('createPoolBtn').style.display = 'inline-flex';
     }
@@ -1515,7 +1520,7 @@ header::before {
       document.getElementById('gridContainer').style.display = 'block';
       document.getElementById('poolStats').style.display = 'grid';
       
-      if (isAdmin) {
+      if (isUserAdmin) {
         document.getElementById('adminPanel').classList.add('visible');
         populateAdminFields();
       }
@@ -1832,7 +1837,7 @@ header::before {
   }
 
   window.savePoolSettings = async function() {
-    if (!currentPool || !isAdmin) return;
+    if (!currentPool || !isUserAdmin) return;
     
     try {
       await db.collection('boxesPools').doc(currentPool.id).update({
@@ -1856,7 +1861,7 @@ header::before {
   };
 
   window.togglePoolLock = async function() {
-    if (!currentPool || !isAdmin) return;
+    if (!currentPool || !isUserAdmin) return;
     
     const newLockState = !currentPool.locked;
     
@@ -1974,7 +1979,7 @@ header::before {
   };
 
   window.saveGames = async function() {
-    if (!currentPool || !isAdmin) return;
+    if (!currentPool || !isUserAdmin) return;
     
     const gameItems = document.querySelectorAll('.game-item');
     const games = [];
@@ -2137,7 +2142,7 @@ header::before {
   };
 
   window.addManualEntry = async function() {
-    if (!currentPool || !isAdmin) return;
+    if (!currentPool || !isUserAdmin) return;
     
     let name = '';
     let userId = null;
@@ -2312,7 +2317,7 @@ header::before {
   };
 
   window.confirmDeletePool = async function() {
-    if (!currentPool || !isAdmin) return;
+    if (!currentPool || !isUserAdmin) return;
     
     if (!confirm('Are you sure you want to delete this pool? This cannot be undone.')) return;
     
