@@ -1176,298 +1176,21 @@
                     <div></div>
                 </div>
                 
-                <!-- Leaderboard Rows -->
-                <div class="leaderboard-row" onclick="toggleDetails(this)">
-                    <div class="rank rank-1">1</div>
-                    <div class="entry-info">
-                        <div class="entry-avatar">MJ</div>
-                        <div>
-                            <div class="entry-name">MJ's Picks</div>
-                            <div class="entry-user">@mjohnson</div>
-                        </div>
-                    </div>
-                    <div class="week-points active-week">87.5</div>
-                    <div class="week-points">—</div>
-                    <div class="week-points">—</div>
-                    <div class="week-points">—</div>
-                    <div class="total-points">87.5</div>
-                    <button class="expand-btn">▼</button>
-                </div>
-                <div class="entry-details">
-                    <div class="roster-grid">
-                        <div class="roster-player">
-                            <span class="player-position">QB</span>
-                            <div class="player-team-logo">BUF</div>
-                            <div class="player-info">
-                                <div class="player-name">Josh Allen</div>
-                                <div class="player-team-name">Bills</div>
-                            </div>
-                            <div class="player-points">32.4</div>
-                        </div>
-                        <div class="roster-player">
-                            <span class="player-position">QB</span>
-                            <div class="player-team-logo">PHI</div>
-                            <div class="player-info">
-                                <div class="player-name">Jalen Hurts</div>
-                                <div class="player-team-name">Eagles</div>
-                            </div>
-                            <div class="player-points">24.1</div>
-                        </div>
-                        <div class="roster-player">
-                            <span class="player-position">RB</span>
-                            <div class="player-team-logo">DET</div>
-                            <div class="player-info">
-                                <div class="player-name">Jahmyr Gibbs</div>
-                                <div class="player-team-name">Lions</div>
-                            </div>
-                            <div class="player-points">18.2</div>
-                        </div>
-                        <div class="roster-player eliminated">
-                            <span class="player-position">RB</span>
-                            <div class="player-team-logo">MIA</div>
-                            <div class="player-info">
-                                <div class="player-name">De'Von Achane</div>
-                                <div class="player-team-name">Dolphins</div>
-                            </div>
-                            <div class="player-points">8.3</div>
-                        </div>
-                        <!-- More players would be listed here -->
+                <!-- Dynamic Leaderboard Rows -->
+                <div id="leaderboardBody">
+                    <div class="leaderboard-loading" style="text-align: center; padding: 3rem; color: var(--text-secondary);">
+                        Loading leaderboard...
                     </div>
                 </div>
-
-                <div class="leaderboard-row my-entry" onclick="toggleDetails(this)">
-                    <div class="rank rank-2">2</div>
-                    <div class="entry-info">
-                        <div class="entry-avatar">SD</div>
-                        <div>
-                            <div class="entry-name">Stephen's Squad</div>
-                            <div class="entry-user">@stephen</div>
-                        </div>
-                    </div>
-                    <div class="week-points active-week">82.1</div>
-                    <div class="week-points">—</div>
-                    <div class="week-points">—</div>
-                    <div class="week-points">—</div>
-                    <div class="total-points">82.1</div>
-                    <button class="expand-btn">▼</button>
-                </div>
-                <div class="entry-details">
-                    <div class="roster-grid">
-                        <div class="roster-player">
-                            <span class="player-position">QB</span>
-                            <div class="player-team-logo">KC</div>
-                            <div class="player-info">
-                                <div class="player-name">Patrick Mahomes</div>
-                                <div class="player-team-name">Chiefs</div>
-                            </div>
-                            <div class="player-points">28.6</div>
-                        </div>
-                        <div class="roster-player">
-                            <span class="player-position">QB</span>
-                            <div class="player-team-logo">BAL</div>
-                            <div class="player-info">
-                                <div class="player-name">Lamar Jackson</div>
-                                <div class="player-team-name">Ravens</div>
-                            </div>
-                            <div class="player-points">31.2</div>
-                        </div>
-                        <!-- More players -->
-                    </div>
-                </div>
-
-                <div class="leaderboard-row" onclick="toggleDetails(this)">
-                    <div class="rank rank-3">3</div>
-                    <div class="entry-info">
-                        <div class="entry-avatar">TC</div>
-                        <div>
-                            <div class="entry-name">Tom's Team</div>
-                            <div class="entry-user">@tomclark</div>
-                        </div>
-                    </div>
-                    <div class="week-points active-week">79.8</div>
-                    <div class="week-points">—</div>
-                    <div class="week-points">—</div>
-                    <div class="week-points">—</div>
-                    <div class="total-points">79.8</div>
-                    <button class="expand-btn">▼</button>
-                </div>
-                <div class="entry-details">
-                    <div class="roster-grid">
-                        <!-- Player roster here -->
-                    </div>
-                </div>
-
-                <div class="leaderboard-row" onclick="toggleDetails(this)">
-                    <div class="rank">4</div>
-                    <div class="entry-info">
-                        <div class="entry-avatar">JW</div>
-                        <div>
-                            <div class="entry-name">Wildcard Winners</div>
-                            <div class="entry-user">@jwilson</div>
-                        </div>
-                    </div>
-                    <div class="week-points active-week">76.4</div>
-                    <div class="week-points">—</div>
-                    <div class="week-points">—</div>
-                    <div class="week-points">—</div>
-                    <div class="total-points">76.4</div>
-                    <button class="expand-btn">▼</button>
-                </div>
-                <div class="entry-details"></div>
-
-                <div class="leaderboard-row" onclick="toggleDetails(this)">
-                    <div class="rank">5</div>
-                    <div class="entry-info">
-                        <div class="entry-avatar">KL</div>
-                        <div>
-                            <div class="entry-name">Kelly's Killers</div>
-                            <div class="entry-user">@kelly</div>
-                        </div>
-                    </div>
-                    <div class="week-points active-week">71.2</div>
-                    <div class="week-points">—</div>
-                    <div class="week-points">—</div>
-                    <div class="week-points">—</div>
-                    <div class="total-points">71.2</div>
-                    <button class="expand-btn">▼</button>
-                </div>
-                <div class="entry-details"></div>
             </div>
         </div>
 
         <!-- My Entry Tab -->
         <div class="tab-content" id="my-entry">
             <div class="leaderboard-container">
-                <div style="padding: 3rem; text-align: center;">
-                    <h3 style="font-family: 'Oswald', sans-serif; font-size: 1.5rem; margin-bottom: 1rem;">Your Entry: Stephen's Squad</h3>
-                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">Tiebreaker: 48 points</p>
-                    <div class="roster-grid" style="max-width: 900px; margin: 0 auto;">
-                        <div class="roster-player">
-                            <span class="player-position">QB</span>
-                            <div class="player-team-logo">KC</div>
-                            <div class="player-info">
-                                <div class="player-name">Patrick Mahomes</div>
-                                <div class="player-team-name">Chiefs</div>
-                            </div>
-                            <div class="player-points">28.6</div>
-                        </div>
-                        <div class="roster-player">
-                            <span class="player-position">QB</span>
-                            <div class="player-team-logo">BAL</div>
-                            <div class="player-info">
-                                <div class="player-name">Lamar Jackson</div>
-                                <div class="player-team-name">Ravens</div>
-                            </div>
-                            <div class="player-points">31.2</div>
-                        </div>
-                        <div class="roster-player">
-                            <span class="player-position">RB</span>
-                            <div class="player-team-logo">DET</div>
-                            <div class="player-info">
-                                <div class="player-name">Jahmyr Gibbs</div>
-                                <div class="player-team-name">Lions</div>
-                            </div>
-                            <div class="player-points">18.2</div>
-                        </div>
-                        <div class="roster-player">
-                            <span class="player-position">RB</span>
-                            <div class="player-team-logo">PHI</div>
-                            <div class="player-info">
-                                <div class="player-name">Saquon Barkley</div>
-                                <div class="player-team-name">Eagles</div>
-                            </div>
-                            <div class="player-points">22.4</div>
-                        </div>
-                        <div class="roster-player">
-                            <span class="player-position">RB</span>
-                            <div class="player-team-logo">GB</div>
-                            <div class="player-info">
-                                <div class="player-name">Josh Jacobs</div>
-                                <div class="player-team-name">Packers</div>
-                            </div>
-                            <div class="player-points">14.8</div>
-                        </div>
-                        <div class="roster-player eliminated">
-                            <span class="player-position">RB</span>
-                            <div class="player-team-logo">DEN</div>
-                            <div class="player-info">
-                                <div class="player-name">Javonte Williams</div>
-                                <div class="player-team-name">Broncos</div>
-                            </div>
-                            <div class="player-points">6.1</div>
-                        </div>
-                        <div class="roster-player">
-                            <span class="player-position">WR</span>
-                            <div class="player-team-logo">MIN</div>
-                            <div class="player-info">
-                                <div class="player-name">Justin Jefferson</div>
-                                <div class="player-team-name">Vikings</div>
-                            </div>
-                            <div class="player-points">19.3</div>
-                        </div>
-                        <div class="roster-player">
-                            <span class="player-position">WR</span>
-                            <div class="player-team-logo">BUF</div>
-                            <div class="player-info">
-                                <div class="player-name">Amari Cooper</div>
-                                <div class="player-team-name">Bills</div>
-                            </div>
-                            <div class="player-points">11.7</div>
-                        </div>
-                        <div class="roster-player">
-                            <span class="player-position">WR</span>
-                            <div class="player-team-logo">HOU</div>
-                            <div class="player-info">
-                                <div class="player-name">Nico Collins</div>
-                                <div class="player-team-name">Texans</div>
-                            </div>
-                            <div class="player-points">15.2</div>
-                        </div>
-                        <div class="roster-player">
-                            <span class="player-position">WR</span>
-                            <div class="player-team-logo">LAR</div>
-                            <div class="player-info">
-                                <div class="player-name">Puka Nacua</div>
-                                <div class="player-team-name">Rams</div>
-                            </div>
-                            <div class="player-points">17.9</div>
-                        </div>
-                        <div class="roster-player">
-                            <span class="player-position">TE</span>
-                            <div class="player-team-logo">PIT</div>
-                            <div class="player-info">
-                                <div class="player-name">Pat Freiermuth</div>
-                                <div class="player-team-name">Steelers</div>
-                            </div>
-                            <div class="player-points">8.4</div>
-                        </div>
-                        <div class="roster-player">
-                            <span class="player-position">TE</span>
-                            <div class="player-team-logo">TB</div>
-                            <div class="player-info">
-                                <div class="player-name">Cade Otton</div>
-                                <div class="player-team-name">Buccaneers</div>
-                            </div>
-                            <div class="player-points">9.2</div>
-                        </div>
-                        <div class="roster-player">
-                            <span class="player-position">K</span>
-                            <div class="player-team-logo">WAS</div>
-                            <div class="player-info">
-                                <div class="player-name">Austin Seibert</div>
-                                <div class="player-team-name">Commanders</div>
-                            </div>
-                            <div class="player-points">7.0</div>
-                        </div>
-                        <div class="roster-player">
-                            <span class="player-position">K</span>
-                            <div class="player-team-logo">LAC</div>
-                            <div class="player-info">
-                                <div class="player-name">Cameron Dicker</div>
-                                <div class="player-team-name">Chargers</div>
-                            </div>
-                            <div class="player-points">5.0</div>
-                        </div>
+                <div id="myEntryContainer" style="padding: 3rem; text-align: center;">
+                    <div class="leaderboard-loading" style="color: var(--text-secondary);">
+                        Loading your entry...
                     </div>
                 </div>
             </div>
@@ -2067,7 +1790,7 @@
             const userMenu = document.getElementById('userMenu');
             const userAvatar = document.getElementById('userAvatar');
             
-            // Load players and teams data (needed for roster selection)
+            // Load players and teams data (needed for roster selection and display)
             await loadPlayers();
             await loadTeamsStatus();
             
@@ -2077,14 +1800,22 @@
                 
                 const displayName = user.displayName || user.email.split('@')[0];
                 if (userAvatar) userAvatar.textContent = getUserInitials(displayName);
-                
-                // Load pool data if we have an ID
-                if (currentPoolId) {
-                    loadPoolData(currentPoolId);
-                }
             } else {
                 if (authButtons) authButtons.style.display = 'flex';
                 if (userMenu) userMenu.style.display = 'none';
+            }
+            
+            // Load pool data if we have an ID (for both logged in and guest users)
+            if (currentPoolId) {
+                await loadPoolData(currentPoolId);
+            } else {
+                // No pool ID provided
+                document.getElementById('leaderboardBody').innerHTML = `
+                    <div style="text-align: center; padding: 3rem; color: var(--text-secondary);">
+                        <p style="font-size: 1.25rem; margin-bottom: 0.5rem;">No pool selected</p>
+                        <p style="font-size: 0.9rem;">Please use a valid pool link or go back to the home page.</p>
+                    </div>
+                `;
             }
         });
 
@@ -2093,25 +1824,90 @@
             try {
                 const poolDoc = await db.collection('pools').doc(poolId).get();
                 if (poolDoc.exists) {
-                    currentPoolData = poolDoc.data();
+                    currentPoolData = { id: poolDoc.id, ...poolDoc.data() };
                     updatePoolHeader(currentPoolData);
-                    loadLeaderboard(poolId);
+                    await loadLeaderboard(poolId);
+                    await loadMyEntry(poolId);
+                } else {
+                    document.getElementById('leaderboardBody').innerHTML = `
+                        <div style="text-align: center; padding: 3rem; color: var(--accent-red);">
+                            Pool not found. Please check the URL.
+                        </div>
+                    `;
                 }
             } catch (error) {
                 console.error('Error loading pool:', error);
+                document.getElementById('leaderboardBody').innerHTML = `
+                    <div style="text-align: center; padding: 3rem; color: var(--accent-red);">
+                        Error loading pool: ${error.message}
+                    </div>
+                `;
             }
         }
 
         function updatePoolHeader(pool) {
-            // Update pool name if element exists
+            // Update pool name
             const poolNameEl = document.querySelector('.pool-name');
             if (poolNameEl && pool.name) {
                 poolNameEl.textContent = pool.name;
+                document.title = `${pool.name} | GridironPools`;
+            }
+
+            // Update commissioner
+            const commEl = document.querySelector('.pool-commissioner');
+            if (commEl && pool.commissionerName) {
+                commEl.textContent = `Hosted by @${pool.commissionerName.split(' ')[0].toLowerCase()}`;
+            }
+
+            // Update pool type badge
+            const typeBadge = document.querySelector('.pool-type-badge');
+            if (typeBadge) {
+                typeBadge.textContent = pool.type === 'betting-pool' ? '💰 Betting Pool' : '🏈 NFL Playoff Fantasy';
+            }
+
+            // Update status badge
+            const statusBadge = document.querySelector('.pool-status-badge');
+            if (statusBadge && pool.status) {
+                const statusText = pool.status.charAt(0).toUpperCase() + pool.status.slice(1);
+                statusBadge.className = `pool-status-badge ${pool.status}`;
+                statusBadge.innerHTML = `<span class="status-dot"></span> ${statusText === 'Open' ? 'Entries Open' : statusText}`;
+            }
+
+            // Update stats
+            const buyIn = pool.buyIn || 0;
+            const entryCount = pool.entryCount || 0;
+            const prizePool = buyIn * entryCount;
+            
+            // Buy-In
+            const buyInEl = document.querySelector('.pool-stat:nth-child(1) .pool-stat-value');
+            if (buyInEl) buyInEl.textContent = buyIn > 0 ? `$${buyIn}` : 'Free';
+
+            // Entries
+            const entriesEl = document.querySelector('.pool-stat:nth-child(2) .pool-stat-value');
+            if (entriesEl) entriesEl.textContent = entryCount;
+
+            // Prize Pool
+            const prizeEl = document.querySelector('.pool-stat:nth-child(3) .pool-stat-value');
+            if (prizeEl) prizeEl.textContent = prizePool > 0 ? `$${prizePool.toLocaleString()}` : '$0';
+
+            // Deadline
+            const deadlineEl = document.querySelector('.pool-stat:nth-child(4) .pool-stat-value');
+            if (deadlineEl && pool.deadline) {
+                const date = pool.deadline.toDate ? pool.deadline.toDate() : new Date(pool.deadline);
+                deadlineEl.textContent = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            }
+
+            // Current Week (you can customize this based on your data)
+            const weekEl = document.querySelector('.pool-stat:nth-child(5) .pool-stat-value');
+            if (weekEl && pool.currentWeek) {
+                weekEl.textContent = pool.currentWeek;
             }
         }
 
         // Load leaderboard from Firestore
         async function loadLeaderboard(poolId) {
+            const container = document.getElementById('leaderboardBody');
+            
             try {
                 const entriesSnapshot = await db.collection('pools').doc(poolId)
                     .collection('entries')
@@ -2119,11 +1915,206 @@
                     .get();
                 
                 const entries = entriesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                // Update leaderboard UI - would need to implement dynamic rendering
-                console.log('Loaded entries:', entries);
+                
+                if (entries.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 3rem; color: var(--text-secondary);">
+                            <p style="font-size: 1.25rem; margin-bottom: 0.5rem;">No entries yet</p>
+                            <p style="font-size: 0.9rem;">Be the first to submit an entry!</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Get current user to highlight their entry
+                const currentUserId = auth.currentUser?.uid;
+                
+                // Render leaderboard rows
+                container.innerHTML = entries.map((entry, index) => {
+                    const rank = index + 1;
+                    const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : '';
+                    const isMyEntry = entry.userId === currentUserId;
+                    const myEntryClass = isMyEntry ? 'my-entry' : '';
+                    
+                    // Get initials for avatar
+                    const initials = getInitials(entry.entryName || entry.userName || 'UN');
+                    
+                    // Week points with fallback
+                    const wp = entry.weekPoints || {};
+                    const wcPts = wp.wildCard || wp.WC || 0;
+                    const divPts = wp.divisional || wp.DIV || 0;
+                    const confPts = wp.conference || wp.CONF || 0;
+                    const sbPts = wp.superBowl || wp.SB || 0;
+                    const totalPts = entry.totalPoints || 0;
+                    
+                    // Build roster grid HTML
+                    const rosterHtml = renderEntryRoster(entry.roster);
+                    
+                    return `
+                        <div class="leaderboard-row ${myEntryClass}" onclick="toggleDetails(this)" data-entry-id="${entry.id}">
+                            <div class="rank ${rankClass}">${rank}</div>
+                            <div class="entry-info">
+                                <div class="entry-avatar">${initials}</div>
+                                <div>
+                                    <div class="entry-name">${entry.entryName || 'Unnamed Entry'}</div>
+                                    <div class="entry-user">@${(entry.userName || 'user').split(' ')[0].toLowerCase()}</div>
+                                </div>
+                            </div>
+                            <div class="week-points ${wcPts > 0 ? 'active-week' : ''}">${wcPts > 0 ? wcPts.toFixed(1) : '—'}</div>
+                            <div class="week-points ${divPts > 0 ? 'active-week' : ''}">${divPts > 0 ? divPts.toFixed(1) : '—'}</div>
+                            <div class="week-points ${confPts > 0 ? 'active-week' : ''}">${confPts > 0 ? confPts.toFixed(1) : '—'}</div>
+                            <div class="week-points ${sbPts > 0 ? 'active-week' : ''}">${sbPts > 0 ? sbPts.toFixed(1) : '—'}</div>
+                            <div class="total-points">${totalPts.toFixed(1)}</div>
+                            <button class="expand-btn">▼</button>
+                        </div>
+                        <div class="entry-details">
+                            <div class="roster-grid">
+                                ${rosterHtml}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                console.log('Loaded entries:', entries.length);
             } catch (error) {
                 console.error('Error loading leaderboard:', error);
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 3rem; color: var(--accent-red);">
+                        Error loading leaderboard: ${error.message}
+                    </div>
+                `;
             }
+        }
+
+        // Get initials from name
+        function getInitials(name) {
+            if (!name) return '??';
+            const parts = name.split(/[\s']+/);
+            if (parts.length >= 2) {
+                return (parts[0][0] + parts[1][0]).toUpperCase();
+            }
+            return name.substring(0, 2).toUpperCase();
+        }
+
+        // Render roster for an entry
+        function renderEntryRoster(roster) {
+            if (!roster || Object.keys(roster).length === 0) {
+                return '<div style="color: var(--text-muted); padding: 1rem;">No roster data available</div>';
+            }
+            
+            // Sort roster by position order
+            const positionOrder = ['QB', 'RB', 'WR', 'TE', 'K'];
+            const sortedRoster = Object.entries(roster).sort((a, b) => {
+                const posA = a[1].position || a[0].split('-')[0];
+                const posB = b[1].position || b[0].split('-')[0];
+                return positionOrder.indexOf(posA) - positionOrder.indexOf(posB);
+            });
+            
+            return sortedRoster.map(([key, player]) => {
+                const position = player.position || key.split('-')[0];
+                const team = player.team || '??';
+                const name = player.name || 'Unknown Player';
+                const teamName = player.teamName || team;
+                const isEliminated = teamsStatus[team]?.eliminated || false;
+                const eliminatedClass = isEliminated ? 'eliminated' : '';
+                
+                // Get player points from players data if available
+                let points = 0;
+                const playerData = Object.values(playersData).flat().find(p => p.name === name && p.team === team);
+                if (playerData) {
+                    points = playerData.totalPoints || 0;
+                }
+                
+                return `
+                    <div class="roster-player ${eliminatedClass}">
+                        <span class="player-position">${position}</span>
+                        <div class="player-team-logo">${team}</div>
+                        <div class="player-info">
+                            <div class="player-name">${name}${isEliminated ? ' ❌' : ''}</div>
+                            <div class="player-team-name">${teamName}</div>
+                        </div>
+                        <div class="player-points">${points.toFixed(1)}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Load current user's entry
+        async function loadMyEntry(poolId) {
+            const container = document.getElementById('myEntryContainer');
+            const user = auth.currentUser;
+            
+            if (!user) {
+                container.innerHTML = `
+                    <div style="color: var(--text-secondary);">
+                        <p style="font-size: 1.25rem; margin-bottom: 1rem;">Please log in to view your entry</p>
+                        <a href="home.html" class="btn btn-outline">Log In</a>
+                    </div>
+                `;
+                return;
+            }
+            
+            try {
+                const entriesSnapshot = await db.collection('pools').doc(poolId)
+                    .collection('entries')
+                    .where('userId', '==', user.uid)
+                    .get();
+                
+                if (entriesSnapshot.empty) {
+                    container.innerHTML = `
+                        <div style="color: var(--text-secondary);">
+                            <p style="font-size: 1.25rem; margin-bottom: 1rem;">You haven't submitted an entry yet</p>
+                            <p style="font-size: 0.9rem; margin-bottom: 1.5rem;">Go to the "Submit Entry" tab to create your roster</p>
+                            <button class="btn btn-primary" onclick="document.querySelector('[data-tab=\\'submit\\']').click()">
+                                Submit Entry
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Display user's entry (or entries if multiple allowed)
+                const entries = entriesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                container.innerHTML = entries.map(entry => {
+                    const wp = entry.weekPoints || {};
+                    const totalPts = entry.totalPoints || 0;
+                    const rosterHtml = renderEntryRoster(entry.roster);
+                    
+                    return `
+                        <h3 style="font-family: 'Oswald', sans-serif; font-size: 1.5rem; margin-bottom: 1rem;">
+                            ${entry.entryName || 'Your Entry'}
+                        </h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">
+                            Total Points: <span style="color: var(--accent-blue); font-weight: 600;">${totalPts.toFixed(1)}</span>
+                        </p>
+                        <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                            Tiebreaker: ${entry.tiebreaker || 0} points
+                        </p>
+                        <div class="roster-grid" style="max-width: 900px; margin: 0 auto;">
+                            ${rosterHtml}
+                        </div>
+                    `;
+                }).join('<hr style="border-color: var(--card-border); margin: 2rem 0;">');
+                
+            } catch (error) {
+                console.error('Error loading my entry:', error);
+                container.innerHTML = `
+                    <div style="color: var(--accent-red);">
+                        Error loading your entry: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Get user initials for avatar display
+        function getUserInitials(name) {
+            if (!name) return '??';
+            const parts = name.trim().split(/[\s@]+/);
+            if (parts.length >= 2) {
+                return (parts[0][0] + parts[1][0]).toUpperCase();
+            }
+            return name.substring(0, 2).toUpperCase();
         }
 
         // Submit entry to Firestore
