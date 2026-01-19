@@ -1127,6 +1127,23 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
 
                 <div class="data-card">
                     <div class="data-card-header">
+                        <h3 class="data-card-title">Upload JSON</h3>
+                    </div>
+                    <div class="data-card-body">
+                        <p style="margin-bottom: 1rem; color: var(--text-secondary);">Or upload a JSON file with pre-calculated stats:</p>
+                        <div class="form-group">
+                            <input type="file" class="form-control" id="statsJsonFile" accept=".json" onchange="previewStatsJson()">
+                        </div>
+                        <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.5rem;">Or paste JSON directly:</p>
+                        <div class="form-group" style="margin-top: 0.5rem;">
+                            <textarea class="form-control" id="statsJsonText" placeholder="Paste JSON data here..." style="min-height: 120px;"></textarea>
+                        </div>
+                        <button class="btn btn-primary" onclick="previewStatsJsonFromText()">Preview JSON Stats</button>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
                         <h3 class="data-card-title">Paste CSV</h3>
                     </div>
                     <div class="data-card-body">
@@ -2305,6 +2322,168 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
                 console.error('Import error:', error);
                 resultDiv.innerHTML = `<div class="alert alert-error">Error: ${error.message}</div>`;
             }
+        }
+
+        // =========================================
+        // IMPORT STATS FROM JSON
+        // =========================================
+        function previewStatsJson() {
+            const fileInput = document.getElementById('statsJsonFile');
+            if (!fileInput.files || !fileInput.files[0]) {
+                alert('Please select a JSON file');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    processStatsJsonPreview(data);
+                } catch (error) {
+                    alert('Invalid JSON file: ' + error.message);
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+
+        function previewStatsJsonFromText() {
+            const text = document.getElementById('statsJsonText').value.trim();
+            if (!text) {
+                alert('Please paste JSON data or upload a file');
+                return;
+            }
+
+            try {
+                const data = JSON.parse(text);
+                processStatsJsonPreview(data);
+            } catch (error) {
+                alert('Invalid JSON: ' + error.message);
+            }
+        }
+
+        function processStatsJsonPreview(data) {
+            if (!Array.isArray(data)) {
+                alert('JSON must be an array of player stats');
+                return;
+            }
+
+            statsToImport = [];
+            const tbody = document.getElementById('statsPreviewBody');
+            tbody.innerHTML = '';
+
+            const rounds = ['WC', 'DIV', 'CONF', 'SB'];
+
+            data.forEach(player => {
+                const playerStats = {
+                    name: player.name,
+                    team: player.team?.toUpperCase(),
+                    position: player.position?.toUpperCase(),
+                    rounds: {},
+                    totalPoints: 0
+                };
+
+                // Parse each round's stats from JSON format
+                rounds.forEach(round => {
+                    const prefix = `${round}_`;
+                    const isKicker = player.position?.toUpperCase() === 'K';
+                    
+                    let roundStats = {};
+                    let hasData = false;
+                    
+                    if (isKicker) {
+                        // Kicker stats: pat, fg_under_50, fg_50_plus
+                        const pat = player[`${prefix}pat`] || 0;
+                        const fgUnder50 = player[`${prefix}fg_under_50`] || 0;
+                        const fg50Plus = player[`${prefix}fg_50_plus`] || 0;
+                        
+                        if (pat || fgUnder50 || fg50Plus) {
+                            hasData = true;
+                            roundStats = {
+                                xp: pat,
+                                fg: fgUnder50,
+                                fg50: fg50Plus
+                            };
+                            // Calculate kicker points: 1 per XP, 3 per FG, 5 per FG 50+
+                            roundStats.points = (pat * 1) + (fgUnder50 * 3) + (fg50Plus * 5);
+                        }
+                    } else {
+                        // Skill position stats
+                        const passYds = player[`${prefix}passing_yards`] || 0;
+                        const rushYds = player[`${prefix}rushing_yards`] || 0;
+                        const recYds = player[`${prefix}receiving_yards`] || 0;
+                        const rec = player[`${prefix}receptions`] || 0;
+                        const td = player[`${prefix}touchdowns`] || 0;
+                        const twoPt = player[`${prefix}two_pt_conversions`] || 0;
+                        
+                        if (passYds || rushYds || recYds || rec || td || twoPt) {
+                            hasData = true;
+                            roundStats = {
+                                passYds,
+                                rushYds,
+                                recYds,
+                                rec,
+                                td,
+                                '2pt': twoPt
+                            };
+                            // Calculate points using scoring rules
+                            roundStats.points = calculatePointsFromJson(roundStats);
+                        }
+                    }
+                    
+                    if (hasData) {
+                        playerStats.rounds[round] = roundStats;
+                    }
+                });
+
+                // Calculate total points from all rounds
+                playerStats.totalPoints = Object.values(playerStats.rounds).reduce((sum, r) => sum + (r.points || 0), 0);
+
+                statsToImport.push(playerStats);
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${playerStats.name}</td>
+                        <td>${playerStats.team}</td>
+                        <td>${playerStats.position}</td>
+                        <td>${playerStats.rounds.WC?.points || '-'}</td>
+                        <td>${playerStats.rounds.DIV?.points || '-'}</td>
+                        <td>${playerStats.rounds.CONF?.points || '-'}</td>
+                        <td>${playerStats.rounds.SB?.points || '-'}</td>
+                        <td style="font-weight: 600; color: var(--accent-gold);">${playerStats.totalPoints}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('statsPreviewCard').style.display = 'block';
+            document.getElementById('statsPreviewCount').textContent = `${statsToImport.length} players from JSON`;
+        }
+
+        // Calculate points for skill positions from JSON stats
+        function calculatePointsFromJson(stats) {
+            let points = 0;
+            
+            // Passing: 1 pt per 25 yards
+            points += Math.floor((stats.passYds || 0) / 25);
+            
+            // Rushing: 1 pt per 10 yards
+            points += Math.floor((stats.rushYds || 0) / 10);
+            
+            // Receiving: 1 pt per 10 yards
+            points += Math.floor((stats.recYds || 0) / 10);
+            
+            // PPR: 1 pt per reception
+            points += (stats.rec || 0) * 1;
+            
+            // Touchdowns: 6 pts each
+            points += (stats.td || 0) * 6;
+            
+            // 2-pt conversions: 2 pts each
+            points += (stats['2pt'] || 0) * 2;
+            
+            return points;
         }
 
         // =========================================
