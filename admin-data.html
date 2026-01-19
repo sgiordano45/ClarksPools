@@ -1778,7 +1778,7 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
 
             try {
                 const snapshot = await db.collection('pools')
-                    .where('type', '==', 'fantasy')
+                    .where('type', '==', 'playoff-fantasy')
                     .get();
                 
                 select.innerHTML = '<option value="">Select a pool...</option>';
