@@ -1584,9 +1584,21 @@
                     }
                 });
 
-                // Sort each position by totalPoints (highest first)
+                // Sort each position by calculated points (floored at 0) - highest first
                 Object.keys(playersData).forEach(pos => {
-                    playersData[pos].sort((a, b) => b.totalPoints - a.totalPoints);
+                    playersData[pos].sort((a, b) => {
+                        const aPoints = (a.stats ? 
+                            Math.max(0, a.stats.WC?.points || 0) +
+                            Math.max(0, a.stats.DIV?.points || 0) +
+                            Math.max(0, a.stats.CONF?.points || 0) +
+                            Math.max(0, a.stats.SB?.points || 0) : 0);
+                        const bPoints = (b.stats ? 
+                            Math.max(0, b.stats.WC?.points || 0) +
+                            Math.max(0, b.stats.DIV?.points || 0) +
+                            Math.max(0, b.stats.CONF?.points || 0) +
+                            Math.max(0, b.stats.SB?.points || 0) : 0);
+                        return bPoints - aPoints;
+                    });
                 });
 
                 console.log('Players loaded:', Object.values(playersData).flat().length);
@@ -1654,7 +1666,14 @@
                 const isUsed = usedTeams.has(player.team);
                 const isEliminated = teamsStatus[player.team]?.eliminated || false;
                 const eliminatedClass = isEliminated ? 'eliminated' : '';
-                const points = player.totalPoints || 0;
+                // Calculate points from stats, flooring each round at 0
+                let points = 0;
+                if (player.stats) {
+                    points = Math.max(0, player.stats.WC?.points || 0) +
+                             Math.max(0, player.stats.DIV?.points || 0) +
+                             Math.max(0, player.stats.CONF?.points || 0) +
+                             Math.max(0, player.stats.SB?.points || 0);
+                }
                 // Use teamName from teams collection, fallback to player.teamName, then team abbr
                 const teamName = teamsStatus[player.team]?.name || player.teamName || player.team;
                 // Escape single quotes in names for onclick handler
@@ -1670,7 +1689,7 @@
                             <div class="player-option-name">${player.name} ${isEliminated ? '❌' : ''}</div>
                             <div class="player-option-meta">${teamName} ${isUsed ? '(Team Used)' : ''} ${isEliminated ? '(Eliminated)' : ''}</div>
                         </div>
-                        <div style="font-family: 'Oswald', sans-serif; font-size: 1rem; color: var(--accent-gold); margin-left: auto;">${points} pts</div>
+                        <div style="font-family: 'Oswald', sans-serif; font-size: 1rem; color: var(--accent-gold); margin-left: auto;">${points.toFixed(1)} pts</div>
                     </div>
                 `;
             }).join('');
@@ -2033,11 +2052,11 @@
                 );
                 
                 if (playerFromDb && playerFromDb.stats) {
-                    // Add up stats for each round
-                    points.WC += playerFromDb.stats.WC?.points || 0;
-                    points.DIV += playerFromDb.stats.DIV?.points || 0;
-                    points.CONF += playerFromDb.stats.CONF?.points || 0;
-                    points.SB += playerFromDb.stats.SB?.points || 0;
+                    // Add up stats for each round, flooring at 0 (no negative points)
+                    points.WC += Math.max(0, playerFromDb.stats.WC?.points || 0);
+                    points.DIV += Math.max(0, playerFromDb.stats.DIV?.points || 0);
+                    points.CONF += Math.max(0, playerFromDb.stats.CONF?.points || 0);
+                    points.SB += Math.max(0, playerFromDb.stats.SB?.points || 0);
                 }
             });
             
@@ -2089,8 +2108,14 @@
                 const isEliminated = teamsStatus[team]?.eliminated || false;
                 const eliminatedClass = isEliminated ? 'eliminated' : '';
                 
-                // Get player points
-                const points = playerFromDb?.totalPoints || 0;
+                // Calculate player points from stats, flooring each round at 0
+                let points = 0;
+                if (playerFromDb?.stats) {
+                    points = Math.max(0, playerFromDb.stats.WC?.points || 0) +
+                             Math.max(0, playerFromDb.stats.DIV?.points || 0) +
+                             Math.max(0, playerFromDb.stats.CONF?.points || 0) +
+                             Math.max(0, playerFromDb.stats.SB?.points || 0);
+                }
                 
                 return `
                     <div class="roster-player ${eliminatedClass}">
