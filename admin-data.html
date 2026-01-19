@@ -1328,6 +1328,7 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
                                     <th>Name</th>
                                     <th>Team</th>
                                     <th>Pos</th>
+                                    <th>Status</th>
                                     <th>WC</th>
                                     <th>DIV</th>
                                     <th>CONF</th>
@@ -1342,6 +1343,51 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
                 </div>
             </section>
         </main>
+    </div>
+
+    <!-- Edit Player Modal -->
+    <div class="modal-overlay" id="editPlayerModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Player</h3>
+                <button class="modal-close" onclick="closeModal('editPlayerModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editPlayerId">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" class="form-control" id="editPlayerName">
+                    </div>
+                    <div class="form-group">
+                        <label>Team</label>
+                        <select class="form-control" id="editPlayerTeam"></select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Position</label>
+                    <select class="form-control" id="editPlayerPosition" style="max-width: 150px;">
+                        <option value="QB">QB</option>
+                        <option value="RB">RB</option>
+                        <option value="WR">WR</option>
+                        <option value="TE">TE</option>
+                        <option value="K">K</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-top: 1rem; padding: 1rem; background: rgba(255,82,82,0.1); border-radius: 8px;">
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" id="editPlayerIR" style="margin-right: 0.75rem; width: 18px; height: 18px;">
+                        <span style="color: var(--accent-red); font-weight: 600;">Player is on IR / Out for Playoffs</span>
+                    </label>
+                    <p class="form-help" style="margin-top: 0.5rem;">Check this if the player is injured or otherwise unavailable, even if their team is still active in the playoffs</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger btn-sm" onclick="deletePlayerFromEdit()" style="margin-right: auto;">Delete</button>
+                <button class="btn btn-outline" onclick="closeModal('editPlayerModal')">Cancel</button>
+                <button class="btn btn-gold" onclick="updatePlayer()">Save Changes</button>
+            </div>
+        </div>
     </div>
 
     <!-- Add Game Modal -->
@@ -2862,18 +2908,21 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
         // =========================================
         // VIEW PLAYERS
         // =========================================
+        let currentPlayersView = [];
+
         async function loadPlayersView() {
             const teamFilter = document.getElementById('viewPlayersTeam').value;
             const posFilter = document.getElementById('viewPlayersPos').value;
             const tbody = document.getElementById('playersViewBody');
 
-            tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 2rem;">Loading...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 2rem;">Loading...</td></tr>';
 
             try {
                 let query = db.collection('players').orderBy('name');
                 const snapshot = await query.get();
                 
-                let players = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                currentPlayersView = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                let players = [...currentPlayersView];
                 
                 // Apply filters
                 if (teamFilter !== 'all') {
@@ -2884,33 +2933,48 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
                 }
 
                 // Update counts
-                const allPlayers = snapshot.docs.map(doc => doc.data());
-                document.getElementById('playersCount').textContent = allPlayers.length;
-                document.getElementById('playersQB').textContent = allPlayers.filter(p => p.position === 'QB').length;
-                document.getElementById('playersRB').textContent = allPlayers.filter(p => p.position === 'RB').length;
-                document.getElementById('playersWR').textContent = allPlayers.filter(p => p.position === 'WR').length;
-                document.getElementById('playersTE').textContent = allPlayers.filter(p => p.position === 'TE').length;
-                document.getElementById('playersK').textContent = allPlayers.filter(p => p.position === 'K').length;
+                document.getElementById('playersCount').textContent = currentPlayersView.length;
+                document.getElementById('playersQB').textContent = currentPlayersView.filter(p => p.position === 'QB').length;
+                document.getElementById('playersRB').textContent = currentPlayersView.filter(p => p.position === 'RB').length;
+                document.getElementById('playersWR').textContent = currentPlayersView.filter(p => p.position === 'WR').length;
+                document.getElementById('playersTE').textContent = currentPlayersView.filter(p => p.position === 'TE').length;
+                document.getElementById('playersK').textContent = currentPlayersView.filter(p => p.position === 'K').length;
 
                 if (players.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 2rem; color: var(--text-muted);">No players found</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 2rem; color: var(--text-muted);">No players found</td></tr>';
                     return;
                 }
 
                 tbody.innerHTML = players.map(player => {
                     const stats = player.stats || {};
+                    const isIR = player.ir || player.status === 'ir';
+                    const teamEliminated = TEAMS[player.team]?.eliminated;
+                    
+                    let statusBadge = '';
+                    if (isIR) {
+                        statusBadge = '<span style="background: var(--accent-red); color: white; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">IR</span>';
+                    } else if (teamEliminated) {
+                        statusBadge = '<span style="background: var(--text-muted); color: white; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">ELIM</span>';
+                    } else {
+                        statusBadge = '<span style="background: var(--accent-green); color: white; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">Active</span>';
+                    }
+                    
+                    const rowStyle = isIR ? 'opacity: 0.6;' : (teamEliminated ? 'opacity: 0.7;' : '');
+                    
                     return `
-                        <tr>
+                        <tr style="${rowStyle}">
                             <td>${player.name}</td>
                             <td>${player.team}</td>
                             <td>${player.position}</td>
+                            <td>${statusBadge}</td>
                             <td>${stats.WC?.points || '-'}</td>
                             <td>${stats.DIV?.points || '-'}</td>
                             <td>${stats.CONF?.points || '-'}</td>
                             <td>${stats.SB?.points || '-'}</td>
                             <td style="font-weight: 600; color: var(--accent-gold);">${player.totalPoints || 0}</td>
                             <td>
-                                <button class="btn btn-outline btn-sm" onclick="deletePlayer('${player.id}')">🗑️</button>
+                                <button class="btn btn-outline btn-sm" onclick="editPlayer('${player.id}')" title="Edit">✏️</button>
+                                <button class="btn btn-outline btn-sm" onclick="deletePlayer('${player.id}')" title="Delete">🗑️</button>
                             </td>
                         </tr>
                     `;
@@ -2918,8 +2982,67 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
 
             } catch (error) {
                 console.error('Error loading players:', error);
-                tbody.innerHTML = '<tr><td colspan="9" style="color: var(--accent-red);">Error loading players</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10" style="color: var(--accent-red);">Error loading players</td></tr>';
             }
+        }
+
+        function editPlayer(playerId) {
+            const player = currentPlayersView.find(p => p.id === playerId);
+            if (!player) return;
+
+            // Populate team select
+            const teamSelect = document.getElementById('editPlayerTeam');
+            teamSelect.innerHTML = '<option value="">Select team...</option>';
+            Object.entries(TEAMS).forEach(([abbr, team]) => {
+                teamSelect.innerHTML += `<option value="${abbr}">${abbr} - ${team.name}</option>`;
+            });
+
+            document.getElementById('editPlayerId').value = playerId;
+            document.getElementById('editPlayerName').value = player.name || '';
+            document.getElementById('editPlayerTeam').value = player.team || '';
+            document.getElementById('editPlayerPosition').value = player.position || 'QB';
+            document.getElementById('editPlayerIR').checked = player.ir || player.status === 'ir';
+
+            document.getElementById('editPlayerModal').classList.add('active');
+        }
+
+        async function updatePlayer() {
+            const playerId = document.getElementById('editPlayerId').value;
+            const name = document.getElementById('editPlayerName').value.trim();
+            const team = document.getElementById('editPlayerTeam').value;
+            const position = document.getElementById('editPlayerPosition').value;
+            const ir = document.getElementById('editPlayerIR').checked;
+
+            if (!name || !team) {
+                alert('Please fill in name and team');
+                return;
+            }
+
+            try {
+                await db.collection('players').doc(playerId).update({
+                    name,
+                    team,
+                    teamName: TEAMS[team]?.name || team,
+                    position,
+                    ir,
+                    status: ir ? 'ir' : 'active',
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                closeModal('editPlayerModal');
+                loadPlayersView();
+            } catch (error) {
+                console.error('Error updating player:', error);
+                alert('Error updating player: ' + error.message);
+            }
+        }
+
+        function deletePlayerFromEdit() {
+            const playerId = document.getElementById('editPlayerId').value;
+            if (!confirm('Delete this player? This cannot be undone.')) return;
+            
+            deletePlayer(playerId);
+            closeModal('editPlayerModal');
         }
 
         async function deletePlayer(playerId) {
