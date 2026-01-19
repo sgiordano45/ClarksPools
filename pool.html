@@ -1642,26 +1642,33 @@
                 return;
             }
             
-            const filteredPlayers = players.filter(p => 
-                p.name.toLowerCase().includes(filter.toLowerCase()) ||
-                p.team.toLowerCase().includes(filter.toLowerCase()) ||
-                p.teamName.toLowerCase().includes(filter.toLowerCase())
-            );
+            const filteredPlayers = players.filter(p => {
+                // Get team name from teams collection for filtering
+                const teamName = teamsStatus[p.team]?.name || p.teamName || p.team;
+                return p.name.toLowerCase().includes(filter.toLowerCase()) ||
+                    p.team.toLowerCase().includes(filter.toLowerCase()) ||
+                    teamName.toLowerCase().includes(filter.toLowerCase());
+            });
 
             list.innerHTML = filteredPlayers.map(player => {
                 const isUsed = usedTeams.has(player.team);
                 const isEliminated = teamsStatus[player.team]?.eliminated || false;
                 const eliminatedClass = isEliminated ? 'eliminated' : '';
                 const points = player.totalPoints || 0;
+                // Use teamName from teams collection, fallback to player.teamName, then team abbr
+                const teamName = teamsStatus[player.team]?.name || player.teamName || player.team;
+                // Escape single quotes in names for onclick handler
+                const escapedName = player.name.replace(/'/g, "\\'");
+                const escapedTeamName = teamName.replace(/'/g, "\\'");
                 
                 return `
                     <div class="player-option ${isUsed ? 'used' : ''} ${eliminatedClass}" 
-                         onclick="${isUsed ? '' : `selectPlayer('${player.name}', '${player.team}', '${player.teamName}', '${position}')`}"
+                         onclick="${isUsed ? '' : `selectPlayer('${escapedName}', '${player.team}', '${escapedTeamName}', '${position}')`}"
                          style="${isUsed ? 'opacity: 0.4; cursor: not-allowed;' : ''}">
                         <div class="player-team-logo" style="${isEliminated ? 'opacity: 0.5;' : ''}">${player.team}</div>
                         <div class="player-option-info">
                             <div class="player-option-name">${player.name} ${isEliminated ? '❌' : ''}</div>
-                            <div class="player-option-meta">${player.teamName} ${isUsed ? '(Team Used)' : ''} ${isEliminated ? '(Eliminated)' : ''}</div>
+                            <div class="player-option-meta">${teamName} ${isUsed ? '(Team Used)' : ''} ${isEliminated ? '(Eliminated)' : ''}</div>
                         </div>
                         <div style="font-family: 'Oswald', sans-serif; font-size: 1rem; color: var(--accent-gold); margin-left: auto;">${points} pts</div>
                     </div>
@@ -1936,8 +1943,11 @@
                     const isMyEntry = entry.userId === currentUserId;
                     const myEntryClass = isMyEntry ? 'my-entry' : '';
                     
+                    // Use teamName as the entry display name
+                    const displayName = entry.teamName || entry.entryName || 'Unnamed Entry';
+                    
                     // Get initials for avatar
-                    const initials = getInitials(entry.entryName || entry.userName || 'UN');
+                    const initials = getInitials(displayName);
                     
                     // Week points with fallback
                     const wp = entry.weekPoints || {};
@@ -1947,8 +1957,8 @@
                     const sbPts = wp.superBowl || wp.SB || 0;
                     const totalPts = entry.totalPoints || 0;
                     
-                    // Build roster grid HTML
-                    const rosterHtml = renderEntryRoster(entry.roster);
+                    // Build roster grid HTML using players array and roster map
+                    const rosterHtml = renderEntryRoster(entry.roster, entry.players);
                     
                     return `
                         <div class="leaderboard-row ${myEntryClass}" onclick="toggleDetails(this)" data-entry-id="${entry.id}">
@@ -1956,8 +1966,8 @@
                             <div class="entry-info">
                                 <div class="entry-avatar">${initials}</div>
                                 <div>
-                                    <div class="entry-name">${entry.entryName || 'Unnamed Entry'}</div>
-                                    <div class="entry-user">@${(entry.userName || 'user').split(' ')[0].toLowerCase()}</div>
+                                    <div class="entry-name">${displayName}</div>
+                                    <div class="entry-user">Tiebreaker: ${entry.tiebreaker || 0}</div>
                                 </div>
                             </div>
                             <div class="week-points ${wcPts > 0 ? 'active-week' : ''}">${wcPts > 0 ? wcPts.toFixed(1) : '—'}</div>
@@ -1997,33 +2007,49 @@
         }
 
         // Render roster for an entry
-        function renderEntryRoster(roster) {
+        function renderEntryRoster(roster, players) {
             if (!roster || Object.keys(roster).length === 0) {
                 return '<div style="color: var(--text-muted); padding: 1rem;">No roster data available</div>';
             }
             
-            // Sort roster by position order
-            const positionOrder = ['QB', 'RB', 'WR', 'TE', 'K'];
+            // Create a map of player names to their data from players array
+            const playerMap = {};
+            if (players && Array.isArray(players)) {
+                players.forEach(p => {
+                    playerMap[p.name.toLowerCase()] = p;
+                });
+            }
+            
+            // Sort roster by position order using the key prefix (qb1, rb1, etc.)
+            const positionOrder = ['qb', 'rb', 'wr', 'te', 'k'];
             const sortedRoster = Object.entries(roster).sort((a, b) => {
-                const posA = a[1].position || a[0].split('-')[0];
-                const posB = b[1].position || b[0].split('-')[0];
-                return positionOrder.indexOf(posA) - positionOrder.indexOf(posB);
+                const posA = a[0].replace(/[0-9]/g, '').toLowerCase();
+                const posB = b[0].replace(/[0-9]/g, '').toLowerCase();
+                const orderA = positionOrder.indexOf(posA);
+                const orderB = positionOrder.indexOf(posB);
+                if (orderA !== orderB) return orderA - orderB;
+                // Same position, sort by number
+                return a[0].localeCompare(b[0]);
             });
             
-            return sortedRoster.map(([key, player]) => {
-                const position = player.position || key.split('-')[0];
-                const team = player.team || '??';
-                const name = player.name || 'Unknown Player';
-                const teamName = player.teamName || team;
+            return sortedRoster.map(([key, playerName]) => {
+                // Extract position from key (e.g., "qb1" -> "QB")
+                const position = key.replace(/[0-9]/g, '').toUpperCase();
+                const name = playerName || 'Unknown Player';
+                
+                // Look up player in players collection to get team
+                const playerFromDb = Object.values(playersData).flat().find(p => 
+                    p.name.toLowerCase() === name.toLowerCase()
+                );
+                
+                const team = playerFromDb?.team || '??';
+                // Get team name from teams collection
+                const teamName = teamsStatus[team]?.name || team;
                 const isEliminated = teamsStatus[team]?.eliminated || false;
                 const eliminatedClass = isEliminated ? 'eliminated' : '';
                 
-                // Get player points from players data if available
-                let points = 0;
-                const playerData = Object.values(playersData).flat().find(p => p.name === name && p.team === team);
-                if (playerData) {
-                    points = playerData.totalPoints || 0;
-                }
+                // Get player points
+                const points = playerFromDb?.totalPoints || 0;
                 
                 return `
                     <div class="roster-player ${eliminatedClass}">
@@ -2079,11 +2105,12 @@
                 container.innerHTML = entries.map(entry => {
                     const wp = entry.weekPoints || {};
                     const totalPts = entry.totalPoints || 0;
-                    const rosterHtml = renderEntryRoster(entry.roster);
+                    const displayName = entry.teamName || entry.entryName || 'Your Entry';
+                    const rosterHtml = renderEntryRoster(entry.roster, entry.players);
                     
                     return `
                         <h3 style="font-family: 'Oswald', sans-serif; font-size: 1.5rem; margin-bottom: 1rem;">
-                            ${entry.entryName || 'Your Entry'}
+                            ${displayName}
                         </h3>
                         <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">
                             Total Points: <span style="color: var(--accent-blue); font-weight: 600;">${totalPts.toFixed(1)}</span>
