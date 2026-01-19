@@ -1918,10 +1918,9 @@
             try {
                 const entriesSnapshot = await db.collection('pools').doc(poolId)
                     .collection('entries')
-                    .orderBy('totalPoints', 'desc')
                     .get();
                 
-                const entries = entriesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                let entries = entriesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 
                 if (entries.length === 0) {
                     container.innerHTML = `
@@ -1932,6 +1931,19 @@
                     `;
                     return;
                 }
+                
+                // Calculate points for each entry and sort by total (descending), then tiebreaker (descending)
+                entries = entries.map(entry => {
+                    const calculated = calculateEntryWeekPoints(entry.roster);
+                    return { ...entry, calculatedPoints: calculated };
+                }).sort((a, b) => {
+                    // Sort by total points descending
+                    if (b.calculatedPoints.total !== a.calculatedPoints.total) {
+                        return b.calculatedPoints.total - a.calculatedPoints.total;
+                    }
+                    // If tied, sort by tiebreaker descending (higher tiebreaker wins)
+                    return (b.tiebreaker || 0) - (a.tiebreaker || 0);
+                });
                 
                 // Get current user to highlight their entry
                 const currentUserId = auth.currentUser?.uid;
@@ -1949,13 +1961,12 @@
                     // Get initials for avatar
                     const initials = getInitials(displayName);
                     
-                    // Week points with fallback
-                    const wp = entry.weekPoints || {};
-                    const wcPts = wp.wildCard || wp.WC || 0;
-                    const divPts = wp.divisional || wp.DIV || 0;
-                    const confPts = wp.conference || wp.CONF || 0;
-                    const sbPts = wp.superBowl || wp.SB || 0;
-                    const totalPts = entry.totalPoints || 0;
+                    // Use pre-calculated week points
+                    const wcPts = entry.calculatedPoints.WC;
+                    const divPts = entry.calculatedPoints.DIV;
+                    const confPts = entry.calculatedPoints.CONF;
+                    const sbPts = entry.calculatedPoints.SB;
+                    const totalPts = entry.calculatedPoints.total;
                     
                     // Build roster grid HTML using players array and roster map
                     const rosterHtml = renderEntryRoster(entry.roster, entry.players);
@@ -2004,6 +2015,36 @@
                 return (parts[0][0] + parts[1][0]).toUpperCase();
             }
             return name.substring(0, 2).toUpperCase();
+        }
+
+        // Calculate entry week points from roster players' stats
+        function calculateEntryWeekPoints(roster) {
+            const points = { WC: 0, DIV: 0, CONF: 0, SB: 0, total: 0 };
+            
+            if (!roster || Object.keys(roster).length === 0) {
+                return points;
+            }
+            
+            // Loop through each player in the roster
+            Object.values(roster).forEach(playerName => {
+                // Find the player in playersData
+                const playerFromDb = Object.values(playersData).flat().find(p => 
+                    p.name.toLowerCase() === playerName.toLowerCase()
+                );
+                
+                if (playerFromDb && playerFromDb.stats) {
+                    // Add up stats for each round
+                    points.WC += playerFromDb.stats.WC?.points || 0;
+                    points.DIV += playerFromDb.stats.DIV?.points || 0;
+                    points.CONF += playerFromDb.stats.CONF?.points || 0;
+                    points.SB += playerFromDb.stats.SB?.points || 0;
+                }
+            });
+            
+            // Calculate total
+            points.total = points.WC + points.DIV + points.CONF + points.SB;
+            
+            return points;
         }
 
         // Render roster for an entry
@@ -2103,18 +2144,38 @@
                 const entries = entriesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 
                 container.innerHTML = entries.map(entry => {
-                    const wp = entry.weekPoints || {};
-                    const totalPts = entry.totalPoints || 0;
                     const displayName = entry.teamName || entry.entryName || 'Your Entry';
                     const rosterHtml = renderEntryRoster(entry.roster, entry.players);
+                    
+                    // Calculate points from player stats
+                    const calculatedPoints = calculateEntryWeekPoints(entry.roster);
                     
                     return `
                         <h3 style="font-family: 'Oswald', sans-serif; font-size: 1.5rem; margin-bottom: 1rem;">
                             ${displayName}
                         </h3>
-                        <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">
-                            Total Points: <span style="color: var(--accent-blue); font-weight: 600;">${totalPts.toFixed(1)}</span>
-                        </p>
+                        <div style="display: flex; justify-content: center; gap: 2rem; margin-bottom: 1rem;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">WC</div>
+                                <div style="font-family: 'Oswald', sans-serif; color: ${calculatedPoints.WC > 0 ? 'var(--accent-green)' : 'var(--text-muted)'};">${calculatedPoints.WC > 0 ? calculatedPoints.WC.toFixed(1) : '—'}</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">DIV</div>
+                                <div style="font-family: 'Oswald', sans-serif; color: ${calculatedPoints.DIV > 0 ? 'var(--accent-green)' : 'var(--text-muted)'};">${calculatedPoints.DIV > 0 ? calculatedPoints.DIV.toFixed(1) : '—'}</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">CONF</div>
+                                <div style="font-family: 'Oswald', sans-serif; color: ${calculatedPoints.CONF > 0 ? 'var(--accent-green)' : 'var(--text-muted)'};">${calculatedPoints.CONF > 0 ? calculatedPoints.CONF.toFixed(1) : '—'}</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">SB</div>
+                                <div style="font-family: 'Oswald', sans-serif; color: ${calculatedPoints.SB > 0 ? 'var(--accent-green)' : 'var(--text-muted)'};">${calculatedPoints.SB > 0 ? calculatedPoints.SB.toFixed(1) : '—'}</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Total</div>
+                                <div style="font-family: 'Bebas Neue', sans-serif; font-size: 1.25rem; color: var(--accent-blue);">${calculatedPoints.total.toFixed(1)}</div>
+                            </div>
+                        </div>
                         <p style="color: var(--text-secondary); margin-bottom: 2rem;">
                             Tiebreaker: ${entry.tiebreaker || 0} points
                         </p>
