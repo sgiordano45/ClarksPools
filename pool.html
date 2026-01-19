@@ -1744,7 +1744,8 @@
                             team: player.team,
                             teamName: player.teamName || player.team,
                             totalPoints: player.totalPoints || 0,
-                            stats: player.stats || {}
+                            stats: player.stats || {},
+                            ir: player.ir || player.status === 'ir' || false
                         });
                     }
                 });
@@ -2247,15 +2248,16 @@
                 if (counts[position]) {
                     counts[position].total++;
                     
-                    // Find player and check if their team is eliminated
+                    // Find player and check if their team is eliminated or player is on IR
                     const playerFromDb = Object.values(playersData).flat().find(p => 
                         p.name.toLowerCase() === playerName.toLowerCase()
                     );
                     
                     const team = playerFromDb?.team;
                     const isEliminated = team ? (teamsStatus[team]?.eliminated || false) : false;
+                    const isIR = playerFromDb?.ir || false;
                     
-                    if (!isEliminated) {
+                    if (!isEliminated && !isIR) {
                         counts[position].active++;
                     }
                 }
@@ -2334,7 +2336,17 @@
                 // Get team name from teams collection
                 const teamName = teamsStatus[team]?.name || team;
                 const isEliminated = teamsStatus[team]?.eliminated || false;
-                const eliminatedClass = isEliminated ? 'eliminated' : '';
+                const isIR = playerFromDb?.ir || false;
+                const isOut = isEliminated || isIR;
+                const eliminatedClass = isOut ? 'eliminated' : '';
+                
+                // Determine status indicator
+                let statusIndicator = '';
+                if (isIR) {
+                    statusIndicator = ' <span style="background: var(--accent-red); color: white; padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.65rem; font-weight: 600; margin-left: 0.25rem;">IR</span>';
+                } else if (isEliminated) {
+                    statusIndicator = ' ❌';
+                }
                 
                 // Calculate player points from stats, flooring each round at 0
                 let points = 0;
@@ -2350,7 +2362,7 @@
                         <span class="player-position">${position}</span>
                         <div class="player-team-logo">${team}</div>
                         <div class="player-info">
-                            <div class="player-name">${name}${isEliminated ? ' ❌' : ''}</div>
+                            <div class="player-name">${name}${statusIndicator}</div>
                             <div class="player-team-name">${teamName}</div>
                         </div>
                         <div class="player-points">${points.toFixed(1)}</div>
@@ -2498,6 +2510,7 @@
                     const team = playerFromDb?.team || '??';
                     const teamName = teamsStatus[team]?.name || team;
                     const isEliminated = teamsStatus[team]?.eliminated || false;
+                    const isIR = playerFromDb?.ir || false;
                     const pct = (data.count / totalEntries) * 100;
                     
                     if (positionGroups[data.position]) {
@@ -2507,7 +2520,8 @@
                             teamName,
                             count: data.count,
                             pct,
-                            isEliminated
+                            isEliminated,
+                            isIR
                         });
                     }
                 });
@@ -2531,10 +2545,10 @@
                                 ${positionGroups[pos].length === 0 ? 
                                     '<div style="padding: 1rem; color: var(--text-muted); text-align: center;">No players drafted</div>' :
                                     positionGroups[pos].map(player => `
-                                        <div class="ownership-player ${player.isEliminated ? 'eliminated' : ''}">
+                                        <div class="ownership-player ${player.isEliminated || player.isIR ? 'eliminated' : ''}">
                                             <div class="player-team-logo">${player.team}</div>
                                             <div class="ownership-player-info">
-                                                <div class="ownership-player-name">${player.name}${player.isEliminated ? ' ❌' : ''}</div>
+                                                <div class="ownership-player-name">${player.name}${player.isIR ? ' <span style="background: var(--accent-red); color: white; padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.65rem; font-weight: 600;">IR</span>' : (player.isEliminated ? ' ❌' : '')}</div>
                                                 <div class="ownership-player-team">${player.teamName}</div>
                                             </div>
                                             <div class="ownership-count">${player.count}</div>
