@@ -636,6 +636,39 @@
             font-size: 0.85rem;
         }
 
+        /* Strength Score */
+        .strength-score {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 50px;
+        }
+
+        .strength-label {
+            font-size: 0.55rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .strength-value {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.2rem;
+            color: var(--accent-gold);
+        }
+
+        .strength-value.high {
+            color: var(--accent-green);
+        }
+
+        .strength-value.medium {
+            color: var(--accent-gold);
+        }
+
+        .strength-value.low {
+            color: var(--text-muted);
+        }
+
         .player-position {
             font-family: 'Oswald', sans-serif;
             font-size: 0.7rem;
@@ -2188,10 +2221,16 @@
                 deadlineEl.textContent = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
             }
 
-            // Current Week (you can customize this based on your data)
+            // Current Week (formatted display)
             const weekEl = document.querySelector('.pool-stat:nth-child(5) .pool-stat-value');
             if (weekEl && pool.currentWeek) {
-                weekEl.textContent = pool.currentWeek;
+                const weekNames = {
+                    'wildcard': 'Wild Card',
+                    'divisional': 'Divisional',
+                    'conference': 'Conf Champ',
+                    'superbowl': 'Super Bowl'
+                };
+                weekEl.textContent = weekNames[pool.currentWeek] || pool.currentWeek;
             }
         }
 
@@ -2239,6 +2278,20 @@
                 // Set default compare entry if not set or invalid
                 if (!selectedCompareEntry || !myEntries.find(e => e.id === selectedCompareEntry.id)) {
                     selectedCompareEntry = myEntries.length > 0 ? myEntries[0] : null;
+                }
+                
+                // Check if strength score should be shown
+                const showStrength = currentPoolData?.showStrength || false;
+                
+                // If showing strength, calculate for all entries and find max
+                let maxStrength = 0;
+                if (showStrength) {
+                    entries.forEach(entry => {
+                        entry.strengthScore = calculateStrengthScore(entry.roster);
+                        if (entry.strengthScore > maxStrength) {
+                            maxStrength = entry.strengthScore;
+                        }
+                    });
                 }
                 
                 // Build compare selector HTML if user has entries
@@ -2331,6 +2384,18 @@
                     // Build roster grid HTML using players array and roster map
                     const rosterHtml = renderEntryRoster(entry.roster, entry.players, sharedPlayers);
                     
+                    // Build strength HTML if enabled
+                    let strengthHtml = '';
+                    if (showStrength) {
+                        const strengthClass = getStrengthClass(entry.strengthScore, maxStrength);
+                        strengthHtml = `
+                            <div class="strength-score">
+                                <div class="strength-label">Upside</div>
+                                <div class="strength-value ${strengthClass}">${entry.strengthScore}</div>
+                            </div>
+                        `;
+                    }
+                    
                     return `
                         <div class="leaderboard-row ${myEntryClass}" onclick="toggleDetails(this)" data-entry-id="${entry.id}">
                             <div class="rank ${rankClass}">${rank}</div>
@@ -2363,6 +2428,7 @@
                                     <div class="active-pos-count ${activeByPos.K.active === activeByPos.K.total ? 'full' : activeByPos.K.active === 0 ? 'none' : 'partial'}">${activeByPos.K.active}</div>
                                 </div>
                             </div>
+                            ${strengthHtml}
                             <div class="week-points ${wcPts > 0 ? 'active-week' : ''}">${wcPts > 0 ? wcPts.toFixed(1) : '—'}</div>
                             <div class="week-points ${divPts > 0 ? 'active-week' : ''}">${divPts > 0 ? divPts.toFixed(1) : '—'}</div>
                             <div class="week-points ${confPts > 0 ? 'active-week' : ''}">${confPts > 0 ? confPts.toFixed(1) : '—'}</div>
@@ -2528,6 +2594,98 @@
         let myEntries = [];
         let allEntries = [];
         let selectedCompareEntry = null;
+
+        // Cached median points per position (calculated once per page load)
+        let positionMedians = null;
+
+        // Calculate median value from array
+        function calculateMedian(values) {
+            if (values.length === 0) return 0;
+            const sorted = [...values].sort((a, b) => a - b);
+            const mid = Math.floor(sorted.length / 2);
+            return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+        }
+
+        // Calculate median points per position from all players who have played
+        function calculatePositionMedians() {
+            if (positionMedians) return positionMedians;
+            
+            const pointsByPosition = {
+                QB: [],
+                RB: [],
+                WR: [],
+                TE: [],
+                K: []
+            };
+            
+            // Gather per-game points for each position
+            const allPlayers = Object.values(playersData).flat();
+            
+            allPlayers.forEach(player => {
+                if (!player.stats || !player.position) return;
+                
+                // Get points from each round the player participated in
+                ['WC', 'DIV', 'CONF', 'SB'].forEach(round => {
+                    const roundStats = player.stats[round];
+                    if (roundStats && typeof roundStats.points === 'number') {
+                        const pts = Math.max(0, roundStats.points);
+                        if (pointsByPosition[player.position]) {
+                            pointsByPosition[player.position].push(pts);
+                        }
+                    }
+                });
+            });
+            
+            // Calculate median for each position
+            positionMedians = {
+                QB: calculateMedian(pointsByPosition.QB),
+                RB: calculateMedian(pointsByPosition.RB),
+                WR: calculateMedian(pointsByPosition.WR),
+                TE: calculateMedian(pointsByPosition.TE),
+                K: calculateMedian(pointsByPosition.K)
+            };
+            
+            console.log('Position medians:', positionMedians);
+            return positionMedians;
+        }
+
+        // Calculate strength score for an entry based on active players
+        function calculateStrengthScore(roster) {
+            const medians = calculatePositionMedians();
+            let strengthScore = 0;
+            
+            if (!roster || Object.keys(roster).length === 0) {
+                return 0;
+            }
+            
+            Object.entries(roster).forEach(([key, playerName]) => {
+                const position = key.replace(/[0-9]/g, '').toUpperCase();
+                
+                // Find player to check if active
+                const playerFromDb = Object.values(playersData).flat().find(p => 
+                    p.name.toLowerCase() === playerName.toLowerCase()
+                );
+                
+                const team = playerFromDb?.team;
+                const isEliminated = team ? (teamsStatus[team]?.eliminated || false) : false;
+                const isIR = playerFromDb?.ir || false;
+                
+                // Only count active players
+                if (!isEliminated && !isIR && medians[position]) {
+                    strengthScore += medians[position];
+                }
+            });
+            
+            return Math.round(strengthScore * 10) / 10; // Round to 1 decimal
+        }
+
+        // Get strength class for styling
+        function getStrengthClass(score, maxScore) {
+            const pct = maxScore > 0 ? (score / maxScore) * 100 : 0;
+            if (pct >= 80) return 'high';
+            if (pct >= 50) return 'medium';
+            return 'low';
+        }
 
         // Calculate entry week points from roster players' stats
         function calculateEntryWeekPoints(roster) {

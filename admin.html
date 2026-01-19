@@ -2592,6 +2592,15 @@
                     </select>
                 </div>
                 <div class="form-group">
+                    <label>Current Week</label>
+                    <select class="form-control" id="editPoolCurrentWeek">
+                        <option value="wildcard">Wild Card</option>
+                        <option value="divisional">Divisional</option>
+                        <option value="conference">Conference Championship</option>
+                        <option value="superbowl">Super Bowl</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label>Buy-In ($)</label>
                     <input type="number" class="form-control" id="editPoolBuyIn" min="0" step="1">
                 </div>
@@ -2602,6 +2611,16 @@
                 <div class="form-group">
                     <label>Entry Deadline</label>
                     <input type="datetime-local" class="form-control" id="editPoolDeadline">
+                </div>
+                <div class="form-group" style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--card-border);">
+                    <label style="font-weight: 600; color: var(--accent-gold); margin-bottom: 0.75rem; display: block;">Display Options</label>
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" id="editPoolShowStrength" style="margin-right: 0.75rem; width: 18px; height: 18px;">
+                        <span>Show Strength Score on Leaderboard</span>
+                    </label>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; margin-left: 1.75rem;">
+                        Displays future upside based on active player positions × avg points per position
+                    </p>
                 </div>
             </div>
             <div class="modal-footer">
@@ -3141,8 +3160,10 @@
                 document.getElementById('editPoolId').value = poolId;
                 document.getElementById('editPoolName').value = pool.name || '';
                 document.getElementById('editPoolStatus').value = pool.status || 'open';
+                document.getElementById('editPoolCurrentWeek').value = pool.currentWeek || 'wildcard';
                 document.getElementById('editPoolBuyIn').value = pool.buyIn || 0;
                 document.getElementById('editPoolDescription').value = pool.description || '';
+                document.getElementById('editPoolShowStrength').checked = pool.showStrength || false;
                 
                 // Handle deadline - convert Firestore timestamp to datetime-local format
                 if (pool.deadline) {
@@ -3166,9 +3187,11 @@
             const poolId = document.getElementById('editPoolId').value;
             const name = document.getElementById('editPoolName').value;
             const status = document.getElementById('editPoolStatus').value;
+            const currentWeek = document.getElementById('editPoolCurrentWeek').value;
             const buyIn = parseFloat(document.getElementById('editPoolBuyIn').value) || 0;
             const description = document.getElementById('editPoolDescription').value;
             const deadlineStr = document.getElementById('editPoolDeadline').value;
+            const showStrength = document.getElementById('editPoolShowStrength').checked;
             
             if (!name) {
                 alert('Pool name is required');
@@ -3179,8 +3202,10 @@
                 const updateData = {
                     name,
                     status,
+                    currentWeek,
                     buyIn,
                     description,
+                    showStrength,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
                 
