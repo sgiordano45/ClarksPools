@@ -1278,7 +1278,7 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
                         <h1 class="page-title">View Players</h1>
                         <p class="page-subtitle">View all imported players and their stats</p>
                     </div>
-                    <div style="display: flex; gap: 1rem;">
+                    <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
                         <select class="form-control" style="width: 140px;" id="viewPlayersTeam" onchange="loadPlayersView()">
                             <option value="all">All Teams</option>
                         </select>
@@ -1290,6 +1290,7 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
                             <option value="TE">TE</option>
                             <option value="K">K</option>
                         </select>
+                        <button class="btn btn-primary" onclick="recalculateAllPoints()">🔄 Recalculate All Points</button>
                     </div>
                 </div>
 
@@ -1347,7 +1348,7 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
 
     <!-- Edit Player Modal -->
     <div class="modal-overlay" id="editPlayerModal">
-        <div class="modal">
+        <div class="modal" style="max-width: 700px;">
             <div class="modal-header">
                 <h3 class="modal-title">Edit Player</h3>
                 <button class="modal-close" onclick="closeModal('editPlayerModal')">&times;</button>
@@ -1364,22 +1365,138 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
                         <select class="form-control" id="editPlayerTeam"></select>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label>Position</label>
-                    <select class="form-control" id="editPlayerPosition" style="max-width: 150px;">
-                        <option value="QB">QB</option>
-                        <option value="RB">RB</option>
-                        <option value="WR">WR</option>
-                        <option value="TE">TE</option>
-                        <option value="K">K</option>
-                    </select>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Position</label>
+                        <select class="form-control" id="editPlayerPosition" onchange="toggleStatsFields()">
+                            <option value="QB">QB</option>
+                            <option value="RB">RB</option>
+                            <option value="WR">WR</option>
+                            <option value="TE">TE</option>
+                            <option value="K">K</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: center; padding-top: 1.5rem;">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" id="editPlayerIR" style="margin-right: 0.5rem; width: 18px; height: 18px;">
+                            <span style="color: var(--accent-red); font-weight: 600;">IR / Out</span>
+                        </label>
+                    </div>
                 </div>
-                <div class="form-group" style="margin-top: 1rem; padding: 1rem; background: rgba(255,82,82,0.1); border-radius: 8px;">
-                    <label style="display: flex; align-items: center; cursor: pointer;">
-                        <input type="checkbox" id="editPlayerIR" style="margin-right: 0.75rem; width: 18px; height: 18px;">
-                        <span style="color: var(--accent-red); font-weight: 600;">Player is on IR / Out for Playoffs</span>
-                    </label>
-                    <p class="form-help" style="margin-top: 0.5rem;">Check this if the player is injured or otherwise unavailable, even if their team is still active in the playoffs</p>
+                
+                <!-- Stats Section -->
+                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--card-border);">
+                    <h4 style="margin-bottom: 1rem; color: var(--accent-gold);">Player Stats</h4>
+                    
+                    <!-- Skill Position Stats -->
+                    <div id="skillStatsFields">
+                        <table class="preview-table" style="font-size: 0.85rem;">
+                            <thead>
+                                <tr>
+                                    <th>Round</th>
+                                    <th>Pass Yds</th>
+                                    <th>Rush Yds</th>
+                                    <th>Rec Yds</th>
+                                    <th>Rec</th>
+                                    <th>TD</th>
+                                    <th>2PT</th>
+                                    <th>Pts</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>WC</strong></td>
+                                    <td><input type="number" class="form-control" id="editStats_WC_passYds" style="width: 70px; padding: 0.25rem;"></td>
+                                    <td><input type="number" class="form-control" id="editStats_WC_rushYds" style="width: 70px; padding: 0.25rem;"></td>
+                                    <td><input type="number" class="form-control" id="editStats_WC_recYds" style="width: 70px; padding: 0.25rem;"></td>
+                                    <td><input type="number" class="form-control" id="editStats_WC_rec" style="width: 50px; padding: 0.25rem;"></td>
+                                    <td><input type="number" class="form-control" id="editStats_WC_td" style="width: 50px; padding: 0.25rem;"></td>
+                                    <td><input type="number" class="form-control" id="editStats_WC_2pt" style="width: 50px; padding: 0.25rem;"></td>
+                                    <td><span id="editStats_WC_pts" style="font-weight: 600; color: var(--accent-gold);">0</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>DIV</strong></td>
+                                    <td><input type="number" class="form-control" id="editStats_DIV_passYds" style="width: 70px; padding: 0.25rem;"></td>
+                                    <td><input type="number" class="form-control" id="editStats_DIV_rushYds" style="width: 70px; padding: 0.25rem;"></td>
+                                    <td><input type="number" class="form-control" id="editStats_DIV_recYds" style="width: 70px; padding: 0.25rem;"></td>
+                                    <td><input type="number" class="form-control" id="editStats_DIV_rec" style="width: 50px; padding: 0.25rem;"></td>
+                                    <td><input type="number" class="form-control" id="editStats_DIV_td" style="width: 50px; padding: 0.25rem;"></td>
+                                    <td><input type="number" class="form-control" id="editStats_DIV_2pt" style="width: 50px; padding: 0.25rem;"></td>
+                                    <td><span id="editStats_DIV_pts" style="font-weight: 600; color: var(--accent-gold);">0</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>CONF</strong></td>
+                                    <td><input type="number" class="form-control" id="editStats_CONF_passYds" style="width: 70px; padding: 0.25rem;"></td>
+                                    <td><input type="number" class="form-control" id="editStats_CONF_rushYds" style="width: 70px; padding: 0.25rem;"></td>
+                                    <td><input type="number" class="form-control" id="editStats_CONF_recYds" style="width: 70px; padding: 0.25rem;"></td>
+                                    <td><input type="number" class="form-control" id="editStats_CONF_rec" style="width: 50px; padding: 0.25rem;"></td>
+                                    <td><input type="number" class="form-control" id="editStats_CONF_td" style="width: 50px; padding: 0.25rem;"></td>
+                                    <td><input type="number" class="form-control" id="editStats_CONF_2pt" style="width: 50px; padding: 0.25rem;"></td>
+                                    <td><span id="editStats_CONF_pts" style="font-weight: 600; color: var(--accent-gold);">0</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>SB</strong></td>
+                                    <td><input type="number" class="form-control" id="editStats_SB_passYds" style="width: 70px; padding: 0.25rem;"></td>
+                                    <td><input type="number" class="form-control" id="editStats_SB_rushYds" style="width: 70px; padding: 0.25rem;"></td>
+                                    <td><input type="number" class="form-control" id="editStats_SB_recYds" style="width: 70px; padding: 0.25rem;"></td>
+                                    <td><input type="number" class="form-control" id="editStats_SB_rec" style="width: 50px; padding: 0.25rem;"></td>
+                                    <td><input type="number" class="form-control" id="editStats_SB_td" style="width: 50px; padding: 0.25rem;"></td>
+                                    <td><input type="number" class="form-control" id="editStats_SB_2pt" style="width: 50px; padding: 0.25rem;"></td>
+                                    <td><span id="editStats_SB_pts" style="font-weight: 600; color: var(--accent-gold);">0</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Kicker Stats -->
+                    <div id="kickerStatsFields" style="display: none;">
+                        <table class="preview-table" style="font-size: 0.85rem;">
+                            <thead>
+                                <tr>
+                                    <th>Round</th>
+                                    <th>PAT</th>
+                                    <th>FG (&lt;50)</th>
+                                    <th>FG (50+)</th>
+                                    <th>Pts</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>WC</strong></td>
+                                    <td><input type="number" class="form-control" id="editStats_WC_xp" style="width: 60px; padding: 0.25rem;"></td>
+                                    <td><input type="number" class="form-control" id="editStats_WC_fg" style="width: 60px; padding: 0.25rem;"></td>
+                                    <td><input type="number" class="form-control" id="editStats_WC_fg50" style="width: 60px; padding: 0.25rem;"></td>
+                                    <td><span id="editStats_WC_kpts" style="font-weight: 600; color: var(--accent-gold);">0</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>DIV</strong></td>
+                                    <td><input type="number" class="form-control" id="editStats_DIV_xp" style="width: 60px; padding: 0.25rem;"></td>
+                                    <td><input type="number" class="form-control" id="editStats_DIV_fg" style="width: 60px; padding: 0.25rem;"></td>
+                                    <td><input type="number" class="form-control" id="editStats_DIV_fg50" style="width: 60px; padding: 0.25rem;"></td>
+                                    <td><span id="editStats_DIV_kpts" style="font-weight: 600; color: var(--accent-gold);">0</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>CONF</strong></td>
+                                    <td><input type="number" class="form-control" id="editStats_CONF_xp" style="width: 60px; padding: 0.25rem;"></td>
+                                    <td><input type="number" class="form-control" id="editStats_CONF_fg" style="width: 60px; padding: 0.25rem;"></td>
+                                    <td><input type="number" class="form-control" id="editStats_CONF_fg50" style="width: 60px; padding: 0.25rem;"></td>
+                                    <td><span id="editStats_CONF_kpts" style="font-weight: 600; color: var(--accent-gold);">0</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>SB</strong></td>
+                                    <td><input type="number" class="form-control" id="editStats_SB_xp" style="width: 60px; padding: 0.25rem;"></td>
+                                    <td><input type="number" class="form-control" id="editStats_SB_fg" style="width: 60px; padding: 0.25rem;"></td>
+                                    <td><input type="number" class="form-control" id="editStats_SB_fg50" style="width: 60px; padding: 0.25rem;"></td>
+                                    <td><span id="editStats_SB_kpts" style="font-weight: 600; color: var(--accent-gold);">0</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div style="margin-top: 1rem; text-align: right;">
+                        <span style="color: var(--text-muted); margin-right: 1rem;">Total: <strong id="editStatsTotalPts" style="color: var(--accent-blue); font-size: 1.1rem;">0</strong></span>
+                        <button class="btn btn-outline btn-sm" onclick="recalculateEditStats()">Recalculate Points</button>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -2107,18 +2224,18 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
         function calculatePoints(stats) {
             let points = 0;
             
-            // Passing: 1 pt per 25 yards (no fractions)
-            points += Math.floor((stats.passYds || 0) / 25);
+            // Passing: 1 pt per 25 yards (floor negative yards at 0)
+            points += Math.floor(Math.max(0, stats.passYds || 0) / 25);
             // Passing TDs: 6 pts each
             points += (stats.passTD || 0) * 6;
             
-            // Rushing: 1 pt per 10 yards (no fractions)
-            points += Math.floor((stats.rushYds || 0) / 10);
+            // Rushing: 1 pt per 10 yards (floor negative yards at 0)
+            points += Math.floor(Math.max(0, stats.rushYds || 0) / 10);
             // Rushing TDs: 6 pts each
             points += (stats.rushTD || 0) * 6;
             
-            // Receiving: 1 pt per 10 yards (no fractions)
-            points += Math.floor((stats.recYds || 0) / 10);
+            // Receiving: 1 pt per 10 yards (floor negative yards at 0)
+            points += Math.floor(Math.max(0, stats.recYds || 0) / 10);
             // Receiving TDs: 6 pts each
             points += (stats.recTD || 0) * 6;
             // PPR: 1 pt per reception
@@ -2547,14 +2664,14 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
         function calculatePointsFromJson(stats) {
             let points = 0;
             
-            // Passing: 1 pt per 25 yards
-            points += Math.floor((stats.passYds || 0) / 25);
+            // Passing: 1 pt per 25 yards (floor negative yards at 0)
+            points += Math.floor(Math.max(0, stats.passYds || 0) / 25);
             
-            // Rushing: 1 pt per 10 yards
-            points += Math.floor((stats.rushYds || 0) / 10);
+            // Rushing: 1 pt per 10 yards (floor negative yards at 0)
+            points += Math.floor(Math.max(0, stats.rushYds || 0) / 10);
             
-            // Receiving: 1 pt per 10 yards
-            points += Math.floor((stats.recYds || 0) / 10);
+            // Receiving: 1 pt per 10 yards (floor negative yards at 0)
+            points += Math.floor(Math.max(0, stats.recYds || 0) / 10);
             
             // PPR: 1 pt per reception
             points += (stats.rec || 0) * 1;
@@ -3003,7 +3120,98 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
             document.getElementById('editPlayerPosition').value = player.position || 'QB';
             document.getElementById('editPlayerIR').checked = player.ir || player.status === 'ir';
 
+            // Load stats into form
+            const stats = player.stats || {};
+            const rounds = ['WC', 'DIV', 'CONF', 'SB'];
+            const isKicker = player.position === 'K';
+            
+            // Clear all stat fields first
+            rounds.forEach(round => {
+                // Skill stats
+                ['passYds', 'rushYds', 'recYds', 'rec', 'td', '2pt'].forEach(stat => {
+                    const el = document.getElementById(`editStats_${round}_${stat}`);
+                    if (el) el.value = '';
+                });
+                // Kicker stats
+                ['xp', 'fg', 'fg50'].forEach(stat => {
+                    const el = document.getElementById(`editStats_${round}_${stat}`);
+                    if (el) el.value = '';
+                });
+            });
+            
+            // Populate stats
+            rounds.forEach(round => {
+                const roundStats = stats[round] || {};
+                
+                if (isKicker) {
+                    document.getElementById(`editStats_${round}_xp`).value = roundStats.xp || '';
+                    document.getElementById(`editStats_${round}_fg`).value = roundStats.fg || '';
+                    document.getElementById(`editStats_${round}_fg50`).value = roundStats.fg50 || '';
+                } else {
+                    document.getElementById(`editStats_${round}_passYds`).value = roundStats.passYds || '';
+                    document.getElementById(`editStats_${round}_rushYds`).value = roundStats.rushYds || '';
+                    document.getElementById(`editStats_${round}_recYds`).value = roundStats.recYds || '';
+                    document.getElementById(`editStats_${round}_rec`).value = roundStats.rec || '';
+                    document.getElementById(`editStats_${round}_td`).value = roundStats.td || '';
+                    document.getElementById(`editStats_${round}_2pt`).value = roundStats['2pt'] || '';
+                }
+            });
+            
+            // Show/hide appropriate stats fields
+            toggleStatsFields();
+            
+            // Calculate displayed points
+            recalculateEditStats();
+
             document.getElementById('editPlayerModal').classList.add('active');
+        }
+
+        function toggleStatsFields() {
+            const position = document.getElementById('editPlayerPosition').value;
+            const isKicker = position === 'K';
+            
+            document.getElementById('skillStatsFields').style.display = isKicker ? 'none' : 'block';
+            document.getElementById('kickerStatsFields').style.display = isKicker ? 'block' : 'none';
+            
+            recalculateEditStats();
+        }
+
+        function recalculateEditStats() {
+            const position = document.getElementById('editPlayerPosition').value;
+            const isKicker = position === 'K';
+            const rounds = ['WC', 'DIV', 'CONF', 'SB'];
+            let totalPoints = 0;
+            
+            rounds.forEach(round => {
+                let pts = 0;
+                
+                if (isKicker) {
+                    const xp = parseInt(document.getElementById(`editStats_${round}_xp`).value) || 0;
+                    const fg = parseInt(document.getElementById(`editStats_${round}_fg`).value) || 0;
+                    const fg50 = parseInt(document.getElementById(`editStats_${round}_fg50`).value) || 0;
+                    
+                    pts = (xp * 1) + (fg * 3) + (fg50 * 5);
+                    document.getElementById(`editStats_${round}_kpts`).textContent = pts;
+                } else {
+                    const passYds = parseInt(document.getElementById(`editStats_${round}_passYds`).value) || 0;
+                    const rushYds = parseInt(document.getElementById(`editStats_${round}_rushYds`).value) || 0;
+                    const recYds = parseInt(document.getElementById(`editStats_${round}_recYds`).value) || 0;
+                    const rec = parseInt(document.getElementById(`editStats_${round}_rec`).value) || 0;
+                    const td = parseInt(document.getElementById(`editStats_${round}_td`).value) || 0;
+                    const twoPt = parseInt(document.getElementById(`editStats_${round}_2pt`).value) || 0;
+                    
+                    pts = Math.floor(Math.max(0, passYds) / 25) +
+                          Math.floor(Math.max(0, rushYds) / 10) +
+                          Math.floor(Math.max(0, recYds) / 10) +
+                          rec + (td * 6) + (twoPt * 2);
+                    
+                    document.getElementById(`editStats_${round}_pts`).textContent = pts;
+                }
+                
+                totalPoints += pts;
+            });
+            
+            document.getElementById('editStatsTotalPts').textContent = totalPoints;
         }
 
         async function updatePlayer() {
@@ -3018,6 +3226,45 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
                 return;
             }
 
+            // Build stats object
+            const rounds = ['WC', 'DIV', 'CONF', 'SB'];
+            const isKicker = position === 'K';
+            const stats = {};
+            let totalPoints = 0;
+            
+            rounds.forEach(round => {
+                const roundStats = {};
+                let pts = 0;
+                
+                if (isKicker) {
+                    roundStats.xp = parseInt(document.getElementById(`editStats_${round}_xp`).value) || 0;
+                    roundStats.fg = parseInt(document.getElementById(`editStats_${round}_fg`).value) || 0;
+                    roundStats.fg50 = parseInt(document.getElementById(`editStats_${round}_fg50`).value) || 0;
+                    
+                    pts = (roundStats.xp * 1) + (roundStats.fg * 3) + (roundStats.fg50 * 5);
+                } else {
+                    roundStats.passYds = parseInt(document.getElementById(`editStats_${round}_passYds`).value) || 0;
+                    roundStats.rushYds = parseInt(document.getElementById(`editStats_${round}_rushYds`).value) || 0;
+                    roundStats.recYds = parseInt(document.getElementById(`editStats_${round}_recYds`).value) || 0;
+                    roundStats.rec = parseInt(document.getElementById(`editStats_${round}_rec`).value) || 0;
+                    roundStats.td = parseInt(document.getElementById(`editStats_${round}_td`).value) || 0;
+                    roundStats['2pt'] = parseInt(document.getElementById(`editStats_${round}_2pt`).value) || 0;
+                    
+                    pts = Math.floor(Math.max(0, roundStats.passYds) / 25) +
+                          Math.floor(Math.max(0, roundStats.rushYds) / 10) +
+                          Math.floor(Math.max(0, roundStats.recYds) / 10) +
+                          roundStats.rec + (roundStats.td * 6) + (roundStats['2pt'] * 2);
+                }
+                
+                roundStats.points = pts;
+                totalPoints += pts;
+                
+                // Only add round if there are any stats
+                if (Object.values(roundStats).some(v => v !== 0)) {
+                    stats[round] = roundStats;
+                }
+            });
+
             try {
                 await db.collection('players').doc(playerId).update({
                     name,
@@ -3026,6 +3273,8 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
                     position,
                     ir,
                     status: ir ? 'ir' : 'active',
+                    stats,
+                    totalPoints,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
@@ -3034,6 +3283,80 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
             } catch (error) {
                 console.error('Error updating player:', error);
                 alert('Error updating player: ' + error.message);
+            }
+        }
+
+        // Recalculate all player points from stored stats
+        async function recalculateAllPoints() {
+            if (!confirm('Recalculate points for ALL players from their stored stats? This will update all point values.')) return;
+            
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'alert alert-info';
+            resultDiv.textContent = 'Recalculating points...';
+            document.querySelector('#view-players .page-header').after(resultDiv);
+            
+            try {
+                const snapshot = await db.collection('players').get();
+                let updated = 0;
+                let errors = 0;
+                
+                for (const doc of snapshot.docs) {
+                    const player = doc.data();
+                    const stats = player.stats || {};
+                    const isKicker = player.position === 'K';
+                    let totalPoints = 0;
+                    const updatedStats = {};
+                    
+                    ['WC', 'DIV', 'CONF', 'SB'].forEach(round => {
+                        if (stats[round]) {
+                            const roundStats = { ...stats[round] };
+                            let pts = 0;
+                            
+                            if (isKicker) {
+                                pts = ((roundStats.xp || 0) * 1) + 
+                                      ((roundStats.fg || 0) * 3) + 
+                                      ((roundStats.fg50 || 0) * 5);
+                            } else {
+                                pts = Math.floor(Math.max(0, roundStats.passYds || 0) / 25) +
+                                      Math.floor(Math.max(0, roundStats.rushYds || 0) / 10) +
+                                      Math.floor(Math.max(0, roundStats.recYds || 0) / 10) +
+                                      (roundStats.rec || 0) + 
+                                      ((roundStats.td || 0) * 6) + 
+                                      ((roundStats['2pt'] || 0) * 2);
+                            }
+                            
+                            roundStats.points = pts;
+                            totalPoints += pts;
+                            updatedStats[round] = roundStats;
+                        }
+                    });
+                    
+                    try {
+                        await doc.ref.update({
+                            stats: updatedStats,
+                            totalPoints,
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        updated++;
+                    } catch (e) {
+                        errors++;
+                        console.error('Error updating player:', doc.id, e);
+                    }
+                }
+                
+                resultDiv.className = 'alert alert-success';
+                resultDiv.textContent = `✓ Recalculated points for ${updated} players.${errors > 0 ? ` ${errors} errors.` : ''}`;
+                
+                // Refresh the view
+                loadPlayersView();
+                
+                // Remove alert after 5 seconds
+                setTimeout(() => resultDiv.remove(), 5000);
+                
+            } catch (error) {
+                console.error('Recalculation error:', error);
+                resultDiv.className = 'alert alert-error';
+                resultDiv.textContent = 'Error: ' + error.message;
             }
         }
 
@@ -3077,6 +3400,14 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
             // Initialize - Load teams first, then populate selects
             await loadPlayoffTeams();
             populateTeamSelects();
+            
+            // Add event listeners for stats inputs to auto-recalculate
+            const statsInputs = document.querySelectorAll('[id^="editStats_"]');
+            statsInputs.forEach(input => {
+                if (input.tagName === 'INPUT') {
+                    input.addEventListener('input', recalculateEditStats);
+                }
+            });
         });
     </script>
 </body>
