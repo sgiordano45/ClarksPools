@@ -367,10 +367,6 @@
             color: var(--text-secondary);
         }
 
-        .leaderboard-header.with-strength {
-            grid-template-columns: 50px 1fr 140px 60px 70px 70px 70px 70px 80px 40px;
-        }
-
         .leaderboard-row {
             display: grid;
             grid-template-columns: 50px 1fr 140px 70px 70px 70px 70px 80px 40px;
@@ -380,10 +376,6 @@
             align-items: center;
             transition: background 0.2s ease;
             cursor: pointer;
-        }
-
-        .leaderboard-row.with-strength {
-            grid-template-columns: 50px 1fr 140px 60px 70px 70px 70px 70px 80px 40px;
         }
 
         .leaderboard-row:hover {
@@ -544,137 +536,6 @@
 
         .roster-player.eliminated .player-team-logo {
             filter: grayscale(100%);
-        }
-
-        .roster-player.shared-player {
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
-        }
-
-        .roster-player.shared-player .player-name::after {
-            content: ' 🔗';
-            font-size: 0.7rem;
-        }
-
-        .roster-player.unique-player {
-            border-color: var(--accent-gold);
-        }
-
-        /* Overlap Badge */
-        .overlap-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-            font-size: 0.7rem;
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            margin-left: 0.5rem;
-        }
-
-        .overlap-badge.high {
-            background: rgba(0, 200, 83, 0.2);
-            color: var(--accent-green);
-        }
-
-        .overlap-badge.medium {
-            background: rgba(255, 193, 7, 0.2);
-            color: var(--accent-gold);
-        }
-
-        .overlap-badge.low {
-            background: rgba(90, 113, 148, 0.2);
-            color: var(--text-muted);
-        }
-
-        .overlap-badge.identical {
-            background: rgba(0, 212, 255, 0.2);
-            color: var(--accent-blue);
-        }
-
-        /* Overlap Details in expanded section */
-        .overlap-summary {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-            padding: 0.75rem 1rem;
-            background: var(--secondary-dark);
-            border-radius: 8px;
-            font-size: 0.85rem;
-            flex-wrap: wrap;
-        }
-
-        .overlap-stat {
-            display: flex;
-            align-items: center;
-            gap: 0.35rem;
-        }
-
-        .overlap-stat-value {
-            font-family: 'Oswald', sans-serif;
-            font-weight: 600;
-        }
-
-        .overlap-stat-value.shared { color: var(--accent-blue); }
-        .overlap-stat-value.unique-them { color: var(--accent-red); }
-        .overlap-stat-value.unique-me { color: var(--accent-green); }
-
-        /* Compare Entry Selector */
-        .compare-selector {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            background: var(--tertiary-dark);
-            border-radius: 8px;
-            margin-bottom: 1rem;
-        }
-
-        .compare-selector label {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        .compare-selector select {
-            background: var(--secondary-dark);
-            color: var(--text-primary);
-            border: 1px solid var(--card-border);
-            border-radius: 4px;
-            padding: 0.4rem 0.75rem;
-            font-family: 'Roboto Condensed', sans-serif;
-            font-size: 0.85rem;
-        }
-
-        /* Strength Score */
-        .strength-score {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-width: 50px;
-        }
-
-        .strength-label {
-            font-size: 0.55rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .strength-value {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 1.2rem;
-            color: var(--accent-gold);
-        }
-
-        .strength-value.high {
-            color: var(--accent-green);
-        }
-
-        .strength-value.medium {
-            color: var(--accent-gold);
-        }
-
-        .strength-value.low {
-            color: var(--text-muted);
         }
 
         .player-position {
@@ -1453,7 +1314,7 @@
         <!-- Leaderboard Tab -->
         <div class="tab-content active" id="leaderboard">
             <div class="leaderboard-container">
-                <div class="leaderboard-header" id="leaderboardHeader">
+                <div class="leaderboard-header">
                     <div>Rank</div>
                     <div>Entry</div>
                     <div style="text-align:center">Active</div>
@@ -1882,10 +1743,8 @@
                             name: player.name,
                             team: player.team,
                             teamName: player.teamName || player.team,
-                            position: position,
                             totalPoints: player.totalPoints || 0,
-                            stats: player.stats || {},
-                            ir: player.ir || player.status === 'ir' || false
+                            stats: player.stats || {}
                         });
                     }
                 });
@@ -1992,7 +1851,7 @@
                          style="${isUsed ? 'opacity: 0.4; cursor: not-allowed;' : ''}">
                         <div class="player-team-logo" style="${isEliminated ? 'opacity: 0.5;' : ''}">${player.team}</div>
                         <div class="player-option-info">
-                            <div class="player-option-name">${player.name} ${isEliminated ? '❌' : ''}</div>
+                            <div class="player-option-name">${capitalizeName(player.name)} ${isEliminated ? '❌' : ''}</div>
                             <div class="player-option-meta">${teamName} ${isUsed ? '(Team Used)' : ''} ${isEliminated ? '(Eliminated)' : ''}</div>
                         </div>
                         <div style="font-family: 'Oswald', sans-serif; font-size: 1rem; color: var(--accent-gold); margin-left: auto;">${points.toFixed(1)} pts</div>
@@ -2020,7 +1879,7 @@
                 <div class="slot-player">
                     <div class="player-team-logo">${team}</div>
                     <div class="player-info">
-                        <div class="player-name">${name}</div>
+                        <div class="player-name">${capitalizeName(name)}</div>
                         <div class="player-team-name">${teamName}</div>
                     </div>
                 </div>
@@ -2230,16 +2089,10 @@
                 deadlineEl.textContent = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
             }
 
-            // Current Week (formatted display)
+            // Current Week (you can customize this based on your data)
             const weekEl = document.querySelector('.pool-stat:nth-child(5) .pool-stat-value');
             if (weekEl && pool.currentWeek) {
-                const weekNames = {
-                    'wildcard': 'Wild Card',
-                    'divisional': 'Divisional',
-                    'conference': 'Conf Champ',
-                    'superbowl': 'Super Bowl'
-                };
-                weekEl.textContent = weekNames[pool.currentWeek] || pool.currentWeek;
+                weekEl.textContent = pool.currentWeek;
             }
         }
 
@@ -2280,52 +2133,8 @@
                 // Get current user to highlight their entry
                 const currentUserId = auth.currentUser?.uid;
                 
-                // Store entries and find user's entries for comparison
-                allEntries = entries;
-                myEntries = entries.filter(e => e.userId === currentUserId);
-                
-                // Set default compare entry if not set or invalid
-                if (!selectedCompareEntry || !myEntries.find(e => e.id === selectedCompareEntry.id)) {
-                    selectedCompareEntry = myEntries.length > 0 ? myEntries[0] : null;
-                }
-                
-                // Check if strength score should be shown
-                const showStrength = currentPoolData?.showStrength || false;
-                
-                // If showing strength, calculate for all entries and find max
-                let maxStrength = 0;
-                if (showStrength) {
-                    entries.forEach(entry => {
-                        entry.strengthScore = calculateStrengthScore(entry.roster);
-                        if (entry.strengthScore > maxStrength) {
-                            maxStrength = entry.strengthScore;
-                        }
-                    });
-                }
-                
-                // Build compare selector HTML if user has entries
-                let compareSelectorHtml = '';
-                if (myEntries.length > 0) {
-                    const activeCount = getActivePlayerNames(selectedCompareEntry?.roster).length;
-                    compareSelectorHtml = `
-                        <div class="compare-selector">
-                            <label>🔗 Compare rosters to:</label>
-                            <select id="compareEntrySelect" onchange="updateCompareEntry(this.value)">
-                                ${myEntries.map(e => `
-                                    <option value="${e.id}" ${selectedCompareEntry?.id === e.id ? 'selected' : ''}>
-                                        ${e.teamName || e.entryName || 'My Entry'}
-                                    </option>
-                                `).join('')}
-                            </select>
-                            <span style="color: var(--text-muted); font-size: 0.8rem;">
-                                (${activeCount} active players)
-                            </span>
-                        </div>
-                    `;
-                }
-                
                 // Render leaderboard rows
-                const rowsHtml = entries.map((entry, index) => {
+                container.innerHTML = entries.map((entry, index) => {
                     const rank = index + 1;
                     const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : '';
                     const isMyEntry = entry.userId === currentUserId;
@@ -2347,73 +2156,16 @@
                     // Calculate active players by position
                     const activeByPos = calculateActiveByPosition(entry.roster);
                     
-                    // Calculate overlap if user has entries and this isn't their own entry being compared
-                    let overlapBadgeHtml = '';
-                    let overlapSummaryHtml = '';
-                    let sharedPlayers = new Set();
-                    
-                    if (selectedCompareEntry && selectedCompareEntry.id !== entry.id) {
-                        const overlap = calculateRosterOverlap(selectedCompareEntry.roster, entry.roster);
-                        const badgeClass = getOverlapBadgeClass(overlap);
-                        sharedPlayers = new Set(overlap.shared);
-                        
-                        // Badge text
-                        let badgeText = `${overlap.sharedCount} shared`;
-                        if (badgeClass === 'identical') {
-                            badgeText = '✓ Identical';
-                        }
-                        
-                        overlapBadgeHtml = `<span class="overlap-badge ${badgeClass}">${badgeText}</span>`;
-                        
-                        // Get last names for display
-                        const uniqueToThemNames = overlap.uniqueToThem.slice(0, 3).map(p => {
-                            const parts = p.split(' ');
-                            return parts.length > 1 ? parts[parts.length - 1] : p;
-                        });
-                        
-                        // Overlap summary for expanded view
-                        overlapSummaryHtml = `
-                            <div class="overlap-summary">
-                                <div class="overlap-stat">
-                                    <span class="overlap-stat-value shared">${overlap.sharedCount}</span>
-                                    <span>shared active players</span>
-                                </div>
-                                <div class="overlap-stat">
-                                    <span class="overlap-stat-value unique-them">${overlap.uniqueToThem.length}</span>
-                                    <span>unique to them${uniqueToThemNames.length > 0 ? ` (${uniqueToThemNames.join(', ')}${overlap.uniqueToThem.length > 3 ? '...' : ''})` : ''}</span>
-                                </div>
-                                <div class="overlap-stat">
-                                    <span class="overlap-stat-value unique-me">${overlap.uniqueToMe.length}</span>
-                                    <span>unique to you</span>
-                                </div>
-                            </div>
-                        `;
-                    }
-                    
                     // Build roster grid HTML using players array and roster map
-                    const rosterHtml = renderEntryRoster(entry.roster, entry.players, sharedPlayers);
-                    
-                    // Build strength HTML if enabled
-                    let strengthHtml = '';
-                    if (showStrength) {
-                        const strengthClass = getStrengthClass(entry.strengthScore, maxStrength);
-                        strengthHtml = `
-                            <div class="strength-score">
-                                <div class="strength-label">Upside</div>
-                                <div class="strength-value ${strengthClass}">${entry.strengthScore}</div>
-                            </div>
-                        `;
-                    }
-                    
-                    const strengthRowClass = showStrength ? 'with-strength' : '';
+                    const rosterHtml = renderEntryRoster(entry.roster, entry.players);
                     
                     return `
-                        <div class="leaderboard-row ${myEntryClass} ${strengthRowClass}" onclick="toggleDetails(this)" data-entry-id="${entry.id}">
+                        <div class="leaderboard-row ${myEntryClass}" onclick="toggleDetails(this)" data-entry-id="${entry.id}">
                             <div class="rank ${rankClass}">${rank}</div>
                             <div class="entry-info">
                                 <div class="entry-avatar">${initials}</div>
                                 <div>
-                                    <div class="entry-name">${displayName}${overlapBadgeHtml}</div>
+                                    <div class="entry-name">${displayName}</div>
                                     <div class="entry-user">Tiebreaker: ${entry.tiebreaker || 0}</div>
                                 </div>
                             </div>
@@ -2439,7 +2191,6 @@
                                     <div class="active-pos-count ${activeByPos.K.active === activeByPos.K.total ? 'full' : activeByPos.K.active === 0 ? 'none' : 'partial'}">${activeByPos.K.active}</div>
                                 </div>
                             </div>
-                            ${strengthHtml}
                             <div class="week-points ${wcPts > 0 ? 'active-week' : ''}">${wcPts > 0 ? wcPts.toFixed(1) : '—'}</div>
                             <div class="week-points ${divPts > 0 ? 'active-week' : ''}">${divPts > 0 ? divPts.toFixed(1) : '—'}</div>
                             <div class="week-points ${confPts > 0 ? 'active-week' : ''}">${confPts > 0 ? confPts.toFixed(1) : '—'}</div>
@@ -2448,48 +2199,12 @@
                             <button class="expand-btn">▼</button>
                         </div>
                         <div class="entry-details">
-                            ${overlapSummaryHtml}
                             <div class="roster-grid">
                                 ${rosterHtml}
                             </div>
                         </div>
                     `;
                 }).join('');
-                
-                container.innerHTML = compareSelectorHtml + rowsHtml;
-                
-                // Update header based on showStrength
-                const header = document.getElementById('leaderboardHeader');
-                if (header) {
-                    if (showStrength) {
-                        header.classList.add('with-strength');
-                        header.innerHTML = `
-                            <div>Rank</div>
-                            <div>Entry</div>
-                            <div style="text-align:center">Active</div>
-                            <div style="text-align:center">Upside</div>
-                            <div style="text-align:center">WC</div>
-                            <div style="text-align:center">DIV</div>
-                            <div style="text-align:center">CONF</div>
-                            <div style="text-align:center">SB</div>
-                            <div style="text-align:center">Total</div>
-                            <div></div>
-                        `;
-                    } else {
-                        header.classList.remove('with-strength');
-                        header.innerHTML = `
-                            <div>Rank</div>
-                            <div>Entry</div>
-                            <div style="text-align:center">Active</div>
-                            <div style="text-align:center">WC</div>
-                            <div style="text-align:center">DIV</div>
-                            <div style="text-align:center">CONF</div>
-                            <div style="text-align:center">SB</div>
-                            <div style="text-align:center">Total</div>
-                            <div></div>
-                        `;
-                    }
-                }
                 
                 console.log('Loaded entries:', entries.length);
             } catch (error) {
@@ -2502,14 +2217,6 @@
             }
         }
 
-        // Update compare entry selection
-        function updateCompareEntry(entryId) {
-            selectedCompareEntry = myEntries.find(e => e.id === entryId);
-            if (currentPoolId) {
-                loadLeaderboard(currentPoolId);
-            }
-        }
-
         // Get initials from name
         function getInitials(name) {
             if (!name) return '??';
@@ -2518,6 +2225,15 @@
                 return (parts[0][0] + parts[1][0]).toUpperCase();
             }
             return name.substring(0, 2).toUpperCase();
+        }
+
+        // Capitalize each word in a name (handles hyphenated names like Smith-Njigba)
+        function capitalizeName(name) {
+            if (!name) return '';
+            return name.split(/(\s+|-)/).map(part => {
+                if (part === ' ' || part === '-') return part;
+                return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
+            }).join('');
         }
 
         // Calculate active (non-eliminated) players by position for an entry
@@ -2540,203 +2256,21 @@
                 if (counts[position]) {
                     counts[position].total++;
                     
-                    // Find player and check if their team is eliminated or player is on IR
+                    // Find player and check if their team is eliminated
                     const playerFromDb = Object.values(playersData).flat().find(p => 
                         p.name.toLowerCase() === playerName.toLowerCase()
                     );
                     
                     const team = playerFromDb?.team;
                     const isEliminated = team ? (teamsStatus[team]?.eliminated || false) : false;
-                    const isIR = playerFromDb?.ir || false;
                     
-                    if (!isEliminated && !isIR) {
+                    if (!isEliminated) {
                         counts[position].active++;
                     }
                 }
             });
             
             return counts;
-        }
-
-        // Get list of active (non-eliminated, non-IR) player names from a roster
-        function getActivePlayerNames(roster) {
-            if (!roster || Object.keys(roster).length === 0) {
-                return [];
-            }
-            
-            const activePlayers = [];
-            
-            Object.values(roster).forEach(playerName => {
-                const playerFromDb = Object.values(playersData).flat().find(p => 
-                    p.name.toLowerCase() === playerName.toLowerCase()
-                );
-                
-                const team = playerFromDb?.team;
-                const isEliminated = team ? (teamsStatus[team]?.eliminated || false) : false;
-                const isIR = playerFromDb?.ir || false;
-                
-                if (!isEliminated && !isIR) {
-                    activePlayers.push(playerName.toLowerCase());
-                }
-            });
-            
-            return activePlayers;
-        }
-
-        // Calculate roster overlap between two entries
-        function calculateRosterOverlap(myRoster, theirRoster) {
-            const myActive = new Set(getActivePlayerNames(myRoster));
-            const theirActive = new Set(getActivePlayerNames(theirRoster));
-            
-            const shared = [];
-            const uniqueToMe = [];
-            const uniqueToThem = [];
-            
-            // Find shared players
-            myActive.forEach(player => {
-                if (theirActive.has(player)) {
-                    shared.push(player);
-                } else {
-                    uniqueToMe.push(player);
-                }
-            });
-            
-            // Find players unique to them
-            theirActive.forEach(player => {
-                if (!myActive.has(player)) {
-                    uniqueToThem.push(player);
-                }
-            });
-            
-            const totalActive = myActive.size;
-            const overlapPercent = totalActive > 0 ? (shared.length / totalActive) * 100 : 0;
-            
-            return {
-                shared,
-                uniqueToMe,
-                uniqueToThem,
-                sharedCount: shared.length,
-                myActiveCount: myActive.size,
-                theirActiveCount: theirActive.size,
-                overlapPercent
-            };
-        }
-
-        // Get overlap badge class based on percentage
-        function getOverlapBadgeClass(overlap) {
-            if (overlap.sharedCount === overlap.myActiveCount && overlap.myActiveCount === overlap.theirActiveCount) {
-                return 'identical';
-            } else if (overlap.overlapPercent >= 70) {
-                return 'high';
-            } else if (overlap.overlapPercent >= 40) {
-                return 'medium';
-            }
-            return 'low';
-        }
-
-        // Store for comparison
-        let myEntries = [];
-        let allEntries = [];
-        let selectedCompareEntry = null;
-
-        // Cached median points per position (calculated once per page load)
-        let positionMedians = null;
-
-        // Calculate median value from array
-        function calculateMedian(values) {
-            if (values.length === 0) return 0;
-            const sorted = [...values].sort((a, b) => a - b);
-            const mid = Math.floor(sorted.length / 2);
-            return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
-        }
-
-        // Calculate median points per position from all players who have played
-        function calculatePositionMedians() {
-            // Recalculate each time to ensure fresh data
-            const pointsByPosition = {
-                QB: [],
-                RB: [],
-                WR: [],
-                TE: [],
-                K: []
-            };
-            
-            // Gather per-game points for each position
-            const allPlayers = Object.values(playersData).flat();
-            console.log('Calculating medians from', allPlayers.length, 'players');
-            
-            allPlayers.forEach(player => {
-                if (!player.stats || !player.position) return;
-                
-                // Get points from each round the player participated in
-                ['WC', 'DIV', 'CONF', 'SB'].forEach(round => {
-                    const roundStats = player.stats[round];
-                    if (roundStats && typeof roundStats.points === 'number') {
-                        const pts = Math.max(0, roundStats.points);
-                        if (pointsByPosition[player.position]) {
-                            pointsByPosition[player.position].push(pts);
-                        }
-                    }
-                });
-            });
-            
-            console.log('Points by position sample counts:', {
-                QB: pointsByPosition.QB.length,
-                RB: pointsByPosition.RB.length,
-                WR: pointsByPosition.WR.length,
-                TE: pointsByPosition.TE.length,
-                K: pointsByPosition.K.length
-            });
-            
-            // Calculate median for each position
-            positionMedians = {
-                QB: calculateMedian(pointsByPosition.QB),
-                RB: calculateMedian(pointsByPosition.RB),
-                WR: calculateMedian(pointsByPosition.WR),
-                TE: calculateMedian(pointsByPosition.TE),
-                K: calculateMedian(pointsByPosition.K)
-            };
-            
-            console.log('Position medians:', positionMedians);
-            return positionMedians;
-        }
-
-        // Calculate strength score for an entry based on active players
-        function calculateStrengthScore(roster) {
-            const medians = calculatePositionMedians();
-            let strengthScore = 0;
-            
-            if (!roster || Object.keys(roster).length === 0) {
-                return 0;
-            }
-            
-            Object.entries(roster).forEach(([key, playerName]) => {
-                const position = key.replace(/[0-9]/g, '').toUpperCase();
-                
-                // Find player to check if active
-                const playerFromDb = Object.values(playersData).flat().find(p => 
-                    p.name.toLowerCase() === playerName.toLowerCase()
-                );
-                
-                const team = playerFromDb?.team;
-                const isEliminated = team ? (teamsStatus[team]?.eliminated || false) : false;
-                const isIR = playerFromDb?.ir || false;
-                
-                // Only count active players
-                if (!isEliminated && !isIR && medians[position]) {
-                    strengthScore += medians[position];
-                }
-            });
-            
-            return Math.round(strengthScore * 10) / 10; // Round to 1 decimal
-        }
-
-        // Get strength class for styling
-        function getStrengthClass(score, maxScore) {
-            const pct = maxScore > 0 ? (score / maxScore) * 100 : 0;
-            if (pct >= 80) return 'high';
-            if (pct >= 50) return 'medium';
-            return 'low';
         }
 
         // Calculate entry week points from roster players' stats
@@ -2770,7 +2304,7 @@
         }
 
         // Render roster for an entry
-        function renderEntryRoster(roster, players, sharedPlayers = new Set()) {
+        function renderEntryRoster(roster, players) {
             if (!roster || Object.keys(roster).length === 0) {
                 return '<div style="color: var(--text-muted); padding: 1rem;">No roster data available</div>';
             }
@@ -2809,24 +2343,7 @@
                 // Get team name from teams collection
                 const teamName = teamsStatus[team]?.name || team;
                 const isEliminated = teamsStatus[team]?.eliminated || false;
-                const isIR = playerFromDb?.ir || false;
-                const isOut = isEliminated || isIR;
-                
-                // Check if this player is shared with compared entry
-                const isShared = sharedPlayers.has(name.toLowerCase());
-                
-                // Build CSS classes
-                let cssClasses = 'roster-player';
-                if (isOut) cssClasses += ' eliminated';
-                if (isShared && !isOut) cssClasses += ' shared-player';
-                
-                // Determine status indicator
-                let statusIndicator = '';
-                if (isIR) {
-                    statusIndicator = ' <span style="background: var(--accent-red); color: white; padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.65rem; font-weight: 600; margin-left: 0.25rem;">IR</span>';
-                } else if (isEliminated) {
-                    statusIndicator = ' ❌';
-                }
+                const eliminatedClass = isEliminated ? 'eliminated' : '';
                 
                 // Calculate player points from stats, flooring each round at 0
                 let points = 0;
@@ -2838,11 +2355,11 @@
                 }
                 
                 return `
-                    <div class="${cssClasses}">
+                    <div class="roster-player ${eliminatedClass}">
                         <span class="player-position">${position}</span>
                         <div class="player-team-logo">${team}</div>
                         <div class="player-info">
-                            <div class="player-name">${name}${statusIndicator}</div>
+                            <div class="player-name">${capitalizeName(name)}${isEliminated ? ' ❌' : ''}</div>
                             <div class="player-team-name">${teamName}</div>
                         </div>
                         <div class="player-points">${points.toFixed(1)}</div>
@@ -2990,7 +2507,6 @@
                     const team = playerFromDb?.team || '??';
                     const teamName = teamsStatus[team]?.name || team;
                     const isEliminated = teamsStatus[team]?.eliminated || false;
-                    const isIR = playerFromDb?.ir || false;
                     const pct = (data.count / totalEntries) * 100;
                     
                     if (positionGroups[data.position]) {
@@ -3000,8 +2516,7 @@
                             teamName,
                             count: data.count,
                             pct,
-                            isEliminated,
-                            isIR
+                            isEliminated
                         });
                     }
                 });
@@ -3025,10 +2540,10 @@
                                 ${positionGroups[pos].length === 0 ? 
                                     '<div style="padding: 1rem; color: var(--text-muted); text-align: center;">No players drafted</div>' :
                                     positionGroups[pos].map(player => `
-                                        <div class="ownership-player ${player.isEliminated || player.isIR ? 'eliminated' : ''}">
+                                        <div class="ownership-player ${player.isEliminated ? 'eliminated' : ''}">
                                             <div class="player-team-logo">${player.team}</div>
                                             <div class="ownership-player-info">
-                                                <div class="ownership-player-name">${player.name}${player.isIR ? ' <span style="background: var(--accent-red); color: white; padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.65rem; font-weight: 600;">IR</span>' : (player.isEliminated ? ' ❌' : '')}</div>
+                                                <div class="ownership-player-name">${capitalizeName(player.name)}${player.isEliminated ? ' ❌' : ''}</div>
                                                 <div class="ownership-player-team">${player.teamName}</div>
                                             </div>
                                             <div class="ownership-count">${player.count}</div>
