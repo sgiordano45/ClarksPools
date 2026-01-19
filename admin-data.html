@@ -2215,7 +2215,8 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
 
             // Find stat columns for each round
             const rounds = ['WC', 'DIV', 'CONF', 'SB'];
-            const statCols = ['passYds', 'passTD', 'rushYds', 'rushTD', 'rec', 'recYds', 'recTD', 'fg', 'fg50', 'xp', '2pt'];
+            const skillStatCols = ['passYds', 'passTD', 'rushYds', 'rushTD', 'rec', 'recYds', 'recTD', 'passing_yards', 'rushing_yards', 'receiving_yards', 'receptions', 'touchdowns', 'two_pt_conversions', '2pt'];
+            const kickerStatCols = ['pat', 'fg_under_50', 'fg_50_plus', 'fg', 'fg50', 'xp'];
             
             statsToImport = [];
             const tbody = document.getElementById('statsPreviewBody');
@@ -2228,23 +2229,58 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
                 const name = cols[nameIdx];
                 const team = cols[teamIdx]?.toUpperCase();
                 const position = posIdx !== -1 ? cols[posIdx]?.toUpperCase() : '';
+                const isKicker = position === 'K';
                 
                 const playerStats = { name, team, position, rounds: {} };
                 
                 // Parse each round's stats
                 rounds.forEach(round => {
                     const roundStats = {};
-                    statCols.forEach(stat => {
-                        const colName = `${round}_${stat}`;
-                        const colIdx = header.findIndex(h => h === colName || h === colName.toLowerCase());
-                        if (colIdx !== -1 && cols[colIdx]) {
-                            roundStats[stat] = parseInt(cols[colIdx]) || 0;
-                        }
-                    });
                     
-                    if (Object.keys(roundStats).length > 0) {
-                        roundStats.points = calculatePoints(roundStats);
-                        playerStats.rounds[round] = roundStats;
+                    if (isKicker) {
+                        // Parse kicker stats
+                        kickerStatCols.forEach(stat => {
+                            const colName = `${round}_${stat}`;
+                            const colIdx = header.findIndex(h => h === colName || h.toLowerCase() === colName.toLowerCase());
+                            if (colIdx !== -1 && cols[colIdx]) {
+                                roundStats[stat] = parseInt(cols[colIdx]) || 0;
+                            }
+                        });
+                        
+                        if (Object.keys(roundStats).length > 0) {
+                            // Normalize kicker stat names and calculate points
+                            const xp = roundStats.pat || roundStats.xp || 0;
+                            const fg = roundStats.fg_under_50 || roundStats.fg || 0;
+                            const fg50 = roundStats.fg_50_plus || roundStats.fg50 || 0;
+                            
+                            roundStats.xp = xp;
+                            roundStats.fg = fg;
+                            roundStats.fg50 = fg50;
+                            roundStats.points = (xp * 1) + (fg * 3) + (fg50 * 5);
+                            playerStats.rounds[round] = roundStats;
+                        }
+                    } else {
+                        // Parse skill position stats
+                        skillStatCols.forEach(stat => {
+                            const colName = `${round}_${stat}`;
+                            const colIdx = header.findIndex(h => h === colName || h.toLowerCase() === colName.toLowerCase());
+                            if (colIdx !== -1 && cols[colIdx]) {
+                                roundStats[stat] = parseInt(cols[colIdx]) || 0;
+                            }
+                        });
+                        
+                        if (Object.keys(roundStats).length > 0) {
+                            // Normalize stat names
+                            roundStats.passYds = roundStats.passYds || roundStats.passing_yards || 0;
+                            roundStats.rushYds = roundStats.rushYds || roundStats.rushing_yards || 0;
+                            roundStats.recYds = roundStats.recYds || roundStats.receiving_yards || 0;
+                            roundStats.rec = roundStats.rec || roundStats.receptions || 0;
+                            roundStats.td = roundStats.td || roundStats.touchdowns || 0;
+                            roundStats['2pt'] = roundStats['2pt'] || roundStats.two_pt_conversions || 0;
+                            
+                            roundStats.points = calculatePointsFromJson(roundStats);
+                            playerStats.rounds[round] = roundStats;
+                        }
                     }
                 });
 
