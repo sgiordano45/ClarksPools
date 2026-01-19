@@ -791,6 +791,10 @@
 
                 <div class="nav-section">
                     <div class="nav-section-title">Import Data</div>
+                    <a class="nav-item" data-section="import-entries">
+                        <span class="icon">📥</span>
+                        Import Entries
+                    </a>
                     <a class="nav-item" data-section="import-players">
                         <span class="icon">👥</span>
                         Import Players
@@ -888,6 +892,109 @@
                         </div>
                     </div>
                 </div>
+            </section>
+
+            <!-- Import Entries Section -->
+            <section class="content-section" id="import-entries">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Import Fantasy Entries</h1>
+                        <p class="page-subtitle">Upload JSON file with fantasy team entries</p>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">Select Pool</h3>
+                    </div>
+                    <div class="data-card-body">
+                        <div class="form-group">
+                            <label>Target Pool</label>
+                            <select class="form-control" id="importPoolSelect" style="max-width: 400px;">
+                                <option value="">Loading pools...</option>
+                            </select>
+                            <p class="form-help">Entries will be added to this fantasy pool</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">JSON Format</h3>
+                    </div>
+                    <div class="data-card-body">
+                        <p style="margin-bottom: 1rem; color: var(--text-secondary);">Expected JSON structure:</p>
+                        <div class="csv-format">[
+  {
+    "teamName": "Owner Name",
+    "tiebreaker": 45,
+    "players": [
+      { "position": "QB", "name": "Josh Allen" },
+      { "position": "RB", "name": "Saquon Barkley" },
+      ...
+    ]
+  }
+]</div>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">Upload JSON File</h3>
+                    </div>
+                    <div class="data-card-body">
+                        <div class="form-group">
+                            <input type="file" class="form-control" id="entriesJsonFile" accept=".json" onchange="previewEntries()">
+                        </div>
+                        <p style="color: var(--text-muted); font-size: 0.85rem;">Or paste JSON directly:</p>
+                        <div class="form-group" style="margin-top: 0.5rem;">
+                            <textarea class="form-control" id="entriesJsonText" placeholder="Paste JSON data here..." style="min-height: 150px;"></textarea>
+                        </div>
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <button class="btn btn-primary" onclick="previewEntriesFromText()">Preview Entries</button>
+                            <span id="entriesPreviewCount" style="color: var(--text-muted);"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-card" id="entriesPreviewCard" style="display: none;">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">Preview Entries</h3>
+                        <button class="btn btn-gold" onclick="importEntries()">✓ Import All Entries</button>
+                    </div>
+                    <div class="data-card-body">
+                        <div class="stats-grid" style="margin-bottom: 1rem;">
+                            <div class="stat-box">
+                                <div class="stat-box-value" id="previewEntryCount">0</div>
+                                <div class="stat-box-label">Total Entries</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-box-value" id="previewPlayerCount">0</div>
+                                <div class="stat-box-label">Total Players</div>
+                            </div>
+                        </div>
+                        <div class="preview-scroll" style="max-height: 400px;">
+                            <table class="preview-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Team Name</th>
+                                        <th>Tiebreaker</th>
+                                        <th>QB</th>
+                                        <th>RB</th>
+                                        <th>WR</th>
+                                        <th>TE</th>
+                                        <th>K</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="entriesPreviewBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="entriesImportResult"></div>
             </section>
 
             <!-- Import Players Section -->
@@ -1661,6 +1768,213 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
         }
 
         // =========================================
+        // IMPORT FANTASY ENTRIES
+        // =========================================
+        let entriesToImport = [];
+
+        async function loadPoolsForImport() {
+            const select = document.getElementById('importPoolSelect');
+            if (!select) return;
+
+            try {
+                const snapshot = await db.collection('pools')
+                    .where('type', '==', 'fantasy')
+                    .get();
+                
+                select.innerHTML = '<option value="">Select a pool...</option>';
+                
+                if (snapshot.empty) {
+                    select.innerHTML += '<option value="" disabled>No fantasy pools found</option>';
+                    return;
+                }
+
+                snapshot.docs.forEach(doc => {
+                    const pool = doc.data();
+                    select.innerHTML += `<option value="${doc.id}">${pool.name || doc.id}</option>`;
+                });
+            } catch (error) {
+                console.error('Error loading pools:', error);
+                select.innerHTML = '<option value="">Error loading pools</option>';
+            }
+        }
+
+        function previewEntries() {
+            const fileInput = document.getElementById('entriesJsonFile');
+            if (!fileInput.files || !fileInput.files[0]) {
+                alert('Please select a JSON file');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    processEntriesPreview(data);
+                } catch (error) {
+                    alert('Invalid JSON file: ' + error.message);
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+
+        function previewEntriesFromText() {
+            const text = document.getElementById('entriesJsonText').value.trim();
+            if (!text) {
+                alert('Please paste JSON data or upload a file');
+                return;
+            }
+
+            try {
+                const data = JSON.parse(text);
+                processEntriesPreview(data);
+            } catch (error) {
+                alert('Invalid JSON: ' + error.message);
+            }
+        }
+
+        function processEntriesPreview(data) {
+            if (!Array.isArray(data)) {
+                alert('JSON must be an array of entries');
+                return;
+            }
+
+            entriesToImport = data;
+            const tbody = document.getElementById('entriesPreviewBody');
+            tbody.innerHTML = '';
+
+            let totalPlayers = 0;
+
+            data.forEach((entry, index) => {
+                const players = entry.players || [];
+                totalPlayers += players.length;
+
+                // Count by position
+                const qbCount = players.filter(p => p.position === 'QB').length;
+                const rbCount = players.filter(p => p.position === 'RB').length;
+                const wrCount = players.filter(p => p.position === 'WR').length;
+                const teCount = players.filter(p => p.position === 'TE').length;
+                const kCount = players.filter(p => p.position === 'K').length;
+
+                // Validate entry
+                const isValid = entry.teamName && players.length === 14 && 
+                    qbCount === 2 && rbCount === 4 && wrCount === 4 && teCount === 2 && kCount === 2;
+
+                tbody.innerHTML += `
+                    <tr style="${!isValid ? 'color: var(--accent-orange);' : ''}">
+                        <td>${index + 1}</td>
+                        <td>${entry.teamName || 'No name'}</td>
+                        <td>${entry.tiebreaker || '-'}</td>
+                        <td>${qbCount}</td>
+                        <td>${rbCount}</td>
+                        <td>${wrCount}</td>
+                        <td>${teCount}</td>
+                        <td>${kCount}</td>
+                        <td>${isValid ? '✓' : '⚠️'}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('previewEntryCount').textContent = data.length;
+            document.getElementById('previewPlayerCount').textContent = totalPlayers;
+            document.getElementById('entriesPreviewCard').style.display = 'block';
+            document.getElementById('entriesPreviewCount').textContent = `${data.length} entries found`;
+        }
+
+        async function importEntries() {
+            const poolId = document.getElementById('importPoolSelect').value;
+            if (!poolId) {
+                alert('Please select a target pool first');
+                return;
+            }
+
+            if (entriesToImport.length === 0) {
+                alert('No entries to import');
+                return;
+            }
+
+            if (!confirm(`Import ${entriesToImport.length} entries to the selected pool?`)) {
+                return;
+            }
+
+            const resultDiv = document.getElementById('entriesImportResult');
+            resultDiv.innerHTML = '<div class="alert alert-info">Importing entries... Please wait.</div>';
+
+            try {
+                let imported = 0;
+                let errors = 0;
+
+                for (const entry of entriesToImport) {
+                    try {
+                        // Format players by position for the entry structure
+                        const players = entry.players || [];
+                        const roster = {
+                            qb1: players.find(p => p.position === 'QB')?.name || '',
+                            qb2: players.filter(p => p.position === 'QB')[1]?.name || '',
+                            rb1: players.find(p => p.position === 'RB')?.name || '',
+                            rb2: players.filter(p => p.position === 'RB')[1]?.name || '',
+                            rb3: players.filter(p => p.position === 'RB')[2]?.name || '',
+                            rb4: players.filter(p => p.position === 'RB')[3]?.name || '',
+                            wr1: players.find(p => p.position === 'WR')?.name || '',
+                            wr2: players.filter(p => p.position === 'WR')[1]?.name || '',
+                            wr3: players.filter(p => p.position === 'WR')[2]?.name || '',
+                            wr4: players.filter(p => p.position === 'WR')[3]?.name || '',
+                            te1: players.find(p => p.position === 'TE')?.name || '',
+                            te2: players.filter(p => p.position === 'TE')[1]?.name || '',
+                            k1: players.find(p => p.position === 'K')?.name || '',
+                            k2: players.filter(p => p.position === 'K')[1]?.name || ''
+                        };
+
+                        await db.collection('pools').doc(poolId).collection('entries').add({
+                            teamName: entry.teamName,
+                            tiebreaker: entry.tiebreaker || 0,
+                            players: entry.players,
+                            roster: roster,
+                            totalPoints: 0,
+                            weekPoints: {
+                                wildCard: 0,
+                                divisional: 0,
+                                conference: 0,
+                                superBowl: 0
+                            },
+                            paid: false,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+
+                        imported++;
+                    } catch (err) {
+                        console.error('Error importing entry:', entry.teamName, err);
+                        errors++;
+                    }
+                }
+
+                // Update pool entry count
+                await db.collection('pools').doc(poolId).update({
+                    entryCount: firebase.firestore.FieldValue.increment(imported)
+                });
+
+                if (errors === 0) {
+                    resultDiv.innerHTML = `<div class="alert alert-success">✓ Successfully imported ${imported} entries!</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="alert alert-warning">Imported ${imported} entries with ${errors} errors.</div>`;
+                }
+
+                // Clear preview
+                entriesToImport = [];
+                document.getElementById('entriesPreviewCard').style.display = 'none';
+                document.getElementById('entriesJsonFile').value = '';
+                document.getElementById('entriesJsonText').value = '';
+                document.getElementById('entriesPreviewCount').textContent = '';
+
+            } catch (error) {
+                console.error('Import error:', error);
+                resultDiv.innerHTML = `<div class="alert alert-error">Error: ${error.message}</div>`;
+            }
+        }
+
+        // =========================================
         // NAVIGATION
         // =========================================
         document.querySelectorAll('.nav-item').forEach(item => {
@@ -1674,6 +1988,7 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
                     
                     // Load data for section
                     if (section === 'setup-teams') renderSetupTeams();
+                    if (section === 'import-entries') loadPoolsForImport();
                     if (section === 'manage-games') loadGames();
                     if (section === 'teams-status') loadTeamsStatus();
                     if (section === 'view-players') loadPlayersView();
