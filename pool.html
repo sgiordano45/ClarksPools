@@ -356,8 +356,8 @@
 
         .leaderboard-header {
             display: grid;
-            grid-template-columns: 60px 1fr 100px 100px 100px 100px 100px 50px;
-            gap: 1rem;
+            grid-template-columns: 50px 1fr 140px 70px 70px 70px 70px 80px 40px;
+            gap: 0.5rem;
             padding: 1rem 1.5rem;
             background: var(--tertiary-dark);
             font-size: 0.7rem;
@@ -369,8 +369,8 @@
 
         .leaderboard-row {
             display: grid;
-            grid-template-columns: 60px 1fr 100px 100px 100px 100px 100px 50px;
-            gap: 1rem;
+            grid-template-columns: 50px 1fr 140px 70px 70px 70px 70px 80px 40px;
+            gap: 0.5rem;
             padding: 1rem 1.5rem;
             border-bottom: 1px solid var(--card-border);
             align-items: center;
@@ -389,6 +389,44 @@
         .leaderboard-row.my-entry {
             background: rgba(0,212,255,0.05);
             border-left: 3px solid var(--accent-blue);
+        }
+
+        /* Active Players Grid */
+        .active-grid {
+            display: flex;
+            gap: 0.25rem;
+            justify-content: center;
+        }
+
+        .active-pos {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 22px;
+        }
+
+        .active-pos-label {
+            font-size: 0.55rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .active-pos-count {
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .active-pos-count.full {
+            color: var(--accent-green);
+        }
+
+        .active-pos-count.partial {
+            color: var(--accent-gold);
+        }
+
+        .active-pos-count.none {
+            color: var(--accent-red);
         }
 
         .rank {
@@ -544,6 +582,116 @@
             font-family: 'Bebas Neue', sans-serif;
             font-size: 1.1rem;
             color: var(--accent-blue);
+        }
+
+        /* Ownership Tab */
+        .ownership-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .ownership-position {
+            background: var(--tertiary-dark);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .ownership-position-header {
+            background: var(--secondary-dark);
+            padding: 0.75rem 1rem;
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-gold);
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .ownership-player {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 1rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .ownership-player:last-child {
+            border-bottom: none;
+        }
+
+        .ownership-player.eliminated {
+            opacity: 0.5;
+        }
+
+        .ownership-player .player-team-logo {
+            width: 28px;
+            height: 28px;
+            font-size: 0.65rem;
+        }
+
+        .ownership-player-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .ownership-player-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .ownership-player-team {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        .ownership-bar-container {
+            width: 80px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ownership-bar {
+            flex: 1;
+            height: 6px;
+            background: var(--card-bg);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .ownership-bar-fill {
+            height: 100%;
+            background: var(--accent-blue);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .ownership-bar-fill.high {
+            background: var(--accent-green);
+        }
+
+        .ownership-bar-fill.medium {
+            background: var(--accent-gold);
+        }
+
+        .ownership-pct {
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            min-width: 36px;
+            text-align: right;
+        }
+
+        .ownership-count {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            min-width: 24px;
+            text-align: center;
         }
 
         /* Entry Form Tab */
@@ -1158,6 +1306,7 @@
         <div class="tab-navigation">
             <button class="tab-btn active" data-tab="leaderboard">Leaderboard</button>
             <button class="tab-btn" data-tab="my-entry">My Entry</button>
+            <button class="tab-btn" data-tab="ownership">Ownership</button>
             <button class="tab-btn" data-tab="submit">Submit Entry</button>
             <button class="tab-btn" data-tab="rules">Rules & Scoring</button>
         </div>
@@ -1168,6 +1317,7 @@
                 <div class="leaderboard-header">
                     <div>Rank</div>
                     <div>Entry</div>
+                    <div style="text-align:center">Active</div>
                     <div style="text-align:center">WC</div>
                     <div style="text-align:center">DIV</div>
                     <div style="text-align:center">CONF</div>
@@ -1191,6 +1341,21 @@
                 <div id="myEntryContainer" style="padding: 3rem; text-align: center;">
                     <div class="leaderboard-loading" style="color: var(--text-secondary);">
                         Loading your entry...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ownership Tab -->
+        <div class="tab-content" id="ownership">
+            <div class="leaderboard-container" style="padding: 1.5rem;">
+                <h3 style="font-family: 'Oswald', sans-serif; font-size: 1.25rem; margin-bottom: 1.5rem; text-align: center;">
+                    Player Ownership
+                    <span id="ownershipEntryCount" style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 400;"></span>
+                </h3>
+                <div id="ownershipContainer">
+                    <div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                        Loading ownership data...
                     </div>
                 </div>
             </div>
@@ -1854,6 +2019,7 @@
                     updatePoolHeader(currentPoolData);
                     await loadLeaderboard(poolId);
                     await loadMyEntry(poolId);
+                    await loadOwnership(poolId);
                 } else {
                     document.getElementById('leaderboardBody').innerHTML = `
                         <div style="text-align: center; padding: 3rem; color: var(--accent-red);">
@@ -1987,6 +2153,9 @@
                     const sbPts = entry.calculatedPoints.SB;
                     const totalPts = entry.calculatedPoints.total;
                     
+                    // Calculate active players by position
+                    const activeByPos = calculateActiveByPosition(entry.roster);
+                    
                     // Build roster grid HTML using players array and roster map
                     const rosterHtml = renderEntryRoster(entry.roster, entry.players);
                     
@@ -1998,6 +2167,28 @@
                                 <div>
                                     <div class="entry-name">${displayName}</div>
                                     <div class="entry-user">Tiebreaker: ${entry.tiebreaker || 0}</div>
+                                </div>
+                            </div>
+                            <div class="active-grid">
+                                <div class="active-pos">
+                                    <div class="active-pos-label">QB</div>
+                                    <div class="active-pos-count ${activeByPos.QB.active === activeByPos.QB.total ? 'full' : activeByPos.QB.active === 0 ? 'none' : 'partial'}">${activeByPos.QB.active}</div>
+                                </div>
+                                <div class="active-pos">
+                                    <div class="active-pos-label">RB</div>
+                                    <div class="active-pos-count ${activeByPos.RB.active === activeByPos.RB.total ? 'full' : activeByPos.RB.active === 0 ? 'none' : 'partial'}">${activeByPos.RB.active}</div>
+                                </div>
+                                <div class="active-pos">
+                                    <div class="active-pos-label">WR</div>
+                                    <div class="active-pos-count ${activeByPos.WR.active === activeByPos.WR.total ? 'full' : activeByPos.WR.active === 0 ? 'none' : 'partial'}">${activeByPos.WR.active}</div>
+                                </div>
+                                <div class="active-pos">
+                                    <div class="active-pos-label">TE</div>
+                                    <div class="active-pos-count ${activeByPos.TE.active === activeByPos.TE.total ? 'full' : activeByPos.TE.active === 0 ? 'none' : 'partial'}">${activeByPos.TE.active}</div>
+                                </div>
+                                <div class="active-pos">
+                                    <div class="active-pos-label">K</div>
+                                    <div class="active-pos-count ${activeByPos.K.active === activeByPos.K.total ? 'full' : activeByPos.K.active === 0 ? 'none' : 'partial'}">${activeByPos.K.active}</div>
                                 </div>
                             </div>
                             <div class="week-points ${wcPts > 0 ? 'active-week' : ''}">${wcPts > 0 ? wcPts.toFixed(1) : '—'}</div>
@@ -2034,6 +2225,43 @@
                 return (parts[0][0] + parts[1][0]).toUpperCase();
             }
             return name.substring(0, 2).toUpperCase();
+        }
+
+        // Calculate active (non-eliminated) players by position for an entry
+        function calculateActiveByPosition(roster) {
+            const counts = {
+                QB: { active: 0, total: 0 },
+                RB: { active: 0, total: 0 },
+                WR: { active: 0, total: 0 },
+                TE: { active: 0, total: 0 },
+                K: { active: 0, total: 0 }
+            };
+            
+            if (!roster || Object.keys(roster).length === 0) {
+                return counts;
+            }
+            
+            Object.entries(roster).forEach(([key, playerName]) => {
+                const position = key.replace(/[0-9]/g, '').toUpperCase();
+                
+                if (counts[position]) {
+                    counts[position].total++;
+                    
+                    // Find player and check if their team is eliminated
+                    const playerFromDb = Object.values(playersData).flat().find(p => 
+                        p.name.toLowerCase() === playerName.toLowerCase()
+                    );
+                    
+                    const team = playerFromDb?.team;
+                    const isEliminated = team ? (teamsStatus[team]?.eliminated || false) : false;
+                    
+                    if (!isEliminated) {
+                        counts[position].active++;
+                    }
+                }
+            });
+            
+            return counts;
         }
 
         // Calculate entry week points from roster players' stats
@@ -2215,6 +2443,121 @@
                 container.innerHTML = `
                     <div style="color: var(--accent-red);">
                         Error loading your entry: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Load player ownership data
+        async function loadOwnership(poolId) {
+            const container = document.getElementById('ownershipContainer');
+            const countEl = document.getElementById('ownershipEntryCount');
+            
+            try {
+                const entriesSnapshot = await db.collection('pools').doc(poolId)
+                    .collection('entries')
+                    .get();
+                
+                const entries = entriesSnapshot.docs.map(doc => doc.data());
+                const totalEntries = entries.length;
+                
+                if (totalEntries === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                            No entries yet
+                        </div>
+                    `;
+                    return;
+                }
+                
+                countEl.textContent = `(${totalEntries} ${totalEntries === 1 ? 'entry' : 'entries'})`;
+                
+                // Count player occurrences
+                const playerCounts = {};
+                
+                entries.forEach(entry => {
+                    if (entry.roster) {
+                        Object.entries(entry.roster).forEach(([key, playerName]) => {
+                            const position = key.replace(/[0-9]/g, '').toUpperCase();
+                            if (!playerCounts[playerName]) {
+                                playerCounts[playerName] = { count: 0, position };
+                            }
+                            playerCounts[playerName].count++;
+                        });
+                    }
+                });
+                
+                // Group by position
+                const positionGroups = { QB: [], RB: [], WR: [], TE: [], K: [] };
+                
+                Object.entries(playerCounts).forEach(([name, data]) => {
+                    const playerFromDb = Object.values(playersData).flat().find(p => 
+                        p.name.toLowerCase() === name.toLowerCase()
+                    );
+                    
+                    const team = playerFromDb?.team || '??';
+                    const teamName = teamsStatus[team]?.name || team;
+                    const isEliminated = teamsStatus[team]?.eliminated || false;
+                    const pct = (data.count / totalEntries) * 100;
+                    
+                    if (positionGroups[data.position]) {
+                        positionGroups[data.position].push({
+                            name,
+                            team,
+                            teamName,
+                            count: data.count,
+                            pct,
+                            isEliminated
+                        });
+                    }
+                });
+                
+                // Sort each position by count (highest first)
+                Object.keys(positionGroups).forEach(pos => {
+                    positionGroups[pos].sort((a, b) => b.count - a.count);
+                });
+                
+                // Render ownership grid
+                container.innerHTML = `
+                    <div class="ownership-grid">
+                        ${['QB', 'RB', 'WR', 'TE', 'K'].map(pos => `
+                            <div class="ownership-position">
+                                <div class="ownership-position-header">
+                                    ${pos === 'QB' ? 'Quarterbacks' : 
+                                      pos === 'RB' ? 'Running Backs' : 
+                                      pos === 'WR' ? 'Wide Receivers' : 
+                                      pos === 'TE' ? 'Tight Ends' : 'Kickers'}
+                                </div>
+                                ${positionGroups[pos].length === 0 ? 
+                                    '<div style="padding: 1rem; color: var(--text-muted); text-align: center;">No players drafted</div>' :
+                                    positionGroups[pos].map(player => `
+                                        <div class="ownership-player ${player.isEliminated ? 'eliminated' : ''}">
+                                            <div class="player-team-logo">${player.team}</div>
+                                            <div class="ownership-player-info">
+                                                <div class="ownership-player-name">${player.name}${player.isEliminated ? ' ❌' : ''}</div>
+                                                <div class="ownership-player-team">${player.teamName}</div>
+                                            </div>
+                                            <div class="ownership-count">${player.count}</div>
+                                            <div class="ownership-bar-container">
+                                                <div class="ownership-bar">
+                                                    <div class="ownership-bar-fill ${player.pct >= 50 ? 'high' : player.pct >= 25 ? 'medium' : ''}" 
+                                                         style="width: ${player.pct}%"></div>
+                                                </div>
+                                                <div class="ownership-pct">${player.pct.toFixed(0)}%</div>
+                                            </div>
+                                        </div>
+                                    `).join('')
+                                }
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('Error loading ownership:', error);
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: var(--accent-red);">
+                        Error loading ownership data
                     </div>
                 `;
             }
