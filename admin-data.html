@@ -782,8 +782,16 @@
 
             <nav class="sidebar-nav">
                 <div class="nav-section">
+                    <div class="nav-section-title">Season Setup</div>
+                    <a class="nav-item active" data-section="setup-teams">
+                        <span class="icon">⚙️</span>
+                        Setup Teams
+                    </a>
+                </div>
+
+                <div class="nav-section">
                     <div class="nav-section-title">Import Data</div>
-                    <a class="nav-item active" data-section="import-players">
+                    <a class="nav-item" data-section="import-players">
                         <span class="icon">👥</span>
                         Import Players
                     </a>
@@ -823,8 +831,67 @@
 
         <!-- Main Content -->
         <main>
+            <!-- Setup Teams Section -->
+            <section class="content-section active" id="setup-teams">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Setup Playoff Teams</h1>
+                        <p class="page-subtitle">Add the 14 playoff teams for the current season</p>
+                    </div>
+                    <button class="btn btn-gold" onclick="showAddTeamModal()">+ Add Team</button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-box-value" id="setupTeamsCount">0</div>
+                        <div class="stat-box-label">Teams Added</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-box-value" id="setupAFCCount">0</div>
+                        <div class="stat-box-label">AFC Teams</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-box-value" id="setupNFCCount">0</div>
+                        <div class="stat-box-label">NFC Teams</div>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">Quick Setup - 2025 Playoff Teams</h3>
+                    </div>
+                    <div class="data-card-body">
+                        <p style="margin-bottom: 1rem; color: var(--text-secondary);">Load all 14 playoff teams for the 2024-2025 NFL season:</p>
+                        <button class="btn btn-primary" onclick="loadDefaultTeams2025()">Load 2025 Playoff Teams</button>
+                        <button class="btn btn-outline" onclick="clearAllTeams()" style="margin-left: 0.5rem;">Clear All Teams</button>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">AFC Teams</h3>
+                    </div>
+                    <div class="data-card-body">
+                        <div class="teams-grid" id="setupAFCTeams">
+                            <div class="loading">Loading teams...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">NFC Teams</h3>
+                    </div>
+                    <div class="data-card-body">
+                        <div class="teams-grid" id="setupNFCTeams">
+                            <div class="loading">Loading teams...</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Import Players Section -->
-            <section class="content-section active" id="import-players">
+            <section class="content-section" id="import-players">
                 <div class="page-header">
                     <div>
                         <h1 class="page-title">Import Players</h1>
@@ -843,7 +910,7 @@ Patrick Mahomes,KC,QB
 Travis Kelce,KC,TE
 Josh Allen,BUF,QB
 Saquon Barkley,PHI,RB</div>
-                        <p class="form-help">Teams: KC, BUF, BAL, HOU, LAC, PIT, DEN, DET, PHI, TB, LAR, MIN, WAS, GB</p>
+                        <p class="form-help" id="teamsHelpText">Teams: Loading...</p>
                         <p class="form-help">Positions: QB, RB, WR, TE, K</p>
                     </div>
                 </div>
@@ -1324,6 +1391,58 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
         </div>
     </div>
 
+    <!-- Add Team Modal -->
+    <div class="modal-overlay" id="addTeamModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Add Playoff Team</h3>
+                <button class="modal-close" onclick="closeModal('addTeamModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Team Abbreviation</label>
+                        <input type="text" class="form-control" id="newTeamAbbr" placeholder="KC" maxlength="4" style="text-transform: uppercase;">
+                        <p class="form-help">2-4 letter code (e.g., KC, BUF, LAC)</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Team Name</label>
+                        <input type="text" class="form-control" id="newTeamName" placeholder="Chiefs">
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" class="form-control" id="newTeamFullName" placeholder="Kansas City Chiefs">
+                    </div>
+                    <div class="form-group">
+                        <label>Conference</label>
+                        <select class="form-control" id="newTeamConference">
+                            <option value="AFC">AFC</option>
+                            <option value="NFC">NFC</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Seed (1-7)</label>
+                    <select class="form-control" id="newTeamSeed" style="width: 100px;">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('addTeamModal')">Cancel</button>
+                <button class="btn btn-gold" onclick="saveTeam()">Add Team</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -1332,9 +1451,19 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
 
     <script>
         // =========================================
-        // TEAMS DATA
+        // TEAMS DATA (Loaded from Firestore)
         // =========================================
-        const TEAMS = {
+        let TEAMS = {};
+
+        const ROUNDS = {
+            wildcard: 'Wild Card',
+            divisional: 'Divisional',
+            conference: 'Conference',
+            superbowl: 'Super Bowl'
+        };
+
+        // Default teams for 2025 playoffs (can be loaded with one click)
+        const DEFAULT_TEAMS_2025 = {
             KC: { name: 'Chiefs', fullName: 'Kansas City Chiefs', conference: 'AFC', seed: 1 },
             BUF: { name: 'Bills', fullName: 'Buffalo Bills', conference: 'AFC', seed: 2 },
             BAL: { name: 'Ravens', fullName: 'Baltimore Ravens', conference: 'AFC', seed: 3 },
@@ -1351,12 +1480,185 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
             GB: { name: 'Packers', fullName: 'Green Bay Packers', conference: 'NFC', seed: 7 }
         };
 
-        const ROUNDS = {
-            wildcard: 'Wild Card',
-            divisional: 'Divisional',
-            conference: 'Conference',
-            superbowl: 'Super Bowl'
-        };
+        // =========================================
+        // LOAD PLAYOFF TEAMS FROM FIRESTORE
+        // =========================================
+        async function loadPlayoffTeams() {
+            try {
+                const snapshot = await db.collection('teams').get();
+                TEAMS = {};
+                
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    TEAMS[doc.id] = {
+                        name: data.name,
+                        fullName: data.fullName,
+                        conference: data.conference,
+                        seed: data.seed,
+                        eliminated: data.eliminated || false
+                    };
+                });
+
+                // Update UI elements
+                updateTeamsHelpText();
+                renderSetupTeams();
+                populateTeamSelects();
+                
+                console.log(`Loaded ${Object.keys(TEAMS).length} teams from Firestore`);
+                return TEAMS;
+            } catch (error) {
+                console.error('Error loading teams:', error);
+                return {};
+            }
+        }
+
+        function updateTeamsHelpText() {
+            const helpText = document.getElementById('teamsHelpText');
+            if (helpText) {
+                const teamList = Object.keys(TEAMS).sort().join(', ');
+                helpText.textContent = teamList ? `Teams: ${teamList}` : 'Teams: No teams loaded. Go to Setup Teams first.';
+            }
+        }
+
+        function renderSetupTeams() {
+            const afcContainer = document.getElementById('setupAFCTeams');
+            const nfcContainer = document.getElementById('setupNFCTeams');
+            
+            if (!afcContainer || !nfcContainer) return;
+
+            const afcTeams = Object.entries(TEAMS)
+                .filter(([_, t]) => t.conference === 'AFC')
+                .sort((a, b) => a[1].seed - b[1].seed);
+            const nfcTeams = Object.entries(TEAMS)
+                .filter(([_, t]) => t.conference === 'NFC')
+                .sort((a, b) => a[1].seed - b[1].seed);
+
+            // Update counts
+            document.getElementById('setupTeamsCount').textContent = Object.keys(TEAMS).length;
+            document.getElementById('setupAFCCount').textContent = afcTeams.length;
+            document.getElementById('setupNFCCount').textContent = nfcTeams.length;
+
+            if (afcTeams.length === 0) {
+                afcContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No AFC teams added yet</p>';
+            } else {
+                afcContainer.innerHTML = afcTeams.map(([abbr, team]) => renderSetupTeamCard(abbr, team)).join('');
+            }
+
+            if (nfcTeams.length === 0) {
+                nfcContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No NFC teams added yet</p>';
+            } else {
+                nfcContainer.innerHTML = nfcTeams.map(([abbr, team]) => renderSetupTeamCard(abbr, team)).join('');
+            }
+        }
+
+        function renderSetupTeamCard(abbr, team) {
+            return `
+                <div class="team-card">
+                    <div class="team-logo">${abbr}</div>
+                    <div class="team-info">
+                        <div class="team-card-name">${team.fullName}</div>
+                        <div class="team-card-conf">${team.conference} #${team.seed}</div>
+                    </div>
+                    <button class="btn btn-outline btn-sm" onclick="deleteTeam('${abbr}')" title="Remove team">🗑️</button>
+                </div>
+            `;
+        }
+
+        function showAddTeamModal() {
+            document.getElementById('newTeamAbbr').value = '';
+            document.getElementById('newTeamName').value = '';
+            document.getElementById('newTeamFullName').value = '';
+            document.getElementById('newTeamConference').value = 'AFC';
+            document.getElementById('newTeamSeed').value = '1';
+            document.getElementById('addTeamModal').classList.add('active');
+        }
+
+        async function saveTeam() {
+            const abbr = document.getElementById('newTeamAbbr').value.trim().toUpperCase();
+            const name = document.getElementById('newTeamName').value.trim();
+            const fullName = document.getElementById('newTeamFullName').value.trim();
+            const conference = document.getElementById('newTeamConference').value;
+            const seed = parseInt(document.getElementById('newTeamSeed').value);
+
+            if (!abbr || !name || !fullName) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            if (TEAMS[abbr]) {
+                alert(`Team ${abbr} already exists`);
+                return;
+            }
+
+            try {
+                await db.collection('teams').doc(abbr).set({
+                    name,
+                    fullName,
+                    conference,
+                    seed,
+                    eliminated: false,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                closeModal('addTeamModal');
+                await loadPlayoffTeams();
+            } catch (error) {
+                console.error('Error adding team:', error);
+                alert('Error adding team: ' + error.message);
+            }
+        }
+
+        async function deleteTeam(abbr) {
+            if (!confirm(`Remove ${abbr} from playoff teams? This won't delete associated players.`)) return;
+
+            try {
+                await db.collection('teams').doc(abbr).delete();
+                await loadPlayoffTeams();
+            } catch (error) {
+                console.error('Error deleting team:', error);
+                alert('Error deleting team: ' + error.message);
+            }
+        }
+
+        async function clearAllTeams() {
+            if (!confirm('Remove ALL playoff teams? This will clear the teams list but not delete players.')) return;
+
+            try {
+                const snapshot = await db.collection('teams').get();
+                const batch = db.batch();
+                snapshot.docs.forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
+                await loadPlayoffTeams();
+            } catch (error) {
+                console.error('Error clearing teams:', error);
+                alert('Error clearing teams: ' + error.message);
+            }
+        }
+
+        async function loadDefaultTeams2025() {
+            if (Object.keys(TEAMS).length > 0) {
+                if (!confirm('This will replace existing teams with the 2025 playoff teams. Continue?')) return;
+                await clearAllTeams();
+            }
+
+            try {
+                const batch = db.batch();
+                for (const [abbr, team] of Object.entries(DEFAULT_TEAMS_2025)) {
+                    const ref = db.collection('teams').doc(abbr);
+                    batch.set(ref, {
+                        ...team,
+                        eliminated: false,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+                await batch.commit();
+                await loadPlayoffTeams();
+                alert('Successfully loaded 14 playoff teams for 2025!');
+            } catch (error) {
+                console.error('Error loading default teams:', error);
+                alert('Error loading teams: ' + error.message);
+            }
+        }
 
         // =========================================
         // NAVIGATION
@@ -1371,6 +1673,7 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
                     document.getElementById(section).classList.add('active');
                     
                     // Load data for section
+                    if (section === 'setup-teams') renderSetupTeams();
                     if (section === 'manage-games') loadGames();
                     if (section === 'teams-status') loadTeamsStatus();
                     if (section === 'view-players') loadPlayersView();
@@ -1928,19 +2231,12 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
 
         async function loadTeamsStatus() {
             try {
-                const snapshot = await db.collection('teams').get();
-                teamsStatus = {};
-                snapshot.forEach(doc => {
-                    teamsStatus[doc.id] = doc.data();
-                });
-
-                // Initialize any missing teams
-                for (const [abbr, team] of Object.entries(TEAMS)) {
-                    if (!teamsStatus[abbr]) {
-                        teamsStatus[abbr] = { ...team, eliminated: false };
-                    }
-                }
-
+                // Reload teams to get latest eliminated status
+                await loadPlayoffTeams();
+                
+                // Use TEAMS directly since it now includes eliminated status
+                teamsStatus = { ...TEAMS };
+                
                 renderTeamsStatus();
             } catch (error) {
                 console.error('Error loading teams:', error);
@@ -1951,27 +2247,37 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
             const afcContainer = document.getElementById('afcTeams');
             const nfcContainer = document.getElementById('nfcTeams');
             
-            const afcTeams = Object.entries(TEAMS).filter(([_, t]) => t.conference === 'AFC');
-            const nfcTeams = Object.entries(TEAMS).filter(([_, t]) => t.conference === 'NFC');
+            if (Object.keys(TEAMS).length === 0) {
+                afcContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 1rem;">No teams loaded. Go to Setup Teams first.</p>';
+                nfcContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 1rem;">No teams loaded. Go to Setup Teams first.</p>';
+                document.getElementById('teamsActive').textContent = 0;
+                document.getElementById('teamsEliminated').textContent = 0;
+                return;
+            }
+            
+            const afcTeams = Object.entries(TEAMS)
+                .filter(([_, t]) => t.conference === 'AFC')
+                .sort((a, b) => a[1].seed - b[1].seed);
+            const nfcTeams = Object.entries(TEAMS)
+                .filter(([_, t]) => t.conference === 'NFC')
+                .sort((a, b) => a[1].seed - b[1].seed);
 
             let activeCount = 0;
 
             afcContainer.innerHTML = afcTeams.map(([abbr, team]) => {
-                const status = teamsStatus[abbr] || {};
-                const eliminated = status.eliminated || false;
+                const eliminated = team.eliminated || false;
                 if (!eliminated) activeCount++;
                 return renderTeamCard(abbr, team, eliminated);
             }).join('');
 
             nfcContainer.innerHTML = nfcTeams.map(([abbr, team]) => {
-                const status = teamsStatus[abbr] || {};
-                const eliminated = status.eliminated || false;
+                const eliminated = team.eliminated || false;
                 if (!eliminated) activeCount++;
                 return renderTeamCard(abbr, team, eliminated);
             }).join('');
 
             document.getElementById('teamsActive').textContent = activeCount;
-            document.getElementById('teamsEliminated').textContent = 14 - activeCount;
+            document.getElementById('teamsEliminated').textContent = Object.keys(TEAMS).length - activeCount;
         }
 
         function renderTeamCard(abbr, team, eliminated) {
@@ -2115,7 +2421,8 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
                 return;
             }
 
-            // Initialize
+            // Initialize - Load teams first, then populate selects
+            await loadPlayoffTeams();
             populateTeamSelects();
         });
     </script>
