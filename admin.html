@@ -2570,6 +2570,47 @@
         </div>
     </div>
 
+    <!-- Edit Pool Modal -->
+    <div class="modal-overlay" id="editPoolModal">
+        <div class="modal" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Pool</h3>
+                <button class="modal-close" onclick="closeModal('editPoolModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editPoolId">
+                <div class="form-group">
+                    <label>Pool Name</label>
+                    <input type="text" class="form-control" id="editPoolName">
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select class="form-control" id="editPoolStatus">
+                        <option value="open">Open (Accepting Entries)</option>
+                        <option value="live">Live (In Progress)</option>
+                        <option value="closed">Closed (Complete)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Buy-In ($)</label>
+                    <input type="number" class="form-control" id="editPoolBuyIn" min="0" step="1">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea class="form-control" id="editPoolDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Entry Deadline</label>
+                    <input type="datetime-local" class="form-control" id="editPoolDeadline">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('editPoolModal')">Cancel</button>
+                <button class="btn btn-gold" onclick="savePoolChanges()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Entry Detail Modal -->
     <div class="modal-overlay" id="entryDetailModal">
         <div class="modal">
@@ -3085,9 +3126,79 @@
             });
         }
 
-        // Edit pool
-        function editPool(poolId) {
-            alert('Edit pool functionality coming soon!');
+        // Edit pool - load data and show modal
+        async function editPool(poolId) {
+            try {
+                const poolDoc = await db.collection('pools').doc(poolId).get();
+                if (!poolDoc.exists) {
+                    alert('Pool not found');
+                    return;
+                }
+                
+                const pool = poolDoc.data();
+                
+                // Populate form fields
+                document.getElementById('editPoolId').value = poolId;
+                document.getElementById('editPoolName').value = pool.name || '';
+                document.getElementById('editPoolStatus').value = pool.status || 'open';
+                document.getElementById('editPoolBuyIn').value = pool.buyIn || 0;
+                document.getElementById('editPoolDescription').value = pool.description || '';
+                
+                // Handle deadline - convert Firestore timestamp to datetime-local format
+                if (pool.deadline) {
+                    const deadline = pool.deadline.toDate ? pool.deadline.toDate() : new Date(pool.deadline);
+                    document.getElementById('editPoolDeadline').value = deadline.toISOString().slice(0, 16);
+                } else {
+                    document.getElementById('editPoolDeadline').value = '';
+                }
+                
+                // Show modal
+                document.getElementById('editPoolModal').classList.add('active');
+                
+            } catch (error) {
+                console.error('Error loading pool:', error);
+                alert('Error loading pool: ' + error.message);
+            }
+        }
+
+        // Save pool changes
+        async function savePoolChanges() {
+            const poolId = document.getElementById('editPoolId').value;
+            const name = document.getElementById('editPoolName').value;
+            const status = document.getElementById('editPoolStatus').value;
+            const buyIn = parseFloat(document.getElementById('editPoolBuyIn').value) || 0;
+            const description = document.getElementById('editPoolDescription').value;
+            const deadlineStr = document.getElementById('editPoolDeadline').value;
+            
+            if (!name) {
+                alert('Pool name is required');
+                return;
+            }
+            
+            try {
+                const updateData = {
+                    name,
+                    status,
+                    buyIn,
+                    description,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                
+                // Only update deadline if provided
+                if (deadlineStr) {
+                    updateData.deadline = new Date(deadlineStr);
+                }
+                
+                await db.collection('pools').doc(poolId).update(updateData);
+                
+                closeModal('editPoolModal');
+                loadDashboardData();
+                alert('Pool updated successfully!');
+                
+            } catch (error) {
+                console.error('Error updating pool:', error);
+                alert('Error updating pool: ' + error.message);
+            }
         }
 
         // Betting Pool Functions - Load betting lines from Firebase
