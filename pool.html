@@ -367,6 +367,10 @@
             color: var(--text-secondary);
         }
 
+        .leaderboard-header.with-strength {
+            grid-template-columns: 50px 1fr 140px 60px 70px 70px 70px 70px 80px 40px;
+        }
+
         .leaderboard-row {
             display: grid;
             grid-template-columns: 50px 1fr 140px 70px 70px 70px 70px 80px 40px;
@@ -376,6 +380,10 @@
             align-items: center;
             transition: background 0.2s ease;
             cursor: pointer;
+        }
+
+        .leaderboard-row.with-strength {
+            grid-template-columns: 50px 1fr 140px 60px 70px 70px 70px 70px 80px 40px;
         }
 
         .leaderboard-row:hover {
@@ -1445,7 +1453,7 @@
         <!-- Leaderboard Tab -->
         <div class="tab-content active" id="leaderboard">
             <div class="leaderboard-container">
-                <div class="leaderboard-header">
+                <div class="leaderboard-header" id="leaderboardHeader">
                     <div>Rank</div>
                     <div>Entry</div>
                     <div style="text-align:center">Active</div>
@@ -1874,6 +1882,7 @@
                             name: player.name,
                             team: player.team,
                             teamName: player.teamName || player.team,
+                            position: position,
                             totalPoints: player.totalPoints || 0,
                             stats: player.stats || {},
                             ir: player.ir || player.status === 'ir' || false
@@ -2396,8 +2405,10 @@
                         `;
                     }
                     
+                    const strengthRowClass = showStrength ? 'with-strength' : '';
+                    
                     return `
-                        <div class="leaderboard-row ${myEntryClass}" onclick="toggleDetails(this)" data-entry-id="${entry.id}">
+                        <div class="leaderboard-row ${myEntryClass} ${strengthRowClass}" onclick="toggleDetails(this)" data-entry-id="${entry.id}">
                             <div class="rank ${rankClass}">${rank}</div>
                             <div class="entry-info">
                                 <div class="entry-avatar">${initials}</div>
@@ -2446,6 +2457,39 @@
                 }).join('');
                 
                 container.innerHTML = compareSelectorHtml + rowsHtml;
+                
+                // Update header based on showStrength
+                const header = document.getElementById('leaderboardHeader');
+                if (header) {
+                    if (showStrength) {
+                        header.classList.add('with-strength');
+                        header.innerHTML = `
+                            <div>Rank</div>
+                            <div>Entry</div>
+                            <div style="text-align:center">Active</div>
+                            <div style="text-align:center">Upside</div>
+                            <div style="text-align:center">WC</div>
+                            <div style="text-align:center">DIV</div>
+                            <div style="text-align:center">CONF</div>
+                            <div style="text-align:center">SB</div>
+                            <div style="text-align:center">Total</div>
+                            <div></div>
+                        `;
+                    } else {
+                        header.classList.remove('with-strength');
+                        header.innerHTML = `
+                            <div>Rank</div>
+                            <div>Entry</div>
+                            <div style="text-align:center">Active</div>
+                            <div style="text-align:center">WC</div>
+                            <div style="text-align:center">DIV</div>
+                            <div style="text-align:center">CONF</div>
+                            <div style="text-align:center">SB</div>
+                            <div style="text-align:center">Total</div>
+                            <div></div>
+                        `;
+                    }
+                }
                 
                 console.log('Loaded entries:', entries.length);
             } catch (error) {
@@ -2608,8 +2652,7 @@
 
         // Calculate median points per position from all players who have played
         function calculatePositionMedians() {
-            if (positionMedians) return positionMedians;
-            
+            // Recalculate each time to ensure fresh data
             const pointsByPosition = {
                 QB: [],
                 RB: [],
@@ -2620,6 +2663,7 @@
             
             // Gather per-game points for each position
             const allPlayers = Object.values(playersData).flat();
+            console.log('Calculating medians from', allPlayers.length, 'players');
             
             allPlayers.forEach(player => {
                 if (!player.stats || !player.position) return;
@@ -2634,6 +2678,14 @@
                         }
                     }
                 });
+            });
+            
+            console.log('Points by position sample counts:', {
+                QB: pointsByPosition.QB.length,
+                RB: pointsByPosition.RB.length,
+                WR: pointsByPosition.WR.length,
+                TE: pointsByPosition.TE.length,
+                K: pointsByPosition.K.length
             });
             
             // Calculate median for each position
