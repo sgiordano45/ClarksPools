@@ -538,6 +538,104 @@
             filter: grayscale(100%);
         }
 
+        .roster-player.shared-player {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
+        }
+
+        .roster-player.shared-player .player-name::after {
+            content: ' 🔗';
+            font-size: 0.7rem;
+        }
+
+        .roster-player.unique-player {
+            border-color: var(--accent-gold);
+        }
+
+        /* Overlap Badge */
+        .overlap-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            margin-left: 0.5rem;
+        }
+
+        .overlap-badge.high {
+            background: rgba(0, 200, 83, 0.2);
+            color: var(--accent-green);
+        }
+
+        .overlap-badge.medium {
+            background: rgba(255, 193, 7, 0.2);
+            color: var(--accent-gold);
+        }
+
+        .overlap-badge.low {
+            background: rgba(90, 113, 148, 0.2);
+            color: var(--text-muted);
+        }
+
+        .overlap-badge.identical {
+            background: rgba(0, 212, 255, 0.2);
+            color: var(--accent-blue);
+        }
+
+        /* Overlap Details in expanded section */
+        .overlap-summary {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem 1rem;
+            background: var(--secondary-dark);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            flex-wrap: wrap;
+        }
+
+        .overlap-stat {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .overlap-stat-value {
+            font-family: 'Oswald', sans-serif;
+            font-weight: 600;
+        }
+
+        .overlap-stat-value.shared { color: var(--accent-blue); }
+        .overlap-stat-value.unique-them { color: var(--accent-red); }
+        .overlap-stat-value.unique-me { color: var(--accent-green); }
+
+        /* Compare Entry Selector */
+        .compare-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: var(--tertiary-dark);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .compare-selector label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .compare-selector select {
+            background: var(--secondary-dark);
+            color: var(--text-primary);
+            border: 1px solid var(--card-border);
+            border-radius: 4px;
+            padding: 0.4rem 0.75rem;
+            font-family: 'Roboto Condensed', sans-serif;
+            font-size: 0.85rem;
+        }
+
         .player-position {
             font-family: 'Oswald', sans-serif;
             font-size: 0.7rem;
@@ -2134,8 +2232,38 @@
                 // Get current user to highlight their entry
                 const currentUserId = auth.currentUser?.uid;
                 
+                // Store entries and find user's entries for comparison
+                allEntries = entries;
+                myEntries = entries.filter(e => e.userId === currentUserId);
+                
+                // Set default compare entry if not set or invalid
+                if (!selectedCompareEntry || !myEntries.find(e => e.id === selectedCompareEntry.id)) {
+                    selectedCompareEntry = myEntries.length > 0 ? myEntries[0] : null;
+                }
+                
+                // Build compare selector HTML if user has entries
+                let compareSelectorHtml = '';
+                if (myEntries.length > 0) {
+                    const activeCount = getActivePlayerNames(selectedCompareEntry?.roster).length;
+                    compareSelectorHtml = `
+                        <div class="compare-selector">
+                            <label>🔗 Compare rosters to:</label>
+                            <select id="compareEntrySelect" onchange="updateCompareEntry(this.value)">
+                                ${myEntries.map(e => `
+                                    <option value="${e.id}" ${selectedCompareEntry?.id === e.id ? 'selected' : ''}>
+                                        ${e.teamName || e.entryName || 'My Entry'}
+                                    </option>
+                                `).join('')}
+                            </select>
+                            <span style="color: var(--text-muted); font-size: 0.8rem;">
+                                (${activeCount} active players)
+                            </span>
+                        </div>
+                    `;
+                }
+                
                 // Render leaderboard rows
-                container.innerHTML = entries.map((entry, index) => {
+                const rowsHtml = entries.map((entry, index) => {
                     const rank = index + 1;
                     const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : '';
                     const isMyEntry = entry.userId === currentUserId;
@@ -2157,8 +2285,51 @@
                     // Calculate active players by position
                     const activeByPos = calculateActiveByPosition(entry.roster);
                     
+                    // Calculate overlap if user has entries and this isn't their own entry being compared
+                    let overlapBadgeHtml = '';
+                    let overlapSummaryHtml = '';
+                    let sharedPlayers = new Set();
+                    
+                    if (selectedCompareEntry && selectedCompareEntry.id !== entry.id) {
+                        const overlap = calculateRosterOverlap(selectedCompareEntry.roster, entry.roster);
+                        const badgeClass = getOverlapBadgeClass(overlap);
+                        sharedPlayers = new Set(overlap.shared);
+                        
+                        // Badge text
+                        let badgeText = `${overlap.sharedCount} shared`;
+                        if (badgeClass === 'identical') {
+                            badgeText = '✓ Identical';
+                        }
+                        
+                        overlapBadgeHtml = `<span class="overlap-badge ${badgeClass}">${badgeText}</span>`;
+                        
+                        // Get last names for display
+                        const uniqueToThemNames = overlap.uniqueToThem.slice(0, 3).map(p => {
+                            const parts = p.split(' ');
+                            return parts.length > 1 ? parts[parts.length - 1] : p;
+                        });
+                        
+                        // Overlap summary for expanded view
+                        overlapSummaryHtml = `
+                            <div class="overlap-summary">
+                                <div class="overlap-stat">
+                                    <span class="overlap-stat-value shared">${overlap.sharedCount}</span>
+                                    <span>shared active players</span>
+                                </div>
+                                <div class="overlap-stat">
+                                    <span class="overlap-stat-value unique-them">${overlap.uniqueToThem.length}</span>
+                                    <span>unique to them${uniqueToThemNames.length > 0 ? ` (${uniqueToThemNames.join(', ')}${overlap.uniqueToThem.length > 3 ? '...' : ''})` : ''}</span>
+                                </div>
+                                <div class="overlap-stat">
+                                    <span class="overlap-stat-value unique-me">${overlap.uniqueToMe.length}</span>
+                                    <span>unique to you</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
                     // Build roster grid HTML using players array and roster map
-                    const rosterHtml = renderEntryRoster(entry.roster, entry.players);
+                    const rosterHtml = renderEntryRoster(entry.roster, entry.players, sharedPlayers);
                     
                     return `
                         <div class="leaderboard-row ${myEntryClass}" onclick="toggleDetails(this)" data-entry-id="${entry.id}">
@@ -2166,7 +2337,7 @@
                             <div class="entry-info">
                                 <div class="entry-avatar">${initials}</div>
                                 <div>
-                                    <div class="entry-name">${displayName}</div>
+                                    <div class="entry-name">${displayName}${overlapBadgeHtml}</div>
                                     <div class="entry-user">Tiebreaker: ${entry.tiebreaker || 0}</div>
                                 </div>
                             </div>
@@ -2200,12 +2371,15 @@
                             <button class="expand-btn">▼</button>
                         </div>
                         <div class="entry-details">
+                            ${overlapSummaryHtml}
                             <div class="roster-grid">
                                 ${rosterHtml}
                             </div>
                         </div>
                     `;
                 }).join('');
+                
+                container.innerHTML = compareSelectorHtml + rowsHtml;
                 
                 console.log('Loaded entries:', entries.length);
             } catch (error) {
@@ -2215,6 +2389,14 @@
                         Error loading leaderboard: ${error.message}
                     </div>
                 `;
+            }
+        }
+
+        // Update compare entry selection
+        function updateCompareEntry(entryId) {
+            selectedCompareEntry = myEntries.find(e => e.id === entryId);
+            if (currentPoolId) {
+                loadLeaderboard(currentPoolId);
             }
         }
 
@@ -2266,6 +2448,87 @@
             return counts;
         }
 
+        // Get list of active (non-eliminated, non-IR) player names from a roster
+        function getActivePlayerNames(roster) {
+            if (!roster || Object.keys(roster).length === 0) {
+                return [];
+            }
+            
+            const activePlayers = [];
+            
+            Object.values(roster).forEach(playerName => {
+                const playerFromDb = Object.values(playersData).flat().find(p => 
+                    p.name.toLowerCase() === playerName.toLowerCase()
+                );
+                
+                const team = playerFromDb?.team;
+                const isEliminated = team ? (teamsStatus[team]?.eliminated || false) : false;
+                const isIR = playerFromDb?.ir || false;
+                
+                if (!isEliminated && !isIR) {
+                    activePlayers.push(playerName.toLowerCase());
+                }
+            });
+            
+            return activePlayers;
+        }
+
+        // Calculate roster overlap between two entries
+        function calculateRosterOverlap(myRoster, theirRoster) {
+            const myActive = new Set(getActivePlayerNames(myRoster));
+            const theirActive = new Set(getActivePlayerNames(theirRoster));
+            
+            const shared = [];
+            const uniqueToMe = [];
+            const uniqueToThem = [];
+            
+            // Find shared players
+            myActive.forEach(player => {
+                if (theirActive.has(player)) {
+                    shared.push(player);
+                } else {
+                    uniqueToMe.push(player);
+                }
+            });
+            
+            // Find players unique to them
+            theirActive.forEach(player => {
+                if (!myActive.has(player)) {
+                    uniqueToThem.push(player);
+                }
+            });
+            
+            const totalActive = myActive.size;
+            const overlapPercent = totalActive > 0 ? (shared.length / totalActive) * 100 : 0;
+            
+            return {
+                shared,
+                uniqueToMe,
+                uniqueToThem,
+                sharedCount: shared.length,
+                myActiveCount: myActive.size,
+                theirActiveCount: theirActive.size,
+                overlapPercent
+            };
+        }
+
+        // Get overlap badge class based on percentage
+        function getOverlapBadgeClass(overlap) {
+            if (overlap.sharedCount === overlap.myActiveCount && overlap.myActiveCount === overlap.theirActiveCount) {
+                return 'identical';
+            } else if (overlap.overlapPercent >= 70) {
+                return 'high';
+            } else if (overlap.overlapPercent >= 40) {
+                return 'medium';
+            }
+            return 'low';
+        }
+
+        // Store for comparison
+        let myEntries = [];
+        let allEntries = [];
+        let selectedCompareEntry = null;
+
         // Calculate entry week points from roster players' stats
         function calculateEntryWeekPoints(roster) {
             const points = { WC: 0, DIV: 0, CONF: 0, SB: 0, total: 0 };
@@ -2297,7 +2560,7 @@
         }
 
         // Render roster for an entry
-        function renderEntryRoster(roster, players) {
+        function renderEntryRoster(roster, players, sharedPlayers = new Set()) {
             if (!roster || Object.keys(roster).length === 0) {
                 return '<div style="color: var(--text-muted); padding: 1rem;">No roster data available</div>';
             }
@@ -2338,7 +2601,14 @@
                 const isEliminated = teamsStatus[team]?.eliminated || false;
                 const isIR = playerFromDb?.ir || false;
                 const isOut = isEliminated || isIR;
-                const eliminatedClass = isOut ? 'eliminated' : '';
+                
+                // Check if this player is shared with compared entry
+                const isShared = sharedPlayers.has(name.toLowerCase());
+                
+                // Build CSS classes
+                let cssClasses = 'roster-player';
+                if (isOut) cssClasses += ' eliminated';
+                if (isShared && !isOut) cssClasses += ' shared-player';
                 
                 // Determine status indicator
                 let statusIndicator = '';
@@ -2358,7 +2628,7 @@
                 }
                 
                 return `
-                    <div class="roster-player ${eliminatedClass}">
+                    <div class="${cssClasses}">
                         <span class="player-position">${position}</span>
                         <div class="player-team-logo">${team}</div>
                         <div class="player-info">
