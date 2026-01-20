@@ -1,0 +1,1010 @@
+/* ========================================
+   GRIDIRON POOLS - MOBILE ENHANCEMENTS
+   Mobile-first responsive improvements
+   ======================================== */
+
+/* ----------------------------------------
+   CSS VARIABLES FOR MOBILE
+   ---------------------------------------- */
+:root {
+    --mobile-padding: 12px;
+    --mobile-gap: 10px;
+    --mobile-font-sm: 0.85rem;
+    --mobile-font-base: 0.95rem;
+    --mobile-border-radius: 8px;
+    --tap-target-min: 44px;
+}
+
+/* ----------------------------------------
+   GLOBAL MOBILE RESETS
+   ---------------------------------------- */
+@media (max-width: 768px) {
+    * {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+    }
+    
+    html {
+        -webkit-text-size-adjust: 100%;
+        scroll-behavior: smooth;
+    }
+    
+    body {
+        padding: var(--mobile-padding);
+        font-size: var(--mobile-font-base);
+        line-height: 1.5;
+        overflow-x: hidden;
+    }
+    
+    /* Prevent horizontal scroll */
+    .container, .main-content, main, section {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+}
+
+/* ----------------------------------------
+   NAVIGATION - MOBILE
+   ---------------------------------------- */
+@media (max-width: 768px) {
+    nav, .nav, .navbar, .navigation {
+        padding: 10px var(--mobile-padding);
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    nav a, .nav a, .nav-link {
+        padding: 10px 14px;
+        font-size: var(--mobile-font-sm);
+        min-height: var(--tap-target-min);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Hamburger menu support */
+    .nav-toggle {
+        display: block;
+        width: var(--tap-target-min);
+        height: var(--tap-target-min);
+        cursor: pointer;
+    }
+    
+    .nav-menu {
+        width: 100%;
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .nav-menu.hidden {
+        display: none;
+    }
+    
+    /* Logo/Brand adjustments */
+    .logo, .brand, .site-title {
+        font-size: 1.25rem;
+    }
+}
+
+/* ----------------------------------------
+   HEADERS & TITLES
+   ---------------------------------------- */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+        line-height: 1.3;
+    }
+    
+    h2 {
+        font-size: 1.25rem;
+        margin-bottom: 12px;
+    }
+    
+    h3 {
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+    }
+    
+    .page-header, .section-header {
+        padding: 15px var(--mobile-padding);
+        text-align: center;
+    }
+    
+    .page-title {
+        font-size: 1.4rem;
+    }
+    
+    .page-subtitle, .section-subtitle {
+        font-size: var(--mobile-font-sm);
+    }
+}
+
+/* ----------------------------------------
+   BUTTONS - TOUCH FRIENDLY
+   ---------------------------------------- */
+@media (max-width: 768px) {
+    button, .btn, input[type="submit"], input[type="button"] {
+        min-height: var(--tap-target-min);
+        min-width: var(--tap-target-min);
+        padding: 12px 20px;
+        font-size: var(--mobile-font-base);
+        border-radius: var(--mobile-border-radius);
+        cursor: pointer;
+        touch-action: manipulation;
+    }
+    
+    /* Button groups - stack vertically */
+    .btn-group, .button-group, .actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+    }
+    
+    .btn-group button, .button-group button, .actions button {
+        width: 100%;
+    }
+    
+    /* Inline button pairs */
+    .btn-pair, .btn-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    
+    /* Small/icon buttons */
+    .btn-sm, .btn-icon {
+        min-height: 38px;
+        min-width: 38px;
+        padding: 8px 12px;
+    }
+    
+    /* Action buttons in tables/cards */
+    .action-btn {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+}
+
+/* ----------------------------------------
+   FORMS - MOBILE OPTIMIZED
+   ---------------------------------------- */
+@media (max-width: 768px) {
+    form {
+        width: 100%;
+    }
+    
+    .form-group, .field-group {
+        margin-bottom: 15px;
+    }
+    
+    label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: var(--mobile-font-sm);
+        font-weight: 600;
+    }
+    
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    input[type="tel"],
+    input[type="url"],
+    input[type="date"],
+    input[type="time"],
+    input[type="datetime-local"],
+    select,
+    textarea {
+        width: 100%;
+        min-height: var(--tap-target-min);
+        padding: 12px;
+        font-size: 16px; /* Prevents iOS zoom */
+        border-radius: var(--mobile-border-radius);
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+    
+    select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        padding-right: 36px;
+    }
+    
+    textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+    
+    /* Checkbox and radio - larger touch targets */
+    input[type="checkbox"],
+    input[type="radio"] {
+        width: 22px;
+        height: 22px;
+        margin-right: 10px;
+    }
+    
+    .checkbox-label, .radio-label {
+        display: flex;
+        align-items: center;
+        min-height: var(--tap-target-min);
+        padding: 8px 0;
+    }
+    
+    /* Form row layouts */
+    .form-row {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    /* File input */
+    input[type="file"] {
+        padding: 10px;
+        font-size: var(--mobile-font-sm);
+    }
+    
+    .file-upload-area {
+        padding: 20px;
+        text-align: center;
+        border: 2px dashed #ccc;
+        border-radius: var(--mobile-border-radius);
+    }
+}
+
+/* ----------------------------------------
+   TABLES - RESPONSIVE
+   ---------------------------------------- */
+@media (max-width: 768px) {
+    /* Horizontal scroll wrapper */
+    .table-wrapper, .table-container {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 15px;
+        border-radius: var(--mobile-border-radius);
+    }
+    
+    table {
+        min-width: 100%;
+        font-size: var(--mobile-font-sm);
+        border-collapse: collapse;
+    }
+    
+    th, td {
+        padding: 10px 8px;
+        text-align: left;
+        white-space: nowrap;
+    }
+    
+    th {
+        font-size: 0.8rem;
+        font-weight: 600;
+        position: sticky;
+        top: 0;
+        background: inherit;
+    }
+    
+    /* Sticky first column for leaderboards */
+    .sticky-col table td:first-child,
+    .sticky-col table th:first-child,
+    .leaderboard td:first-child,
+    .leaderboard th:first-child {
+        position: sticky;
+        left: 0;
+        background: inherit;
+        z-index: 1;
+        box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+    }
+    
+    /* Card-style tables for simple data */
+    .table-cards tbody tr {
+        display: block;
+        margin-bottom: 10px;
+        padding: 12px;
+        border-radius: var(--mobile-border-radius);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .table-cards tbody td {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+        border: none;
+    }
+    
+    .table-cards tbody td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        margin-right: 10px;
+    }
+    
+    .table-cards thead {
+        display: none;
+    }
+}
+
+/* ----------------------------------------
+   CARDS & PANELS
+   ---------------------------------------- */
+@media (max-width: 768px) {
+    .card, .panel, .pool-card, .game-card {
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: var(--mobile-border-radius);
+    }
+    
+    .card-header, .panel-header {
+        padding-bottom: 12px;
+        margin-bottom: 12px;
+    }
+    
+    .card-title {
+        font-size: 1.1rem;
+    }
+    
+    .card-body, .panel-body {
+        padding: 0;
+    }
+    
+    .card-footer, .panel-footer {
+        padding-top: 12px;
+        margin-top: 12px;
+    }
+    
+    /* Card grids */
+    .card-grid, .pool-grid, .games-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+}
+
+/* Slightly larger screens - 2 column grid */
+@media (min-width: 480px) and (max-width: 768px) {
+    .card-grid-2, .pool-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ----------------------------------------
+   ADMIN PANEL - MOBILE
+   ---------------------------------------- */
+@media (max-width: 768px) {
+    /* Admin sidebar - convert to bottom nav or collapsible */
+    .admin-sidebar, .sidebar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: auto;
+        z-index: 1000;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        padding: 8px;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .admin-sidebar a, .sidebar a {
+        flex-direction: column;
+        padding: 8px;
+        font-size: 0.7rem;
+        text-align: center;
+    }
+    
+    .admin-sidebar .icon, .sidebar .icon {
+        margin-bottom: 4px;
+    }
+    
+    /* Main content padding for bottom nav */
+    .admin-content, .main-content {
+        padding-bottom: 80px;
+    }
+    
+    /* Admin stats grid */
+    .stats-grid, .admin-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .stat-card, .stat-box {
+        padding: 12px;
+        text-align: center;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.75rem;
+    }
+    
+    /* Admin tabs */
+    .admin-tabs, .tabs {
+        display: flex;
+        overflow-x: auto;
+        gap: 5px;
+        padding-bottom: 5px;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .admin-tabs button, .tabs button, .tab {
+        flex-shrink: 0;
+        padding: 10px 15px;
+        font-size: var(--mobile-font-sm);
+        white-space: nowrap;
+    }
+}
+
+/* ----------------------------------------
+   POOL PAGES - MOBILE
+   ---------------------------------------- */
+@media (max-width: 768px) {
+    /* Player selection grids */
+    .player-grid, .roster-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .player-card, .roster-slot {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        gap: 10px;
+    }
+    
+    .player-info {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .player-name {
+        font-size: 0.95rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .player-team, .player-position {
+        font-size: 0.75rem;
+    }
+    
+    .player-points {
+        font-size: 1.1rem;
+        font-weight: bold;
+    }
+    
+    /* Team logos - smaller on mobile */
+    .team-logo, .player-avatar {
+        width: 40px;
+        height: 40px;
+    }
+    
+    /* Game matchups */
+    .matchup, .game-matchup {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 15px;
+        text-align: center;
+    }
+    
+    .matchup-vs {
+        margin: 10px 0;
+        font-size: 0.9rem;
+    }
+    
+    .team-section {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    /* Eliminated teams */
+    .eliminated {
+        opacity: 0.5;
+    }
+    
+    .eliminated::after {
+        content: "ELIMINATED";
+        font-size: 0.6rem;
+        padding: 2px 6px;
+        margin-left: 5px;
+        border-radius: 3px;
+    }
+}
+
+/* ----------------------------------------
+   BETTING POOL - MOBILE
+   ---------------------------------------- */
+@media (max-width: 768px) {
+    /* Betting lines */
+    .betting-line, .bet-card {
+        padding: 15px;
+        margin-bottom: 12px;
+    }
+    
+    .spread, .line {
+        font-size: 1.3rem;
+        font-weight: bold;
+    }
+    
+    .odds {
+        font-size: 0.9rem;
+    }
+    
+    /* Bet slip */
+    .bet-slip {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 15px;
+        z-index: 999;
+        box-shadow: 0 -4px 15px rgba(0,0,0,0.15);
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .bet-slip.active {
+        transform: translateY(0);
+    }
+    
+    .bet-input-row {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    
+    .bet-input-row input {
+        flex: 1;
+    }
+    
+    /* Bankroll display */
+    .bankroll-display {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 15px;
+        font-size: var(--mobile-font-sm);
+    }
+    
+    .bankroll-amount {
+        font-size: 1.1rem;
+        font-weight: bold;
+    }
+}
+
+/* ----------------------------------------
+   SUPER BOWL BOXES - MOBILE
+   ---------------------------------------- */
+@media (max-width: 768px) {
+    /* Boxes grid - make scrollable */
+    .boxes-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 10px;
+    }
+    
+    .boxes-grid {
+        display: grid;
+        grid-template-columns: repeat(10, minmax(35px, 1fr));
+        gap: 2px;
+        min-width: 380px;
+    }
+    
+    .box-cell {
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        padding: 2px;
+        cursor: pointer;
+    }
+    
+    .box-cell.selected {
+        transform: scale(1.05);
+    }
+    
+    /* Box header numbers */
+    .boxes-header {
+        font-size: 0.7rem;
+        font-weight: bold;
+    }
+    
+    /* Box owner name */
+    .box-owner {
+        font-size: 0.55rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    /* Score display */
+    .score-display {
+        text-align: center;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .quarter-scores {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .quarter-score {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+}
+
+/* ----------------------------------------
+   LEADERBOARDS - MOBILE
+   ---------------------------------------- */
+@media (max-width: 768px) {
+    .leaderboard {
+        font-size: var(--mobile-font-sm);
+    }
+    
+    /* Top 3 highlight */
+    .leaderboard-top {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .leaderboard-position {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        border-radius: var(--mobile-border-radius);
+    }
+    
+    .position-rank {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        border-radius: 50%;
+        margin-right: 12px;
+    }
+    
+    .position-info {
+        flex: 1;
+    }
+    
+    .position-name {
+        font-weight: 600;
+    }
+    
+    .position-score {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+    
+    /* Round-by-round breakdown */
+    .round-breakdown {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 5px;
+        font-size: 0.7rem;
+    }
+    
+    .round-score {
+        text-align: center;
+        padding: 4px;
+    }
+}
+
+/* ----------------------------------------
+   DATA MANAGEMENT - MOBILE
+   ---------------------------------------- */
+@media (max-width: 768px) {
+    /* CSV import area */
+    .import-area, .upload-zone {
+        padding: 25px 15px;
+        text-align: center;
+    }
+    
+    /* Preview table */
+    .preview-table {
+        font-size: 0.75rem;
+    }
+    
+    .preview-table th,
+    .preview-table td {
+        padding: 6px 4px;
+    }
+    
+    /* Status messages */
+    .status-message, .import-status {
+        padding: 12px;
+        margin: 10px 0;
+        font-size: var(--mobile-font-sm);
+        border-radius: var(--mobile-border-radius);
+    }
+    
+    /* Progress bars */
+    .progress-bar {
+        height: 8px;
+        border-radius: 4px;
+    }
+}
+
+/* ----------------------------------------
+   MODALS - MOBILE
+   ---------------------------------------- */
+@media (max-width: 768px) {
+    .modal, .dialog {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        margin: 0;
+        max-height: 100vh;
+        max-width: 100vw;
+        border-radius: 0;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .modal-header {
+        padding: 15px;
+        flex-shrink: 0;
+    }
+    
+    .modal-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 15px;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .modal-footer {
+        padding: 15px;
+        flex-shrink: 0;
+    }
+    
+    .modal-close {
+        width: var(--tap-target-min);
+        height: var(--tap-target-min);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Bottom sheet style modal */
+    .modal-bottom, .bottom-sheet {
+        top: auto;
+        border-radius: 16px 16px 0 0;
+        max-height: 90vh;
+    }
+    
+    .bottom-sheet-handle {
+        width: 40px;
+        height: 4px;
+        border-radius: 2px;
+        margin: 10px auto;
+        background: #ccc;
+    }
+}
+
+/* ----------------------------------------
+   ALERTS & NOTIFICATIONS
+   ---------------------------------------- */
+@media (max-width: 768px) {
+    .alert, .notification, .toast {
+        padding: 12px 15px;
+        margin-bottom: 10px;
+        font-size: var(--mobile-font-sm);
+        border-radius: var(--mobile-border-radius);
+    }
+    
+    .toast {
+        position: fixed;
+        bottom: 80px;
+        left: 15px;
+        right: 15px;
+        z-index: 1001;
+    }
+}
+
+/* ----------------------------------------
+   LOADING STATES
+   ---------------------------------------- */
+@media (max-width: 768px) {
+    .loading, .spinner {
+        padding: 30px;
+        text-align: center;
+    }
+    
+    .skeleton {
+        border-radius: var(--mobile-border-radius);
+        margin-bottom: 10px;
+    }
+    
+    .skeleton-text {
+        height: 16px;
+        margin-bottom: 8px;
+    }
+    
+    .skeleton-card {
+        height: 80px;
+        margin-bottom: 10px;
+    }
+}
+
+/* ----------------------------------------
+   EMPTY STATES
+   ---------------------------------------- */
+@media (max-width: 768px) {
+    .empty-state {
+        padding: 40px 20px;
+        text-align: center;
+    }
+    
+    .empty-state-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+    }
+    
+    .empty-state-title {
+        font-size: 1.1rem;
+        margin-bottom: 8px;
+    }
+    
+    .empty-state-text {
+        font-size: var(--mobile-font-sm);
+        margin-bottom: 20px;
+    }
+}
+
+/* ----------------------------------------
+   UTILITY CLASSES - MOBILE
+   ---------------------------------------- */
+@media (max-width: 768px) {
+    /* Hide on mobile */
+    .hide-mobile, .desktop-only {
+        display: none !important;
+    }
+    
+    /* Show only on mobile */
+    .mobile-only {
+        display: block !important;
+    }
+    
+    /* Text alignment */
+    .text-center-mobile {
+        text-align: center !important;
+    }
+    
+    /* Full width on mobile */
+    .full-width-mobile {
+        width: 100% !important;
+    }
+    
+    /* Stack elements on mobile */
+    .stack-mobile {
+        flex-direction: column !important;
+    }
+    
+    /* Spacing utilities */
+    .p-mobile {
+        padding: var(--mobile-padding) !important;
+    }
+    
+    .m-mobile {
+        margin: var(--mobile-padding) !important;
+    }
+    
+    .gap-mobile {
+        gap: var(--mobile-gap) !important;
+    }
+    
+    /* No scroll */
+    .no-scroll {
+        overflow: hidden !important;
+        position: fixed;
+        width: 100%;
+    }
+}
+
+/* ----------------------------------------
+   TOUCH INTERACTION FEEDBACK
+   ---------------------------------------- */
+@media (max-width: 768px) {
+    .touchable {
+        transition: transform 0.1s ease, opacity 0.1s ease;
+    }
+    
+    .touchable:active {
+        transform: scale(0.98);
+        opacity: 0.8;
+    }
+    
+    /* Remove hover states on touch */
+    @media (hover: none) {
+        button:hover,
+        .btn:hover,
+        a:hover {
+            /* Reset hover styles for touch devices */
+        }
+    }
+}
+
+/* ----------------------------------------
+   PRINT STYLES - LEADERBOARDS
+   ---------------------------------------- */
+@media print {
+    nav, .nav, .sidebar, .admin-sidebar,
+    button, .btn, .bet-slip, .modal {
+        display: none !important;
+    }
+    
+    body {
+        padding: 0;
+        font-size: 10pt;
+    }
+    
+    .leaderboard, table {
+        page-break-inside: avoid;
+    }
+}
+
+/* ----------------------------------------
+   LANDSCAPE ORIENTATION ADJUSTMENTS
+   ---------------------------------------- */
+@media (max-width: 768px) and (orientation: landscape) {
+    .boxes-grid {
+        min-width: auto;
+    }
+    
+    .box-cell {
+        font-size: 0.75rem;
+    }
+    
+    .matchup {
+        flex-direction: row;
+        justify-content: space-around;
+    }
+    
+    .bet-slip {
+        padding: 10px 15px;
+    }
+}
+
+/* ----------------------------------------
+   SAFE AREA INSETS (iPhone X+)
+   ---------------------------------------- */
+@supports (padding: max(0px)) {
+    @media (max-width: 768px) {
+        body {
+            padding-left: max(var(--mobile-padding), env(safe-area-inset-left));
+            padding-right: max(var(--mobile-padding), env(safe-area-inset-right));
+            padding-bottom: max(var(--mobile-padding), env(safe-area-inset-bottom));
+        }
+        
+        .admin-sidebar, .sidebar, .bet-slip, .modal-footer {
+            padding-bottom: max(15px, env(safe-area-inset-bottom));
+        }
+        
+        .toast {
+            bottom: max(80px, calc(60px + env(safe-area-inset-bottom)));
+        }
+    }
+}
