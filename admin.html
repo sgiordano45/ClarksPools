@@ -809,7 +809,88 @@
             select.innerHTML = '<option value="">All Pools</option>' + allPools.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
         }
         
-        function loadEntries() {}
+        async function loadEntries() {
+            const poolId = document.getElementById('entryPoolFilter').value;
+            const tbody = document.getElementById('entriesTableBody');
+            
+            if (!poolId) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">Select a pool to view entries</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">Loading entries...</td></tr>';
+            
+            try {
+                // Get pool info for buy-in amount
+                const pool = allPools.find(p => p.id === poolId);
+                const buyIn = pool?.buyIn || 0;
+                
+                // Get entries from subcollection
+                const snapshot = await db.collection('pools').doc(poolId)
+                    .collection('entries')
+                    .orderBy('totalPoints', 'desc')
+                    .get();
+                
+                if (snapshot.empty) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">No entries in this pool yet</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = snapshot.docs.map((doc, idx) => {
+                    const entry = doc.data();
+                    const paidClass = entry.paid ? 'paid' : 'unpaid';
+                    const paidText = entry.paid ? 'Paid' : 'Unpaid';
+                    
+                    return `
+                        <tr>
+                            <td><strong>${entry.entryName || entry.teamName || 'Entry ' + (idx + 1)}</strong></td>
+                            <td>${pool?.name || 'Unknown Pool'}</td>
+                            <td>${entry.userName || entry.userEmail || 'Unknown'}</td>
+                            <td style="font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem;">${entry.totalPoints || 0}</td>
+                            <td><span class="status-badge ${paidClass}">${paidText}</span></td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="action-btn" title="View" onclick="viewEntry('${poolId}', '${doc.id}')">👁</button>
+                                    ${!entry.paid ? `<button class="action-btn" title="Mark Paid" onclick="markEntryPaid('${poolId}', '${doc.id}', this)">💵</button>` : ''}
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+                
+            } catch (error) {
+                console.error('Error loading entries:', error);
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--accent-red);">Error loading entries: ' + error.message + '</td></tr>';
+            }
+        }
+        
+        function viewEntry(poolId, entryId) {
+            // Could open a modal with entry details
+            window.open(`pool.html?id=${poolId}#entry-${entryId}`, '_blank');
+        }
+        
+        async function markEntryPaid(poolId, entryId, btn) {
+            if (!confirm('Mark this entry as paid?')) return;
+            
+            try {
+                await db.collection('pools').doc(poolId).collection('entries').doc(entryId).update({
+                    paid: true,
+                    paidAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                // Update UI
+                const row = btn.closest('tr');
+                const badge = row.querySelector('.status-badge');
+                badge.classList.remove('unpaid');
+                badge.classList.add('paid');
+                badge.textContent = 'Paid';
+                btn.remove();
+                
+            } catch (error) {
+                console.error('Error marking paid:', error);
+                alert('Error: ' + error.message);
+            }
+        }
         function exportEntries() { alert('Exporting entries...'); }
         
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
