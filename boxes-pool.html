@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Boxes Pools - Gridiron Pools</title>
+<title>Box Pools - SportsPools</title>
 <meta name="theme-color" content="#0a1628">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -347,6 +347,48 @@ header::before {
 
 .stat-card.gold .stat-value { color: var(--accent-gold); }
 .stat-card.green .stat-value { color: var(--accent-green); }
+
+/* Payout Info Bar */
+.payout-info-bar {
+  background: var(--tertiary-dark);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  font-size: 0.95rem;
+}
+
+.payout-info-bar .payout-label {
+  font-weight: 600;
+  color: var(--accent-gold);
+}
+
+.payout-info-bar #payoutInfoDisplay {
+  color: var(--text-secondary);
+}
+
+.payout-info-bar .payout-period {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background: rgba(255,255,255,0.05);
+  border-radius: 4px;
+  margin-right: 0.5rem;
+}
+
+.payout-info-bar .payout-period .period-name {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.payout-info-bar .payout-period .period-pct {
+  color: var(--accent-green);
+}
 
 /* Grid Container */
 .grid-container {
@@ -1487,6 +1529,12 @@ header::before {
       <div class="stat-label">Prize Pool</div>
     </div>
   </div>
+  
+  <!-- Payout Info Bar -->
+  <div class="payout-info-bar" id="payoutInfoBar" style="display: none;">
+    <span class="payout-label">💰 Payouts:</span>
+    <span id="payoutInfoDisplay">--</span>
+  </div>
 
   <!-- Grid Container -->
   <div class="grid-container" id="gridContainer" style="display: none;">
@@ -1721,7 +1769,7 @@ header::before {
 
 <!-- Create Pool Modal -->
 <div class="modal-overlay" id="createPoolModal">
-  <div class="modal">
+  <div class="modal" style="max-width: 550px;">
     <h3>➕ Create New Pool</h3>
     <div class="form-group">
       <label>Pool Name</label>
@@ -1755,9 +1803,59 @@ header::before {
       <label>Cost Per Box ($)</label>
       <input type="number" id="newCostPerBox" placeholder="10" value="10" min="0">
     </div>
+    
+    <!-- Payout Timing Option -->
+    <div class="form-group">
+      <label>Payout Timing</label>
+      <select id="newPayoutTiming" onchange="updatePayoutFields()">
+        <option value="4-period">1Q / Halftime / 3Q / Final (4 payouts)</option>
+        <option value="2-period">Halftime / Final only (2 payouts)</option>
+        <option value="final-only">Final only (1 payout)</option>
+      </select>
+    </div>
+    
+    <!-- Dynamic Payout Percentages -->
+    <div id="payoutFieldsContainer">
+      <div class="form-row" id="payoutRow1">
+        <div class="form-group" id="payoutQ1Group">
+          <label>Q1 Payout %</label>
+          <input type="number" id="newPayoutQ1" value="20" min="0" max="100" onchange="updatePayoutTotal()">
+        </div>
+        <div class="form-group" id="payoutHalfGroup">
+          <label>Halftime %</label>
+          <input type="number" id="newPayoutHalf" value="20" min="0" max="100" onchange="updatePayoutTotal()">
+        </div>
+      </div>
+      <div class="form-row" id="payoutRow2">
+        <div class="form-group" id="payoutQ3Group">
+          <label>Q3 Payout %</label>
+          <input type="number" id="newPayoutQ3" value="20" min="0" max="100" onchange="updatePayoutTotal()">
+        </div>
+        <div class="form-group" id="payoutFinalGroup">
+          <label>Final Payout %</label>
+          <input type="number" id="newPayoutFinal" value="40" min="0" max="100" onchange="updatePayoutTotal()">
+        </div>
+      </div>
+      <p id="payoutTotalDisplay" style="font-size: 0.85rem; color: var(--accent-green); margin-top: 0.5rem; text-align: right;">
+        Total: 100% ✓
+      </p>
+    </div>
+    
+    <!-- Number Sharing Option -->
+    <div class="form-group">
+      <label>Grid Numbers</label>
+      <select id="newNumberSharing">
+        <option value="shared">Same numbers for all games</option>
+        <option value="unique">Different numbers per game</option>
+      </select>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+        "Same numbers" uses one set of randomized numbers for all games in this pool.
+      </p>
+    </div>
+    
     <div class="form-group">
       <label>Description (optional)</label>
-      <textarea id="newDescription" rows="3" placeholder="Pool rules, payout structure..."></textarea>
+      <textarea id="newDescription" rows="2" placeholder="Pool rules, additional info..."></textarea>
     </div>
     <div class="modal-buttons">
       <button class="btn btn-secondary" onclick="hideCreatePoolModal()">Cancel</button>
@@ -2019,6 +2117,49 @@ header::before {
     }
     
     updateTeamLabels();
+    
+    // Update payout info display
+    updatePayoutInfoDisplay();
+  }
+  
+  function updatePayoutInfoDisplay() {
+    const payoutBar = document.getElementById('payoutInfoBar');
+    const payoutDisplay = document.getElementById('payoutInfoDisplay');
+    
+    if (!currentPool) {
+      payoutBar.style.display = 'none';
+      return;
+    }
+    
+    payoutBar.style.display = 'flex';
+    
+    const payouts = currentPool.payouts || { q1: 0.2, half: 0.2, q3: 0.2, final: 0.4 };
+    const timing = currentPool.payoutTiming || '4-period';
+    const numberMode = currentPool.numberSharing === 'shared' ? '(Same #s all games)' : '(Unique #s per game)';
+    
+    let payoutHTML = '';
+    
+    if (timing === '4-period' || (!timing && payouts.q1 > 0)) {
+      payoutHTML = `
+        <span class="payout-period"><span class="period-name">Q1:</span> <span class="period-pct">${Math.round(payouts.q1 * 100)}%</span></span>
+        <span class="payout-period"><span class="period-name">Half:</span> <span class="period-pct">${Math.round(payouts.half * 100)}%</span></span>
+        <span class="payout-period"><span class="period-name">Q3:</span> <span class="period-pct">${Math.round(payouts.q3 * 100)}%</span></span>
+        <span class="payout-period"><span class="period-name">Final:</span> <span class="period-pct">${Math.round(payouts.final * 100)}%</span></span>
+      `;
+    } else if (timing === '2-period') {
+      payoutHTML = `
+        <span class="payout-period"><span class="period-name">Halftime:</span> <span class="period-pct">${Math.round(payouts.half * 100)}%</span></span>
+        <span class="payout-period"><span class="period-name">Final:</span> <span class="period-pct">${Math.round(payouts.final * 100)}%</span></span>
+      `;
+    } else {
+      payoutHTML = `
+        <span class="payout-period"><span class="period-name">Final:</span> <span class="period-pct">100%</span></span>
+      `;
+    }
+    
+    payoutHTML += `<span style="color: var(--text-muted); font-size: 0.85rem; margin-left: 0.5rem;">${numberMode}</span>`;
+    
+    payoutDisplay.innerHTML = payoutHTML;
   }
 
   function renderGameTabs() {
@@ -2505,12 +2646,21 @@ header::before {
           </div>
         </div>
         
-        <div class="form-group">
-          <label style="display: flex; align-items: center; gap: 0.5rem;">
+        <div class="form-group" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+          <label style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
             <input type="checkbox" class="game-numbers-drawn" ${game.numbersDrawn !== false ? 'checked' : ''}>
             Numbers Drawn (visible to players)
           </label>
+          <button type="button" class="btn btn-gold" style="padding: 0.5rem 1rem; font-size: 0.8rem;" onclick="randomizeGameNumbers(${idx})">
+            🎲 Randomize Numbers
+          </button>
         </div>
+        
+        ${currentPool.numberSharing === 'shared' ? `
+        <p style="font-size: 0.8rem; color: var(--accent-blue); margin-bottom: 0.5rem;">
+          ℹ️ This pool uses shared numbers - randomizing will update ALL games.
+        </p>
+        ` : ''}
         
         <div class="form-group">
           <label>Column Numbers (Team 1 digits, comma-separated)</label>
@@ -2732,16 +2882,81 @@ header::before {
 
   window.addGame = function() {
     if (!currentPool.games) currentPool.games = [];
+    
+    // Check if pool uses shared numbers
+    const useShared = currentPool.numberSharing === 'shared';
+    const colNumbers = useShared && currentPool.sharedColNumbers 
+      ? [...currentPool.sharedColNumbers] 
+      : [0,1,2,3,4,5,6,7,8,9];
+    const rowNumbers = useShared && currentPool.sharedRowNumbers 
+      ? [...currentPool.sharedRowNumbers] 
+      : [0,1,2,3,4,5,6,7,8,9];
+    const numbersDrawn = useShared && currentPool.sharedNumbersDrawn;
+    
     currentPool.games.push({
       label: 'New Game',
       team1: '',
       team2: '',
-      colNumbers: [0,1,2,3,4,5,6,7,8,9],
-      rowNumbers: [0,1,2,3,4,5,6,7,8,9],
-      numbersDrawn: false,
+      colNumbers: colNumbers,
+      rowNumbers: rowNumbers,
+      numbersDrawn: numbersDrawn,
       winners: {}
     });
     renderGamesEditor();
+  };
+
+  // Randomize numbers for a game (or all games if shared mode)
+  window.randomizeGameNumbers = async function(gameIdx) {
+    if (!currentPool || !isUserAdmin) return;
+    
+    const newColNumbers = shuffleArray([0,1,2,3,4,5,6,7,8,9]);
+    const newRowNumbers = shuffleArray([0,1,2,3,4,5,6,7,8,9]);
+    
+    if (currentPool.numberSharing === 'shared') {
+      // Update all games with the same numbers
+      currentPool.sharedColNumbers = newColNumbers;
+      currentPool.sharedRowNumbers = newRowNumbers;
+      currentPool.sharedNumbersDrawn = true;
+      
+      currentPool.games.forEach(game => {
+        game.colNumbers = [...newColNumbers];
+        game.rowNumbers = [...newRowNumbers];
+        game.numbersDrawn = true;
+      });
+      
+      try {
+        await db.collection('boxesPools').doc(currentPool.id).update({
+          sharedColNumbers: newColNumbers,
+          sharedRowNumbers: newRowNumbers,
+          sharedNumbersDrawn: true,
+          games: currentPool.games,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        showToast('Numbers randomized for all games!', 'success');
+      } catch (error) {
+        console.error('Error saving numbers:', error);
+        showToast('Error saving numbers', 'error');
+      }
+    } else {
+      // Update only the selected game
+      currentPool.games[gameIdx].colNumbers = newColNumbers;
+      currentPool.games[gameIdx].rowNumbers = newRowNumbers;
+      currentPool.games[gameIdx].numbersDrawn = true;
+      
+      try {
+        await db.collection('boxesPools').doc(currentPool.id).update({
+          games: currentPool.games,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        showToast(`Numbers randomized for Game ${gameIdx + 1}!`, 'success');
+      } catch (error) {
+        console.error('Error saving numbers:', error);
+        showToast('Error saving numbers', 'error');
+      }
+    }
+    
+    renderGamesEditor();
+    renderGrid();
   };
 
   // Populate the game selector dropdown with games from the games collection
@@ -3172,18 +3387,120 @@ header::before {
     document.getElementById('createPoolModal').classList.remove('visible');
   };
 
+  // Update payout fields based on timing selection
+  window.updatePayoutFields = function() {
+    const timing = document.getElementById('newPayoutTiming').value;
+    const q1Group = document.getElementById('payoutQ1Group');
+    const halfGroup = document.getElementById('payoutHalfGroup');
+    const q3Group = document.getElementById('payoutQ3Group');
+    const finalGroup = document.getElementById('payoutFinalGroup');
+    const row1 = document.getElementById('payoutRow1');
+    const row2 = document.getElementById('payoutRow2');
+    
+    if (timing === '4-period') {
+      // Show all fields
+      q1Group.style.display = 'block';
+      halfGroup.style.display = 'block';
+      q3Group.style.display = 'block';
+      finalGroup.style.display = 'block';
+      row1.style.display = 'flex';
+      row2.style.display = 'flex';
+      // Set default values
+      document.getElementById('newPayoutQ1').value = 20;
+      document.getElementById('newPayoutHalf').value = 20;
+      document.getElementById('newPayoutQ3').value = 20;
+      document.getElementById('newPayoutFinal').value = 40;
+    } else if (timing === '2-period') {
+      // Show only halftime and final
+      q1Group.style.display = 'none';
+      halfGroup.style.display = 'block';
+      q3Group.style.display = 'none';
+      finalGroup.style.display = 'block';
+      row1.style.display = 'flex';
+      row2.style.display = 'none';
+      // Set default values
+      document.getElementById('newPayoutQ1').value = 0;
+      document.getElementById('newPayoutHalf').value = 50;
+      document.getElementById('newPayoutQ3').value = 0;
+      document.getElementById('newPayoutFinal').value = 50;
+    } else {
+      // Final only
+      q1Group.style.display = 'none';
+      halfGroup.style.display = 'none';
+      q3Group.style.display = 'none';
+      finalGroup.style.display = 'block';
+      row1.style.display = 'none';
+      row2.style.display = 'flex';
+      // Set default values
+      document.getElementById('newPayoutQ1').value = 0;
+      document.getElementById('newPayoutHalf').value = 0;
+      document.getElementById('newPayoutQ3').value = 0;
+      document.getElementById('newPayoutFinal').value = 100;
+    }
+    updatePayoutTotal();
+  };
+
+  // Update payout total display
+  window.updatePayoutTotal = function() {
+    const timing = document.getElementById('newPayoutTiming').value;
+    let total = 0;
+    
+    if (timing === '4-period') {
+      total = (parseFloat(document.getElementById('newPayoutQ1').value) || 0) +
+              (parseFloat(document.getElementById('newPayoutHalf').value) || 0) +
+              (parseFloat(document.getElementById('newPayoutQ3').value) || 0) +
+              (parseFloat(document.getElementById('newPayoutFinal').value) || 0);
+    } else if (timing === '2-period') {
+      total = (parseFloat(document.getElementById('newPayoutHalf').value) || 0) +
+              (parseFloat(document.getElementById('newPayoutFinal').value) || 0);
+    } else {
+      total = parseFloat(document.getElementById('newPayoutFinal').value) || 0;
+    }
+    
+    const display = document.getElementById('payoutTotalDisplay');
+    if (Math.abs(total - 100) < 0.01) {
+      display.innerHTML = `Total: ${total}% ✓`;
+      display.style.color = 'var(--accent-green)';
+    } else {
+      display.innerHTML = `Total: ${total}% (must equal 100%)`;
+      display.style.color = 'var(--accent-red)';
+    }
+  };
+
+  // Shuffle array helper (Fisher-Yates)
+  function shuffleArray(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
   window.createPool = async function() {
     const name = document.getElementById('newPoolName').value.trim();
     const costPerBox = parseFloat(document.getElementById('newCostPerBox').value) || 0;
     const description = document.getElementById('newDescription').value.trim();
     const sport = document.getElementById('newPoolSport').value;
     const eventType = document.getElementById('newPoolEvent').value;
+    const payoutTiming = document.getElementById('newPayoutTiming').value;
+    const numberSharing = document.getElementById('newNumberSharing').value;
     
-    // Get payout percentages
-    const payoutQ1 = parseFloat(document.getElementById('newPayoutQ1')?.value) || 20;
-    const payoutHalf = parseFloat(document.getElementById('newPayoutHalf')?.value) || 20;
-    const payoutQ3 = parseFloat(document.getElementById('newPayoutQ3')?.value) || 20;
-    const payoutFinal = parseFloat(document.getElementById('newPayoutFinal')?.value) || 40;
+    // Get payout percentages based on timing
+    let payoutQ1 = 0, payoutHalf = 0, payoutQ3 = 0, payoutFinal = 0;
+    
+    if (payoutTiming === '4-period') {
+      payoutQ1 = parseFloat(document.getElementById('newPayoutQ1')?.value) || 0;
+      payoutHalf = parseFloat(document.getElementById('newPayoutHalf')?.value) || 0;
+      payoutQ3 = parseFloat(document.getElementById('newPayoutQ3')?.value) || 0;
+      payoutFinal = parseFloat(document.getElementById('newPayoutFinal')?.value) || 0;
+    } else if (payoutTiming === '2-period') {
+      payoutHalf = parseFloat(document.getElementById('newPayoutHalf')?.value) || 0;
+      payoutFinal = parseFloat(document.getElementById('newPayoutFinal')?.value) || 0;
+    } else {
+      // final-only
+      payoutFinal = 100;
+    }
     
     if (!name) {
       showToast('Please enter a pool name', 'warning');
@@ -3197,13 +3514,23 @@ header::before {
       return;
     }
     
+    // Generate shared numbers if using shared mode
+    let sharedColNumbers = null;
+    let sharedRowNumbers = null;
+    if (numberSharing === 'shared') {
+      sharedColNumbers = shuffleArray([0,1,2,3,4,5,6,7,8,9]);
+      sharedRowNumbers = shuffleArray([0,1,2,3,4,5,6,7,8,9]);
+    }
+    
     try {
-      const docRef = await db.collection('boxesPools').add({
+      const poolData = {
         name,
         costPerBox,
         description,
         sport,
         eventType,
+        payoutTiming,
+        numberSharing,
         payouts: {
           q1: payoutQ1 / 100,
           half: payoutHalf / 100,
@@ -3216,12 +3543,25 @@ header::before {
         createdBy: currentUser.uid,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
+      };
+      
+      // Add shared numbers if applicable
+      if (numberSharing === 'shared') {
+        poolData.sharedColNumbers = sharedColNumbers;
+        poolData.sharedRowNumbers = sharedRowNumbers;
+        poolData.sharedNumbersDrawn = false;
+      }
+      
+      const docRef = await db.collection('boxesPools').add(poolData);
       
       hideCreatePoolModal();
       
+      // Reset form
       document.getElementById('newPoolName').value = '';
       document.getElementById('newDescription').value = '';
+      document.getElementById('newPayoutTiming').value = '4-period';
+      document.getElementById('newNumberSharing').value = 'shared';
+      updatePayoutFields();
       
       await loadPoolsList();
       document.getElementById('poolSelect').value = docRef.id;
