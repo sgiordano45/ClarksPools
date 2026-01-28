@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Super Bowl Boxes - Gridiron Pools</title>
+<title>Boxes Pools - Gridiron Pools</title>
 <meta name="theme-color" content="#0a1628">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1121,7 +1121,7 @@ header::before {
 
 <!-- Auth Gate -->
 <div class="auth-gate" id="authGate">
-  <h2>🏈 Super Bowl Boxes</h2>
+  <h2>🎲 Boxes Pools</h2>
   <p>Please sign in to view and participate in boxes pools.</p>
   <a href="home.html">Sign In</a>
 </div>
@@ -1130,8 +1130,8 @@ header::before {
 <header>
   <div class="header-content">
     <div class="header-left">
-      <h1>SUPER BOWL BOXES</h1>
-      <div class="pool-subtitle" id="poolSubtitle">NFL Playoff Squares</div>
+      <h1 id="pageTitle">BOXES POOLS</h1>
+      <div class="pool-subtitle" id="poolSubtitle">Select a pool to get started</div>
       <div class="header-badges">
         <span class="badge badge-open" id="poolStatusBadge">Open</span>
         <span class="badge badge-admin" id="adminBadge" style="display: none;">Admin</span>
@@ -1385,6 +1385,30 @@ header::before {
       <label>Pool Name</label>
       <input type="text" id="newPoolName" placeholder="e.g., Super Bowl 2026">
     </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Sport / Event Type</label>
+        <select id="newPoolSport" onchange="updateEventOptions()">
+          <option value="nfl">🏈 NFL Football</option>
+          <option value="ncaa_basketball">🏀 College Basketball</option>
+          <option value="nba">🏀 NBA Basketball</option>
+          <option value="nhl">🏒 NHL Hockey</option>
+          <option value="mlb">⚾ MLB Baseball</option>
+          <option value="soccer">⚽ Soccer</option>
+          <option value="other">🎲 Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Event</label>
+        <select id="newPoolEvent">
+          <option value="super_bowl">Super Bowl</option>
+          <option value="playoffs">Playoffs (Multiple Games)</option>
+          <option value="thanksgiving">Thanksgiving Games</option>
+          <option value="single_game">Single Game</option>
+          <option value="custom">Custom Event</option>
+        </select>
+      </div>
+    </div>
     <div class="form-group">
       <label>Cost Per Box ($)</label>
       <input type="number" id="newCostPerBox" placeholder="10" value="10" min="0">
@@ -1403,7 +1427,7 @@ header::before {
 <!-- Confirm Box Modal -->
 <div class="modal-overlay" id="confirmBoxModal">
   <div class="modal">
-    <h3>🏈 Claim This Box?</h3>
+    <h3><span id="confirmModalEmoji">🎲</span> Claim This Box?</h3>
     <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
       You're about to claim box <strong id="confirmBoxCoord"></strong>.
     </p>
@@ -1435,6 +1459,49 @@ header::before {
   let pendingBoxClaim = null;
   let allUsers = [];
   let currentLinkType = 'name';
+
+  // Sport configuration
+  const sportConfig = {
+    nfl: { emoji: '🏈', name: 'NFL Football', events: ['super_bowl', 'playoffs', 'thanksgiving', 'single_game', 'custom'] },
+    ncaa_basketball: { emoji: '🏀', name: 'College Basketball', events: ['march_madness', 'tournament', 'single_game', 'custom'] },
+    nba: { emoji: '🏀', name: 'NBA', events: ['finals', 'playoffs', 'single_game', 'custom'] },
+    nhl: { emoji: '🏒', name: 'NHL Hockey', events: ['stanley_cup', 'playoffs', 'single_game', 'custom'] },
+    mlb: { emoji: '⚾', name: 'MLB Baseball', events: ['world_series', 'playoffs', 'single_game', 'custom'] },
+    soccer: { emoji: '⚽', name: 'Soccer', events: ['world_cup', 'tournament', 'single_game', 'custom'] },
+    other: { emoji: '🎲', name: 'Other', events: ['custom'] }
+  };
+
+  const eventLabels = {
+    super_bowl: 'Super Bowl',
+    playoffs: 'Playoffs (Multiple Games)',
+    thanksgiving: 'Thanksgiving Games',
+    single_game: 'Single Game',
+    march_madness: 'March Madness',
+    tournament: 'Tournament',
+    finals: 'Finals',
+    stanley_cup: 'Stanley Cup',
+    world_series: 'World Series',
+    world_cup: 'World Cup',
+    custom: 'Custom Event'
+  };
+
+  function getSportEmoji(sport) {
+    return sportConfig[sport]?.emoji || '🎲';
+  }
+
+  function getSportName(sport) {
+    return sportConfig[sport]?.name || 'Sports';
+  }
+
+  window.updateEventOptions = function() {
+    const sport = document.getElementById('newPoolSport').value;
+    const eventSelect = document.getElementById('newPoolEvent');
+    const events = sportConfig[sport]?.events || ['custom'];
+    
+    eventSelect.innerHTML = events.map(e => 
+      `<option value="${e}">${eventLabels[e] || e}</option>`
+    ).join('');
+  };
 
   // Auth state listener
   auth.onAuthStateChanged(async (user) => {
@@ -1490,9 +1557,10 @@ header::before {
       
       snapshot.forEach(doc => {
         const pool = doc.data();
+        const emoji = getSportEmoji(pool.sport || 'nfl');
         const option = document.createElement('option');
         option.value = doc.id;
-        option.textContent = pool.name || 'Unnamed Pool';
+        option.textContent = `${emoji} ${pool.name || 'Unnamed Pool'}`;
         select.appendChild(option);
       });
       
@@ -1544,7 +1612,19 @@ header::before {
   };
 
   function updatePoolDisplay() {
-    document.getElementById('poolSubtitle').textContent = currentPool.name || 'Boxes Pool';
+    const sport = currentPool.sport || 'nfl';
+    const emoji = getSportEmoji(sport);
+    const eventType = currentPool.eventType || 'custom';
+    
+    // Update page title based on sport/event
+    const pageTitle = document.getElementById('pageTitle');
+    const titleText = currentPool.name || `${eventLabels[eventType] || 'BOXES'} POOL`;
+    pageTitle.textContent = titleText.toUpperCase();
+    
+    document.getElementById('poolSubtitle').textContent = currentPool.description || getSportName(sport);
+    
+    // Update confirm modal emoji
+    document.getElementById('confirmModalEmoji').textContent = emoji;
     
     const statusBadge = document.getElementById('poolStatusBadge');
     const preLockMessage = document.getElementById('preLockMessage');
@@ -1608,6 +1688,7 @@ header::before {
       const winners = game.winners || {};
       const winnerCount = Object.keys(winners).filter(q => winners[q]?.box).length;
       const numbersDrawn = game.numbersDrawn !== false;
+      const emoji = getSportEmoji(currentPool.sport || 'nfl');
       
       let displayLabel;
       if (numbersDrawn && game.team1 && game.team2) {
@@ -1619,7 +1700,7 @@ header::before {
       return `
         <button class="game-tab ${idx === selectedGameIndex ? 'active' : ''} ${!numbersDrawn ? 'numbers-pending' : ''}" 
                 onclick="selectGame(${idx})">
-          🏈 ${displayLabel}
+          ${emoji} ${displayLabel}
           ${winnerCount > 0 ? `<span class="game-winner-badge">🏆 ${winnerCount}/4</span>` : ''}
         </button>
       `;
@@ -2377,6 +2458,8 @@ header::before {
     const name = document.getElementById('newPoolName').value.trim();
     const costPerBox = parseFloat(document.getElementById('newCostPerBox').value) || 0;
     const description = document.getElementById('newDescription').value.trim();
+    const sport = document.getElementById('newPoolSport').value;
+    const eventType = document.getElementById('newPoolEvent').value;
     
     if (!name) {
       showToast('Please enter a pool name', 'warning');
@@ -2388,6 +2471,8 @@ header::before {
         name,
         costPerBox,
         description,
+        sport,
+        eventType,
         games: [],
         entries: {},
         locked: false,
