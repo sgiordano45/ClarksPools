@@ -1,4 +1,4 @@
-// Firebase Configuration for GridironPools
+// Firebase Configuration for SportsPools
 const firebaseConfig = {
     apiKey: "AIzaSyCX4iNBxECRKOxmCU29Qh-F-8pmERcoEH0",
     authDomain: "clarkspools.firebaseapp.com",
@@ -417,4 +417,9 @@ async function getUserBets(poolId) {
     }
 }
 
-console.log('Firebase initialized for GridironPools');
+// ============================================
+// FUNCTION ALIASES (for compatibility)
+// ============================================
+const loginWithEmail = signInWithEmail;
+
+console.log('Firebase initialized for SportsPools');
