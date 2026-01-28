@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Betting Pools Admin | GridironPools</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto+Condensed:wght@300;400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="admin-common.css">
+    <style>
+        /* Betting-specific styles */
+        .betting-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .betting-stat-card {
+            background: var(--secondary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 1.25rem;
+            text-align: center;
+        }
+
+        .betting-stat-card .stat-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .betting-stat-card .stat-value {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.75rem;
+        }
+
+        .betting-stat-card .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Line Editor */
+        .line-editor-game {
+            background: var(--tertiary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .line-editor-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .line-editor-matchup {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .line-editor-team {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .line-editor-team .team-abbr {
+            background: var(--secondary-dark);
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .line-editor-vs {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .line-editor-time {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .line-editor-status {
+            padding: 0.35rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .line-editor-status.open {
+            background: rgba(0,200,83,0.15);
+            color: var(--accent-green);
+        }
+
+        .line-editor-status.locked {
+            background: rgba(255,82,82,0.15);
+            color: var(--accent-red);
+        }
+
+        .line-editor-status.final {
+            background: rgba(0,212,255,0.15);
+            color: var(--accent-blue);
+        }
+
+        .line-inputs-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+        }
+
+        .line-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .line-input-group label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+
+        .line-input-group input {
+            background: var(--secondary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            padding: 0.6rem 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .line-input-group input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        /* Bet History */
+        .bet-history-item {
+            display: grid;
+            grid-template-columns: 140px 1fr 100px 100px 100px 80px;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--card-border);
+            gap: 1rem;
+        }
+
+        .bet-history-item:hover {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .bet-user {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .bet-user-avatar {
+            width: 32px;
+            height: 32px;
+            background: var(--gradient-field);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .bet-pick {
+            font-family: 'Oswald', sans-serif;
+            font-weight: 600;
+        }
+
+        .bet-pick-line {
+            font-size: 0.85rem;
+            color: var(--accent-gold);
+        }
+
+        .bet-pick-game {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .bet-wager {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.1rem;
+        }
+
+        .bet-to-win {
+            color: var(--accent-green);
+            font-size: 0.9rem;
+        }
+
+        .bet-result {
+            padding: 0.35rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .bet-result.pending {
+            background: rgba(255,193,7,0.15);
+            color: var(--accent-gold);
+        }
+
+        .bet-result.won {
+            background: rgba(0,200,83,0.15);
+            color: var(--accent-green);
+        }
+
+        .bet-result.lost {
+            background: rgba(255,82,82,0.15);
+            color: var(--accent-red);
+        }
+
+        .bet-result.push {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-secondary);
+        }
+
+        /* Bankroll Table */
+        .bankroll-table .bankroll-amount {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.25rem;
+        }
+
+        .bankroll-table .bankroll-change {
+            font-size: 0.85rem;
+        }
+
+        .bankroll-table .bankroll-change.positive {
+            color: var(--accent-green);
+        }
+
+        .bankroll-table .bankroll-change.negative {
+            color: var(--accent-red);
+        }
+
+        /* Settle Game Card */
+        .settle-game-card {
+            background: var(--tertiary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .settle-game-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.25rem;
+            background: var(--secondary-dark);
+        }
+
+        .settle-game-teams {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .settle-team {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .settle-team-logo {
+            width: 36px;
+            height: 36px;
+            background: var(--tertiary-dark);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .settle-team-name {
+            font-family: 'Oswald', sans-serif;
+            font-weight: 600;
+        }
+
+        .settle-vs {
+            color: var(--text-muted);
+        }
+
+        .settle-game-body {
+            padding: 1.25rem;
+        }
+
+        .settle-score-inputs {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .score-input-group {
+            text-align: center;
+        }
+
+        .score-input-group label {
+            display: block;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .score-input-group input {
+            width: 100%;
+            max-width: 100px;
+            margin: 0 auto;
+            display: block;
+            background: var(--secondary-dark);
+            border: 2px solid var(--card-border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            color: var(--text-primary);
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.75rem;
+            text-align: center;
+        }
+
+        .score-input-group input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .score-divider {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+        }
+
+        .settle-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        @media (max-width: 1400px) {
+            .betting-stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .line-inputs-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .bet-history-item {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="home.html" class="logo">
+                    <div class="logo-icon">GP</div>
+                    <div class="logo-text">Gridiron<span>Pools</span></div>
+                </a>
+                <span class="admin-badge">Admin</span>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Admin Pages</div>
+                    <a class="nav-item" href="admin.html">
+                        <span class="icon">📊</span>
+                        Dashboard
+                    </a>
+                    <a class="nav-item" href="admin-data.html">
+                        <span class="icon">📥</span>
+                        Data Manager
+                    </a>
+                    <a class="nav-item active" href="admin-betting.html">
+                        <span class="icon">💰</span>
+                        Betting Pools
+                    </a>
+                    <a class="nav-item" href="admin-boxes.html">
+                        <span class="icon">🎲</span>
+                        Boxes Pools
+                    </a>
+                </div>
+
+                <div class="nav-divider"></div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Betting Management</div>
+                    <a class="nav-item active" data-section="overview">
+                        <span class="icon">📋</span>
+                        Overview
+                    </a>
+                    <a class="nav-item" data-section="lines">
+                        <span class="icon">📊</span>
+                        Manage Lines
+                    </a>
+                    <a class="nav-item" data-section="bets">
+                        <span class="icon">🎯</span>
+                        All Bets
+                    </a>
+                    <a class="nav-item" data-section="settle">
+                        <span class="icon">✅</span>
+                        Settle Games
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar" id="adminAvatar">--</div>
+                    <div class="user-details">
+                        <div class="user-name" id="adminName">Loading...</div>
+                        <div class="user-role">Commissioner</div>
+                    </div>
+                </div>
+                <a href="#" onclick="handleLogout()" style="display: block; margin-top: 0.75rem; font-size: 0.85rem; color: var(--text-secondary); text-decoration: none;">
+                    ← Sign Out
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Overview Section -->
+            <section class="content-section active" id="overview">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">💰 Betting Pool Overview</h1>
+                        <p class="page-subtitle">Monitor all betting pool activity and player bankrolls</p>
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <select class="form-control" style="width: 220px;" id="bettingPoolSelect">
+                            <option value="">Select a pool</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="showSection('lines')">
+                            <span>📊</span> Manage Lines
+                        </button>
+                    </div>
+                </div>
+
+                <div class="betting-stats-grid">
+                    <div class="betting-stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-value" id="statPlayers">0</div>
+                        <div class="stat-label">Players</div>
+                    </div>
+                    <div class="betting-stat-card">
+                        <div class="stat-icon">🎯</div>
+                        <div class="stat-value" id="statActiveBets">0</div>
+                        <div class="stat-label">Active Bets</div>
+                    </div>
+                    <div class="betting-stat-card">
+                        <div class="stat-icon">💵</div>
+                        <div class="stat-value" style="color: var(--accent-green);" id="statTotalWagered">$0</div>
+                        <div class="stat-label">Total Wagered</div>
+                    </div>
+                    <div class="betting-stat-card">
+                        <div class="stat-icon">🏆</div>
+                        <div class="stat-value" style="color: var(--accent-gold);" id="statTopBankroll">$0</div>
+                        <div class="stat-label">Top Bankroll</div>
+                    </div>
+                    <div class="betting-stat-card">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-value" id="statCurrentRound">--</div>
+                        <div class="stat-label">Current Round</div>
+                    </div>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <h3 class="data-card-title">Player Bankrolls</h3>
+                        <button class="btn btn-outline btn-sm" onclick="exportBankrolls()">Export CSV</button>
+                    </div>
+                    <table class="data-table bankroll-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Player</th>
+                                <th>Bankroll</th>
+                                <th>Change</th>
+                                <th>Open Bets</th>
+                                <th>Win Rate</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bankrollsTableBody">
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">No players in this pool yet</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Manage Lines Section -->
+            <section class="content-section" id="lines">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">📊 Manage Lines</h1>
+                        <p class="page-subtitle">Set spreads, moneylines, and over/unders for each game</p>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <select class="form-control" style="width: 160px;" id="linesRoundFilter" onchange="loadBettingLines()">
+                            <option value="all">All Rounds</option>
+                            <option value="wildcard">Wild Card</option>
+                            <option value="divisional">Divisional</option>
+                            <option value="conference">Conference</option>
+                            <option value="superbowl">Super Bowl</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="showAddGameModal()">
+                            <span>➕</span> Add Game
+                        </button>
+                        <button class="btn btn-gold" onclick="saveAllLines()">
+                            <span>💾</span> Save All Lines
+                        </button>
+                    </div>
+                </div>
+
+                <div id="bettingLinesContainer">
+                    <div class="data-card">
+                        <div style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                            <p style="font-size: 1.1rem; margin-bottom: 1rem;">🏈 No games added yet</p>
+                            <p style="font-size: 0.9rem;">Click "Add Game" to create your first betting line</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- All Bets Section -->
+            <section class="content-section" id="bets">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">🎯 All Bets</h1>
+                        <p class="page-subtitle">View all bets placed across your betting pools</p>
+                    </div>
+                    <button class="btn btn-outline" onclick="exportBets()">Export Bets</button>
+                </div>
+
+                <div class="data-card">
+                    <div class="filter-bar">
+                        <input type="text" class="form-control search-input" placeholder="Search player or bet..." id="betSearchInput" oninput="filterBets()">
+                        <select class="form-control" style="width: 180px;" id="betPoolFilter" onchange="filterBets()">
+                            <option value="">All Pools</option>
+                        </select>
+                        <select class="form-control" style="width: 130px;" id="betResultFilter" onchange="filterBets()">
+                            <option value="">All Results</option>
+                            <option value="pending">Pending</option>
+                            <option value="won">Won</option>
+                            <option value="lost">Lost</option>
+                            <option value="push">Push</option>
+                        </select>
+                    </div>
+                    <div class="data-card-header" style="border-top: 1px solid var(--card-border);">
+                        <div class="bet-history-item" style="padding: 0.75rem 1rem; background: var(--tertiary-dark); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary);">
+                            <div>Player</div>
+                            <div>Pick</div>
+                            <div>Wager</div>
+                            <div>To Win</div>
+                            <div>Placed</div>
+                            <div>Result</div>
+                        </div>
+                    </div>
+                    <div id="allBetsContainer">
+                        <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                            No bets placed yet
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settle Games Section -->
+            <section class="content-section" id="settle">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">✅ Settle Games</h1>
+                        <p class="page-subtitle">Enter final scores to settle bets and update bankrolls</p>
+                    </div>
+                    <select class="form-control" style="width: 160px;" id="settleRoundFilter" onchange="loadSettleGames()">
+                        <option value="all">All Rounds</option>
+                        <option value="wildcard">Wild Card</option>
+                        <option value="divisional">Divisional</option>
+                        <option value="conference">Conference</option>
+                        <option value="superbowl">Super Bowl</option>
+                    </select>
+                </div>
+
+                <div id="settleGamesContainer">
+                    <div class="data-card">
+                        <div style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                            <p style="font-size: 1.1rem; margin-bottom: 1rem;">📊 No games to settle</p>
+                            <p style="font-size: 0.9rem;">Add games in "Manage Lines" first</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Add Game Modal -->
+    <div class="modal-overlay" id="addGameModal">
+        <div class="modal" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Game</h3>
+                <button class="modal-close" onclick="closeModal('addGameModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Round</label>
+                        <select class="form-control" id="newGameRound">
+                            <option value="wildcard">Wild Card</option>
+                            <option value="divisional">Divisional</option>
+                            <option value="conference">Conference</option>
+                            <option value="superbowl">Super Bowl</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Game Date & Time</label>
+                        <input type="datetime-local" class="form-control" id="newGameDateTime">
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Away Team Abbr (e.g., LAC)</label>
+                        <input type="text" class="form-control" id="newGameAwayAbbr" placeholder="LAC" maxlength="3" style="text-transform: uppercase;">
+                    </div>
+                    <div class="form-group">
+                        <label>Away Team Name</label>
+                        <input type="text" class="form-control" id="newGameAwayName" placeholder="Chargers">
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Home Team Abbr (e.g., HOU)</label>
+                        <input type="text" class="form-control" id="newGameHomeAbbr" placeholder="HOU" maxlength="3" style="text-transform: uppercase;">
+                    </div>
+                    <div class="form-group">
+                        <label>Home Team Name</label>
+                        <input type="text" class="form-control" id="newGameHomeName" placeholder="Texans">
+                    </div>
+                </div>
+                <div class="options-divider">
+                    <span>Betting Lines</span>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Away Spread</label>
+                        <input type="text" class="form-control" id="newGameAwaySpread" placeholder="+2.5">
+                    </div>
+                    <div class="form-group">
+                        <label>Home Spread</label>
+                        <input type="text" class="form-control" id="newGameHomeSpread" placeholder="-2.5">
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Away Moneyline</label>
+                        <input type="text" class="form-control" id="newGameAwayML" placeholder="+120">
+                    </div>
+                    <div class="form-group">
+                        <label>Home Moneyline</label>
+                        <input type="text" class="form-control" id="newGameHomeML" placeholder="-140">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Over/Under Total</label>
+                    <input type="text" class="form-control" id="newGameTotal" placeholder="45.5" style="max-width: 200px;">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('addGameModal')">Cancel</button>
+                <button class="btn btn-gold" onclick="addNewGame()">Add Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <script>
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCOjbMRpdW60XRPJ3Fom1s1bmvQmOLz8tg",
+            authDomain: "gridironpools-c8cec.firebaseapp.com",
+            projectId: "gridironpools-c8cec",
+            storageBucket: "gridironpools-c8cec.firebasestorage.app",
+            messagingSenderId: "761754722138",
+            appId: "1:761754722138:web:c70b84e7ba2e221e6676af"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        let currentUser = null;
+        let bettingGames = [];
+        let allBets = [];
+        
+        // Navigation
+        document.querySelectorAll('.nav-item[data-section]').forEach(item => {
+            item.addEventListener('click', () => {
+                const section = item.dataset.section;
+                showSection(section);
+            });
+        });
+        
+        function showSection(sectionId) {
+            document.querySelectorAll('.nav-item[data-section]').forEach(item => {
+                item.classList.toggle('active', item.dataset.section === sectionId);
+            });
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.toggle('active', section.id === sectionId);
+            });
+            
+            // Load data for specific sections
+            if (sectionId === 'lines') {
+                loadBettingLines();
+            } else if (sectionId === 'settle') {
+                loadSettleGames();
+            } else if (sectionId === 'bets') {
+                loadAllBets();
+            }
+        }
+        
+        // Auth check
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.href = 'home.html';
+                return;
+            }
+            
+            currentUser = user;
+            
+            // Check admin
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (!userDoc.exists || userDoc.data().role !== 'admin') {
+                alert('Access denied. Admin privileges required.');
+                window.location.href = 'home.html';
+                return;
+            }
+            
+            const profile = userDoc.data();
+            document.getElementById('adminName').textContent = profile.displayName || user.email;
+            document.getElementById('adminAvatar').textContent = (profile.displayName || user.email).substring(0, 2).toUpperCase();
+            
+            // Load initial data
+            await loadBettingLines();
+            await loadBettingPools();
+        });
+        
+        function handleLogout() {
+            auth.signOut().then(() => {
+                window.location.href = 'home.html';
+            });
+        }
+        
+        // Modal functions
+        function showAddGameModal() {
+            document.getElementById('addGameModal').classList.add('active');
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+        
+        // Load betting pools for select
+        async function loadBettingPools() {
+            try {
+                const snapshot = await db.collection('pools')
+                    .where('type', '==', 'betting-pool')
+                    .get();
+                
+                const select = document.getElementById('bettingPoolSelect');
+                select.innerHTML = '<option value="">Select a pool</option>';
+                
+                snapshot.forEach(doc => {
+                    const pool = doc.data();
+                    const option = document.createElement('option');
+                    option.value = doc.id;
+                    option.textContent = pool.name || 'Unnamed Pool';
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading betting pools:', error);
+            }
+        }
+        
+        // Load betting lines
+        async function loadBettingLines() {
+            const container = document.getElementById('bettingLinesContainer');
+            const roundFilter = document.getElementById('linesRoundFilter')?.value || 'all';
+            
+            container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-muted);">Loading games...</div>';
+            
+            try {
+                const snapshot = await db.collection('games').orderBy('gameDateTime', 'asc').get();
+                
+                bettingGames = [];
+                snapshot.forEach(doc => {
+                    const game = { id: doc.id, ...doc.data() };
+                    if (roundFilter === 'all' || game.round === roundFilter) {
+                        bettingGames.push(game);
+                    }
+                });
+                
+                if (bettingGames.length === 0) {
+                    container.innerHTML = `
+                        <div class="data-card">
+                            <div style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                                <p style="font-size: 1.1rem; margin-bottom: 1rem;">🏈 No games added yet</p>
+                                <p style="font-size: 0.9rem;">Click "Add Game" to create your first betting line</p>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Group games by round and date
+                const grouped = {};
+                bettingGames.forEach(game => {
+                    const date = formatGameDate(game.gameDateTime);
+                    const key = `${game.round}-${date}`;
+                    if (!grouped[key]) {
+                        grouped[key] = { round: game.round, date, games: [] };
+                    }
+                    grouped[key].games.push(game);
+                });
+                
+                container.innerHTML = Object.values(grouped).map(group => `
+                    <div class="data-card">
+                        <div class="data-card-header">
+                            <h3 class="data-card-title">${formatRoundName(group.round)} - ${group.date}</h3>
+                        </div>
+                        <div style="padding: 1.5rem;">
+                            ${group.games.map(game => renderLineEditorGame(game)).join('')}
+                        </div>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error loading betting lines:', error);
+                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--accent-red);">Error loading games</div>';
+            }
+        }
+        
+        function renderLineEditorGame(game) {
+            const statusClass = game.status === 'settled' ? 'final' : (game.status === 'locked' ? 'locked' : 'open');
+            const statusText = game.status === 'settled' ? `Final: ${game.awayScore}-${game.homeScore}` : 
+                               (game.status === 'locked' ? 'Locked' : 'Open for Betting');
+            
+            return `
+                <div class="line-editor-game" data-game-id="${game.id}">
+                    <div class="line-editor-header">
+                        <div class="line-editor-matchup">
+                            <div class="line-editor-team">
+                                <span class="team-abbr">${game.awayTeam}</span>
+                                <span>${game.awayName}</span>
+                            </div>
+                            <span class="line-editor-vs">@</span>
+                            <div class="line-editor-team">
+                                <span class="team-abbr">${game.homeTeam}</span>
+                                <span>${game.homeName}</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <div class="line-editor-time">${formatGameTime(game.gameDateTime)}</div>
+                            <span class="line-editor-status ${statusClass}">${statusText}</span>
+                            <button class="btn btn-outline btn-sm" onclick="deleteGame('${game.id}')">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="line-inputs-row">
+                        <div class="line-input-group">
+                            <label>${game.awayTeam} Spread</label>
+                            <input type="text" value="${game.awaySpread || ''}" placeholder="+2.5" id="spread-away-${game.id}">
+                        </div>
+                        <div class="line-input-group">
+                            <label>${game.homeTeam} Spread</label>
+                            <input type="text" value="${game.homeSpread || ''}" placeholder="-2.5" id="spread-home-${game.id}">
+                        </div>
+                        <div class="line-input-group">
+                            <label>${game.awayTeam} ML</label>
+                            <input type="text" value="${game.awayML || ''}" placeholder="+120" id="ml-away-${game.id}">
+                        </div>
+                        <div class="line-input-group">
+                            <label>${game.homeTeam} ML</label>
+                            <input type="text" value="${game.homeML || ''}" placeholder="-140" id="ml-home-${game.id}">
+                        </div>
+                        <div class="line-input-group">
+                            <label>O/U</label>
+                            <input type="text" value="${game.total || ''}" placeholder="45.5" id="total-${game.id}">
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        async function saveAllLines() {
+            const btn = document.querySelector('#lines .btn-gold');
+            btn.disabled = true;
+            btn.innerHTML = '<span>⏳</span> Saving...';
+            
+            try {
+                const batch = db.batch();
+                
+                bettingGames.forEach(game => {
+                    const awaySpread = document.getElementById(`spread-away-${game.id}`)?.value || '';
+                    const homeSpread = document.getElementById(`spread-home-${game.id}`)?.value || '';
+                    const awayML = document.getElementById(`ml-away-${game.id}`)?.value || '';
+                    const homeML = document.getElementById(`ml-home-${game.id}`)?.value || '';
+                    const total = document.getElementById(`total-${game.id}`)?.value || '';
+                    
+                    const ref = db.collection('games').doc(game.id);
+                    batch.update(ref, {
+                        awaySpread,
+                        homeSpread,
+                        awayML,
+                        homeML,
+                        total,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                });
+                
+                await batch.commit();
+                alert('All lines saved successfully!');
+                
+            } catch (error) {
+                console.error('Error saving lines:', error);
+                alert('Error saving lines: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>💾</span> Save All Lines';
+            }
+        }
+        
+        async function addNewGame() {
+            const round = document.getElementById('newGameRound').value;
+            const dateTime = document.getElementById('newGameDateTime').value;
+            const awayTeam = document.getElementById('newGameAwayAbbr').value.toUpperCase();
+            const awayName = document.getElementById('newGameAwayName').value;
+            const homeTeam = document.getElementById('newGameHomeAbbr').value.toUpperCase();
+            const homeName = document.getElementById('newGameHomeName').value;
+            
+            if (!dateTime || !awayTeam || !awayName || !homeTeam || !homeName) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            try {
+                await db.collection('games').add({
+                    round,
+                    gameDateTime: new Date(dateTime),
+                    awayTeam,
+                    awayName,
+                    homeTeam,
+                    homeName,
+                    awaySpread: document.getElementById('newGameAwaySpread').value || '',
+                    homeSpread: document.getElementById('newGameHomeSpread').value || '',
+                    awayML: document.getElementById('newGameAwayML').value || '',
+                    homeML: document.getElementById('newGameHomeML').value || '',
+                    total: document.getElementById('newGameTotal').value || '',
+                    status: 'open',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                // Clear form
+                document.getElementById('newGameAwayAbbr').value = '';
+                document.getElementById('newGameAwayName').value = '';
+                document.getElementById('newGameHomeAbbr').value = '';
+                document.getElementById('newGameHomeName').value = '';
+                document.getElementById('newGameAwaySpread').value = '';
+                document.getElementById('newGameHomeSpread').value = '';
+                document.getElementById('newGameAwayML').value = '';
+                document.getElementById('newGameHomeML').value = '';
+                document.getElementById('newGameTotal').value = '';
+                
+                closeModal('addGameModal');
+                loadBettingLines();
+                
+                alert('Game added successfully!');
+                
+            } catch (error) {
+                console.error('Error adding game:', error);
+                alert('Error adding game: ' + error.message);
+            }
+        }
+        
+        async function deleteGame(gameId) {
+            if (!confirm('Delete this game? This cannot be undone.')) return;
+            
+            try {
+                await db.collection('games').doc(gameId).delete();
+                loadBettingLines();
+            } catch (error) {
+                console.error('Error deleting game:', error);
+                alert('Error deleting game: ' + error.message);
+            }
+        }
+        
+        // Load settle games
+        async function loadSettleGames() {
+            const container = document.getElementById('settleGamesContainer');
+            const roundFilter = document.getElementById('settleRoundFilter')?.value || 'all';
+            
+            container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-muted);">Loading games...</div>';
+            
+            try {
+                const snapshot = await db.collection('games').orderBy('gameDateTime', 'asc').get();
+                
+                let games = [];
+                snapshot.forEach(doc => {
+                    const game = { id: doc.id, ...doc.data() };
+                    if (roundFilter === 'all' || game.round === roundFilter) {
+                        games.push(game);
+                    }
+                });
+                
+                if (games.length === 0) {
+                    container.innerHTML = `
+                        <div class="data-card">
+                            <div style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                                <p style="font-size: 1.1rem; margin-bottom: 1rem;">📊 No games to settle</p>
+                                <p style="font-size: 0.9rem;">Add games in "Manage Lines" first</p>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = games.map(game => renderSettleGame(game)).join('');
+                
+            } catch (error) {
+                console.error('Error loading settle games:', error);
+                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--accent-red);">Error loading games</div>';
+            }
+        }
+        
+        function renderSettleGame(game) {
+            const isSettled = game.status === 'settled';
+            const opacity = isSettled ? 'opacity: 0.7;' : '';
+            const statusClass = isSettled ? 'final' : 'open';
+            const statusText = isSettled ? `Final: ${game.awayScore}-${game.homeScore}` : 'Awaiting Result';
+            
+            return `
+                <div class="settle-game-card" style="${opacity}">
+                    <div class="settle-game-header">
+                        <div class="settle-game-teams">
+                            <div class="settle-team">
+                                <div class="settle-team-logo">${game.awayTeam}</div>
+                                <div class="settle-team-name">${game.awayName}</div>
+                            </div>
+                            <span class="settle-vs">@</span>
+                            <div class="settle-team">
+                                <div class="settle-team-logo">${game.homeTeam}</div>
+                                <div class="settle-team-name">${game.homeName}</div>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="line-editor-status ${statusClass}">${statusText}</span>
+                        </div>
+                    </div>
+                    <div class="settle-game-body">
+                        ${isSettled ? '' : `
+                        <div class="settle-score-inputs">
+                            <div class="score-input-group">
+                                <label>${game.awayTeam} Score</label>
+                                <input type="number" placeholder="0" id="settle-away-${game.id}">
+                            </div>
+                            <div class="score-divider">-</div>
+                            <div class="score-input-group">
+                                <label>${game.homeTeam} Score</label>
+                                <input type="number" placeholder="0" id="settle-home-${game.id}">
+                            </div>
+                        </div>
+                        `}
+                        <div class="settle-actions">
+                            ${isSettled ? 
+                                '<button class="btn btn-outline" disabled>Already Settled</button>' :
+                                `<button class="btn btn-gold" onclick="settleGame('${game.id}')">Settle Game</button>`
+                            }
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        async function settleGame(gameId) {
+            const awayScore = document.getElementById(`settle-away-${gameId}`)?.value;
+            const homeScore = document.getElementById(`settle-home-${gameId}`)?.value;
+            
+            if (!awayScore || !homeScore) {
+                alert('Please enter both scores before settling the game.');
+                return;
+            }
+            
+            if (!confirm(`Settle this game with final score ${awayScore}-${homeScore}?\n\nThis will update all bet results and player bankrolls.`)) {
+                return;
+            }
+            
+            try {
+                await db.collection('games').doc(gameId).update({
+                    status: 'settled',
+                    awayScore: parseInt(awayScore),
+                    homeScore: parseInt(homeScore),
+                    settledAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    settledBy: currentUser.uid
+                });
+                
+                alert(`Game settled! Final: ${awayScore}-${homeScore}`);
+                loadSettleGames();
+                
+            } catch (error) {
+                console.error('Error settling game:', error);
+                alert('Error settling game: ' + error.message);
+            }
+        }
+        
+        // Load all bets
+        async function loadAllBets() {
+            const container = document.getElementById('allBetsContainer');
+            container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-muted);">Loading bets...</div>';
+            
+            try {
+                // For now, show placeholder - actual bet loading would query bets collection
+                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-muted);">No bets placed yet</div>';
+            } catch (error) {
+                console.error('Error loading bets:', error);
+            }
+        }
+        
+        function filterBets() {
+            // Implement bet filtering
+        }
+        
+        function exportBets() {
+            alert('Exporting bets to CSV...');
+        }
+        
+        function exportBankrolls() {
+            alert('Exporting bankrolls to CSV...');
+        }
+        
+        // Helper functions
+        function formatRoundName(round) {
+            const names = {
+                'wildcard': 'Wild Card Round',
+                'divisional': 'Divisional Round',
+                'conference': 'Conference Championships',
+                'superbowl': 'Super Bowl'
+            };
+            return names[round] || round;
+        }
+        
+        function formatGameDate(dateTime) {
+            if (!dateTime) return '';
+            const date = dateTime.toDate ? dateTime.toDate() : new Date(dateTime);
+            return date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+        }
+        
+        function formatGameTime(dateTime) {
+            if (!dateTime) return '';
+            const date = dateTime.toDate ? dateTime.toDate() : new Date(dateTime);
+            return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+        }
+    </script>
+</body>
+</html>
