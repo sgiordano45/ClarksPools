@@ -777,14 +777,34 @@
             <div class="sidebar-header">
                 <a href="home.html" class="logo">
                     <div class="logo-icon">GP</div>
-                    <span class="logo-text">Data<span>Mgr</span></span>
+                    <span class="logo-text">Gridiron<span>Pools</span></span>
                 </a>
             </div>
 
             <nav class="sidebar-nav">
                 <div class="nav-section">
+                    <div class="nav-section-title">Admin Pages</div>
+                    <a class="nav-item" href="admin.html">
+                        <span class="icon">📊</span>
+                        Dashboard
+                    </a>
+                    <a class="nav-item active" href="admin-data.html">
+                        <span class="icon">📥</span>
+                        Data Manager
+                    </a>
+                    <a class="nav-item" href="admin-betting.html">
+                        <span class="icon">💰</span>
+                        Betting Pools
+                    </a>
+                    <a class="nav-item" href="admin-boxes.html">
+                        <span class="icon">🎲</span>
+                        Boxes Pools
+                    </a>
+                </div>
+
+                <div class="nav-section">
                     <div class="nav-section-title">Season Setup</div>
-                    <a class="nav-item active" data-section="setup-teams">
+                    <a class="nav-item" data-section="setup-teams">
                         <span class="icon">⚙️</span>
                         Setup Teams
                     </a>
@@ -3382,17 +3402,13 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
         }
 
         // =========================================
-        // AUTH CHECK
+        // AUTH CHECK - Uses events from firebase-config.js
         // =========================================
-        auth.onAuthStateChanged(async (user) => {
-            if (!user) {
-                window.location.href = 'home.html';
-                return;
-            }
-
-            // Check if admin
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            if (!userDoc.exists || userDoc.data().role !== 'admin') {
+        window.addEventListener('userLoggedIn', async (e) => {
+            const { user, userData } = e.detail;
+            console.log('Data Manager: User logged in', user.email, 'Role:', userData?.role);
+            
+            if (!userData || userData.role !== 'admin') {
                 alert('Access denied. Admin privileges required.');
                 window.location.href = 'home.html';
                 return;
@@ -3409,6 +3425,11 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
                     input.addEventListener('input', recalculateEditStats);
                 }
             });
+        });
+        
+        window.addEventListener('userLoggedOut', () => {
+            console.log('Data Manager: User logged out, redirecting');
+            window.location.href = 'home.html';
         });
     </script>
 </body>
