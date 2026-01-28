@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings | SportsPools</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto+Condensed:wght@300;400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-dark: #0a1628;
+            --secondary-dark: #132238;
+            --tertiary-dark: #1a2d47;
+            --accent-blue: #00d4ff;
+            --accent-gold: #ffc107;
+            --accent-green: #00c853;
+            --accent-red: #ff5252;
+            --text-primary: #ffffff;
+            --text-secondary: #8ba3c7;
+            --text-muted: #5a7194;
+            --gradient-field: linear-gradient(135deg, #1a472a 0%, #2d5a3d 50%, #1a472a 100%);
+            --card-bg: rgba(255,255,255,0.03);
+            --card-border: rgba(255,255,255,0.08);
+            --glow-blue: 0 0 40px rgba(0,212,255,0.3);
+            --glow-gold: 0 0 30px rgba(255,193,7,0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto Condensed', sans-serif;
+            background: var(--primary-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(10,22,40,0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--gradient-field);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5rem;
+            color: white;
+            box-shadow: var(--glow-blue);
+            border: 2px solid rgba(0,212,255,0.3);
+        }
+
+        .logo-text {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .logo-text span {
+            color: var(--accent-blue);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-blue);
+        }
+
+        /* User Menu */
+        .user-menu {
+            display: none;
+            position: relative;
+        }
+
+        .user-menu.logged-in {
+            display: block;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-field);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Oswald', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            border: 2px solid var(--accent-blue);
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            padding-top: 0.5rem;
+            display: none;
+        }
+
+        .user-dropdown-content {
+            background: var(--secondary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            min-width: 200px;
+            overflow: hidden;
+        }
+
+        .user-menu:hover .user-dropdown {
+            display: block;
+        }
+
+        .user-dropdown a {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .user-dropdown a:hover {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-primary);
+        }
+
+        .user-dropdown .admin-link {
+            color: var(--accent-gold);
+            border-top: 1px solid var(--card-border);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 7rem 2rem 4rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 3rem;
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Cards */
+        .settings-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .settings-card h2 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .settings-card h2 .icon {
+            font-size: 1.25rem;
+        }
+
+        /* Profile Header */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            background: var(--gradient-field);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.5rem;
+            color: white;
+            border: 3px solid var(--accent-blue);
+            box-shadow: var(--glow-blue);
+        }
+
+        .profile-info h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            letter-spacing: 1px;
+            margin-bottom: 0.25rem;
+            border: none;
+            padding: 0;
+        }
+
+        .profile-info .email {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-info .role-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .role-badge.admin {
+            background: rgba(255, 193, 7, 0.2);
+            color: var(--accent-gold);
+        }
+
+        .role-badge.user {
+            background: rgba(0, 212, 255, 0.2);
+            color: var(--accent-blue);
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: 'Roboto Condensed', sans-serif;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .form-group input:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-help {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        /* Buttons */
+        .btn {
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--accent-blue);
+            color: var(--primary-dark);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--glow-blue);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-primary);
+            border: 2px solid var(--card-border);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        .btn-danger {
+            background: rgba(255, 82, 82, 0.2);
+            color: var(--accent-red);
+            border: 1px solid var(--accent-red);
+        }
+
+        .btn-danger:hover {
+            background: var(--accent-red);
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-box {
+            background: rgba(255,255,255,0.02);
+            padding: 1.25rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-box .number {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            color: var(--accent-blue);
+            line-height: 1;
+        }
+
+        .stat-box .label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 0.5rem;
+        }
+
+        /* Messages */
+        .message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .message.success {
+            background: rgba(0, 200, 83, 0.15);
+            border: 1px solid rgba(0, 200, 83, 0.4);
+            color: var(--accent-green);
+        }
+
+        .message.error {
+            background: rgba(255, 82, 82, 0.15);
+            border: 1px solid rgba(255, 82, 82, 0.4);
+            color: var(--accent-red);
+        }
+
+        .message.hidden {
+            display: none;
+        }
+
+        /* Activity List */
+        .activity-list {
+            list-style: none;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .activity-details {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-date {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Login Required */
+        .login-required {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .login-required h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .login-required p {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+        }
+
+        /* Loading state */
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            color: var(--text-secondary);
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--card-border);
+            border-top-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+    <link rel="stylesheet" href="mobile-enhancements.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <a href="/" class="logo">
+                <div class="logo-icon">SP</div>
+                <span class="logo-text">Sports<span>Pools</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/#pools">Active Pools</a>
+                <a href="/my-pools.html">My Pools</a>
+            </div>
+            <div class="user-menu" id="userMenu">
+                <div class="user-avatar" id="userAvatar">--</div>
+                <div class="user-dropdown">
+                    <div class="user-dropdown-content">
+                        <a href="my-pools.html">My Pools</a>
+                        <a href="settings.html" style="color: var(--accent-blue);">Settings</a>
+                        <a href="admin.html" class="admin-link" id="adminLink" style="display: none;">Admin Panel</a>
+                        <a href="#" onclick="logout()">Log Out</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Loading State -->
+        <div id="loadingState" class="loading">Loading your profile...</div>
+
+        <!-- Login Required State -->
+        <div id="loginRequired" class="login-required" style="display: none;">
+            <h2>Login Required</h2>
+            <p>Please log in to view and manage your profile settings.</p>
+            <a href="/" class="btn btn-primary">Go to Home</a>
+        </div>
+
+        <!-- Profile Content -->
+        <div id="profileContent" style="display: none;">
+            <div class="page-header">
+                <h1>Account Settings</h1>
+                <p>Manage your profile and preferences</p>
+            </div>
+
+            <!-- Profile Overview Card -->
+            <div class="settings-card">
+                <div class="profile-header">
+                    <div class="profile-avatar" id="profileAvatar">--</div>
+                    <div class="profile-info">
+                        <h2 id="profileName">Loading...</h2>
+                        <p class="email" id="profileEmail">Loading...</p>
+                        <span class="role-badge user" id="profileRole">User</span>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="number" id="statPoolsJoined">0</div>
+                        <div class="label">Pools Joined</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number" id="statTotalEntries">0</div>
+                        <div class="label">Total Entries</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number" id="statMemberSince">--</div>
+                        <div class="label">Member Since</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Profile Card -->
+            <div class="settings-card">
+                <h2><span class="icon">👤</span> Edit Profile</h2>
+                
+                <div id="profileMessage" class="message hidden"></div>
+                
+                <form id="profileForm" onsubmit="updateProfile(event)">
+                    <div class="form-group">
+                        <label for="displayName">Display Name</label>
+                        <input type="text" id="displayName" placeholder="Enter your display name" required>
+                        <p class="form-help">This is how your name appears in pools and leaderboards.</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="emailDisplay">Email Address</label>
+                        <input type="email" id="emailDisplay" disabled>
+                        <p class="form-help">Email cannot be changed. Contact support if needed.</p>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary" id="saveProfileBtn">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Change Password Card -->
+            <div class="settings-card" id="passwordCard">
+                <h2><span class="icon">🔒</span> Change Password</h2>
+                
+                <div id="passwordMessage" class="message hidden"></div>
+                
+                <form id="passwordForm" onsubmit="changePassword(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="newPassword">New Password</label>
+                            <input type="password" id="newPassword" placeholder="Enter new password" minlength="6" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm Password</label>
+                            <input type="password" id="confirmPassword" placeholder="Confirm new password" minlength="6" required>
+                        </div>
+                    </div>
+                    <p class="form-help">Password must be at least 6 characters long.</p>
+                    
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary" id="changePasswordBtn">Update Password</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Recent Activity Card -->
+            <div class="settings-card">
+                <h2><span class="icon">📊</span> Recent Activity</h2>
+                
+                <ul class="activity-list" id="activityList">
+                    <li class="activity-item">
+                        <div class="activity-icon">📋</div>
+                        <div class="activity-details">
+                            <div class="activity-title">Loading activity...</div>
+                            <div class="activity-date">Please wait</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Danger Zone Card -->
+            <div class="settings-card" style="border-color: rgba(255, 82, 82, 0.3);">
+                <h2 style="color: var(--accent-red);"><span class="icon">⚠️</span> Danger Zone</h2>
+                
+                <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                    Once you sign out, you'll need to log back in to access your pools and entries.
+                </p>
+                
+                <div class="btn-group">
+                    <button class="btn btn-danger" onclick="logout()">Sign Out</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script>
+        let currentUser = null;
+        let currentUserData = null;
+
+        // Get user initials
+        function getUserInitials(name) {
+            if (!name) return '??';
+            const names = name.trim().split(' ');
+            if (names.length === 1) {
+                return names[0].substring(0, 2).toUpperCase();
+            }
+            return (names[0][0] + names[names.length - 1][0]).toUpperCase();
+        }
+
+        // Initialize page
+        auth.onAuthStateChanged(async (user) => {
+            const loadingState = document.getElementById('loadingState');
+            const loginRequired = document.getElementById('loginRequired');
+            const profileContent = document.getElementById('profileContent');
+            const userMenu = document.getElementById('userMenu');
+            const userAvatar = document.getElementById('userAvatar');
+            const adminLink = document.getElementById('adminLink');
+            
+            if (user) {
+                currentUser = user;
+                
+                // Update header
+                userMenu.classList.add('logged-in');
+                const displayName = user.displayName || user.email.split('@')[0];
+                userAvatar.textContent = getUserInitials(displayName);
+                
+                // Get user data from Firestore
+                currentUserData = await getCurrentUserData();
+                
+                // Show/hide admin link
+                if (adminLink && currentUserData) {
+                    adminLink.style.display = currentUserData.role === 'admin' ? 'block' : 'none';
+                }
+                
+                // Hide password section for Google users
+                const passwordCard = document.getElementById('passwordCard');
+                const providers = user.providerData.map(p => p.providerId);
+                if (providers.includes('google.com') && !providers.includes('password')) {
+                    passwordCard.style.display = 'none';
+                }
+                
+                // Populate profile data
+                populateProfile(user, currentUserData);
+                
+                // Load activity
+                loadActivity();
+                
+                // Show content
+                loadingState.style.display = 'none';
+                loginRequired.style.display = 'none';
+                profileContent.style.display = 'block';
+            } else {
+                // User not logged in
+                loadingState.style.display = 'none';
+                loginRequired.style.display = 'block';
+                profileContent.style.display = 'none';
+            }
+        });
+
+        function populateProfile(user, userData) {
+            const displayName = user.displayName || userData?.displayName || user.email.split('@')[0];
+            const initials = getUserInitials(displayName);
+            
+            // Profile header
+            document.getElementById('profileAvatar').textContent = initials;
+            document.getElementById('profileName').textContent = displayName;
+            document.getElementById('profileEmail').textContent = user.email;
+            
+            // Role badge
+            const roleBadge = document.getElementById('profileRole');
+            if (userData?.role === 'admin') {
+                roleBadge.textContent = 'Admin';
+                roleBadge.className = 'role-badge admin';
+            } else {
+                roleBadge.textContent = 'Member';
+                roleBadge.className = 'role-badge user';
+            }
+            
+            // Member since
+            const createdAt = userData?.createdAt?.toDate?.() || user.metadata.creationTime;
+            if (createdAt) {
+                const date = new Date(createdAt);
+                document.getElementById('statMemberSince').textContent = date.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    year: 'numeric' 
+                });
+            }
+            
+            // Form fields
+            document.getElementById('displayName').value = displayName;
+            document.getElementById('emailDisplay').value = user.email;
+        }
+
+        async function loadActivity() {
+            const activityList = document.getElementById('activityList');
+            const userId = currentUser.uid;
+            
+            try {
+                // Get user's pool entries
+                const poolsSnapshot = await db.collection('pools').get();
+                const activities = [];
+                let totalEntries = 0;
+                const poolsJoined = new Set();
+                
+                for (const poolDoc of poolsSnapshot.docs) {
+                    const poolData = poolDoc.data();
+                    
+                    // Check entries subcollection
+                    const entriesSnapshot = await db.collection('pools').doc(poolDoc.id)
+                        .collection('entries')
+                        .where('userId', '==', userId)
+                        .get();
+                    
+                    if (!entriesSnapshot.empty) {
+                        poolsJoined.add(poolDoc.id);
+                        totalEntries += entriesSnapshot.size;
+                        
+                        entriesSnapshot.docs.forEach(entryDoc => {
+                            const entryData = entryDoc.data();
+                            activities.push({
+                                type: 'entry',
+                                title: `Joined ${poolData.name}`,
+                                subtitle: entryData.entryName || 'Entry submitted',
+                                date: entryData.createdAt?.toDate?.() || new Date(),
+                                icon: '🏈'
+                            });
+                        });
+                    }
+                    
+                    // Check bankrolls (betting pools)
+                    const bankrollDoc = await db.collection('pools').doc(poolDoc.id)
+                        .collection('bankrolls').doc(userId).get();
+                    
+                    if (bankrollDoc.exists) {
+                        poolsJoined.add(poolDoc.id);
+                        activities.push({
+                            type: 'betting',
+                            title: `Joined ${poolData.name}`,
+                            subtitle: 'Betting pool entry',
+                            date: bankrollDoc.data().createdAt?.toDate?.() || new Date(),
+                            icon: '💰'
+                        });
+                    }
+                }
+                
+                // Check boxes pools
+                const boxesSnapshot = await db.collection('boxesPools').get();
+                for (const boxDoc of boxesSnapshot.docs) {
+                    const boxData = boxDoc.data();
+                    const entries = boxData.entries || {};
+                    
+                    // Check if user has any boxes
+                    const userBoxes = Object.values(entries).filter(e => e.userId === userId);
+                    if (userBoxes.length > 0) {
+                        poolsJoined.add(boxDoc.id);
+                        activities.push({
+                            type: 'boxes',
+                            title: `Claimed ${userBoxes.length} box(es) in ${boxData.name || 'Box Pool'}`,
+                            subtitle: 'Box pool entry',
+                            date: boxData.createdAt?.toDate?.() || new Date(),
+                            icon: '🎲'
+                        });
+                    }
+                }
+                
+                // Update stats
+                document.getElementById('statPoolsJoined').textContent = poolsJoined.size;
+                document.getElementById('statTotalEntries').textContent = totalEntries;
+                
+                // Sort activities by date
+                activities.sort((a, b) => b.date - a.date);
+                
+                // Render activities
+                if (activities.length === 0) {
+                    activityList.innerHTML = `
+                        <li class="activity-item">
+                            <div class="activity-icon">📭</div>
+                            <div class="activity-details">
+                                <div class="activity-title">No activity yet</div>
+                                <div class="activity-date">Join a pool to get started!</div>
+                            </div>
+                        </li>
+                    `;
+                } else {
+                    activityList.innerHTML = activities.slice(0, 10).map(activity => `
+                        <li class="activity-item">
+                            <div class="activity-icon">${activity.icon}</div>
+                            <div class="activity-details">
+                                <div class="activity-title">${activity.title}</div>
+                                <div class="activity-date">${formatDate(activity.date)}</div>
+                            </div>
+                        </li>
+                    `).join('');
+                }
+                
+            } catch (error) {
+                console.error('Error loading activity:', error);
+                activityList.innerHTML = `
+                    <li class="activity-item">
+                        <div class="activity-icon">⚠️</div>
+                        <div class="activity-details">
+                            <div class="activity-title">Unable to load activity</div>
+                            <div class="activity-date">Please try again later</div>
+                        </div>
+                    </li>
+                `;
+            }
+        }
+
+        function formatDate(date) {
+            const now = new Date();
+            const diff = now - date;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            
+            if (days === 0) return 'Today';
+            if (days === 1) return 'Yesterday';
+            if (days < 7) return `${days} days ago`;
+            
+            return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+            });
+        }
+
+        async function updateProfile(event) {
+            event.preventDefault();
+            
+            const btn = document.getElementById('saveProfileBtn');
+            const messageEl = document.getElementById('profileMessage');
+            const newDisplayName = document.getElementById('displayName').value.trim();
+            
+            if (!newDisplayName) {
+                showMessage(messageEl, 'Please enter a display name.', 'error');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+            
+            try {
+                // Update Firebase Auth profile
+                await currentUser.updateProfile({ displayName: newDisplayName });
+                
+                // Update Firestore user document
+                await db.collection('users').doc(currentUser.uid).update({
+                    displayName: newDisplayName,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                // Update UI
+                document.getElementById('profileName').textContent = newDisplayName;
+                document.getElementById('profileAvatar').textContent = getUserInitials(newDisplayName);
+                document.getElementById('userAvatar').textContent = getUserInitials(newDisplayName);
+                
+                showMessage(messageEl, 'Profile updated successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                showMessage(messageEl, error.message || 'Failed to update profile.', 'error');
+            }
+            
+            btn.disabled = false;
+            btn.textContent = 'Save Changes';
+        }
+
+        async function changePassword(event) {
+            event.preventDefault();
+            
+            const btn = document.getElementById('changePasswordBtn');
+            const messageEl = document.getElementById('passwordMessage');
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (newPassword !== confirmPassword) {
+                showMessage(messageEl, 'Passwords do not match.', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showMessage(messageEl, 'Password must be at least 6 characters.', 'error');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = 'Updating...';
+            
+            try {
+                await currentUser.updatePassword(newPassword);
+                
+                showMessage(messageEl, 'Password updated successfully!', 'success');
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmPassword').value = '';
+                
+            } catch (error) {
+                console.error('Error changing password:', error);
+                
+                if (error.code === 'auth/requires-recent-login') {
+                    showMessage(messageEl, 'For security, please sign out and sign back in before changing your password.', 'error');
+                } else {
+                    showMessage(messageEl, error.message || 'Failed to change password.', 'error');
+                }
+            }
+            
+            btn.disabled = false;
+            btn.textContent = 'Update Password';
+        }
+
+        function showMessage(element, message, type) {
+            element.textContent = message;
+            element.className = `message ${type}`;
+            
+            // Auto-hide success messages
+            if (type === 'success') {
+                setTimeout(() => {
+                    element.classList.add('hidden');
+                }, 5000);
+            }
+        }
+
+        async function logout() {
+            await signOut();
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html>
