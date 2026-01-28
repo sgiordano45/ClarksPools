@@ -66,6 +66,27 @@
             color: var(--text-secondary);
             line-height: 1.5;
         }
+        /* Sortable table styles */
+        .sortable {
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .sortable:hover {
+            background: rgba(255,255,255,0.05);
+        }
+        .sort-icon {
+            opacity: 0.4;
+            font-size: 0.75rem;
+            margin-left: 0.25rem;
+            display: inline-block;
+        }
+        .sortable.asc .sort-icon { opacity: 1; }
+        .sortable.desc .sort-icon { opacity: 1; }
+        .sortable.asc .sort-icon::before { content: '▲'; }
+        .sortable.desc .sort-icon::before { content: '▼'; }
+        .sortable:not(.asc):not(.desc) .sort-icon::before { content: '⇅'; }
     </style>
 </head>
 <body>
@@ -377,9 +398,16 @@
                             <option value="">All Pools</option>
                         </select>
                     </div>
-                    <table class="data-table">
+                    <table class="data-table" id="entriesTable">
                         <thead>
-                            <tr><th>Entry Name</th><th>Pool</th><th>User</th><th>Points</th><th>Payment</th><th>Actions</th></tr>
+                            <tr>
+                                <th class="sortable" data-sort="entryName" onclick="sortEntriesTable('entryName')">Entry Name <span class="sort-icon"></span></th>
+                                <th>Pool</th>
+                                <th class="sortable" data-sort="userName" onclick="sortEntriesTable('userName')">User <span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="totalPoints" onclick="sortEntriesTable('totalPoints')">Points <span class="sort-icon"></span></th>
+                                <th class="sortable" data-sort="paid" onclick="sortEntriesTable('paid')">Payment <span class="sort-icon"></span></th>
+                                <th>Actions</th>
+                            </tr>
                         </thead>
                         <tbody id="entriesTableBody">
                             <tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">Select a pool to view entries</td></tr>
@@ -809,59 +837,198 @@
             select.innerHTML = '<option value="">All Pools</option>' + allPools.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
         }
         
+        // Store entries data for sorting
+        let currentEntriesData = [];
+        let currentPoolId = null;
+        let currentSortField = 'totalPoints';
+        let currentSortDir = 'desc';
+        
+        // Helper to get user display name from entry - checks multiple possible fields
+        function getUserFromEntry(entry) {
+            return entry.userName || entry.userDisplayName || entry.displayName || 
+                   entry.ownerName || entry.owner || entry.user || entry.userEmail || 
+                   entry.email || entry.submittedBy || null;
+        }
+        
         async function loadEntries() {
             const poolId = document.getElementById('entryPoolFilter').value;
             const tbody = document.getElementById('entriesTableBody');
             
             if (!poolId) {
                 tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">Select a pool to view entries</td></tr>';
+                currentEntriesData = [];
                 return;
             }
             
             tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">Loading entries...</td></tr>';
             
             try {
-                // Get pool info for buy-in amount
+                // Get pool info
                 const pool = allPools.find(p => p.id === poolId);
-                const buyIn = pool?.buyIn || 0;
+                currentPoolId = poolId;
                 
                 // Get entries from subcollection
                 const snapshot = await db.collection('pools').doc(poolId)
                     .collection('entries')
-                    .orderBy('totalPoints', 'desc')
                     .get();
                 
                 if (snapshot.empty) {
                     tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">No entries in this pool yet</td></tr>';
+                    currentEntriesData = [];
                     return;
                 }
                 
-                tbody.innerHTML = snapshot.docs.map((doc, idx) => {
+                // Build entries array with resolved user names
+                const entries = [];
+                
+                snapshot.docs.forEach(doc => {
                     const entry = doc.data();
-                    const paidClass = entry.paid ? 'paid' : 'unpaid';
-                    const paidText = entry.paid ? 'Paid' : 'Unpaid';
+                    const entryObj = {
+                        id: doc.id,
+                        entryName: entry.entryName || entry.teamName || '',
+                        totalPoints: entry.totalPoints || 0,
+                        paid: entry.paid || false,
+                        userName: getUserFromEntry(entry),
+                        userId: entry.userId || entry.uid || entry.ownerId || null,
+                        poolName: pool?.name || 'Unknown Pool',
+                        rawData: entry
+                    };
+                    entries.push(entryObj);
+                });
+                
+                // Collect unique userIds that need lookup
+                const userIdsNeedingLookup = [...new Set(
+                    entries
+                        .filter(e => !e.userName && e.userId)
+                        .map(e => e.userId)
+                )];
+                
+                // Lookup user names from users collection if needed
+                if (userIdsNeedingLookup.length > 0) {
+                    console.log('Looking up users:', userIdsNeedingLookup);
                     
-                    return `
-                        <tr>
-                            <td><strong>${entry.entryName || entry.teamName || 'Entry ' + (idx + 1)}</strong></td>
-                            <td>${pool?.name || 'Unknown Pool'}</td>
-                            <td>${entry.userName || entry.userEmail || 'Unknown'}</td>
-                            <td style="font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem;">${entry.totalPoints || 0}</td>
-                            <td><span class="status-badge ${paidClass}">${paidText}</span></td>
-                            <td>
-                                <div class="action-btns">
-                                    <button class="action-btn" title="View" onclick="viewEntry('${poolId}', '${doc.id}')">👁</button>
-                                    ${!entry.paid ? `<button class="action-btn" title="Mark Paid" onclick="markEntryPaid('${poolId}', '${doc.id}', this)">💵</button>` : ''}
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
+                    const userMap = {};
+                    for (const uid of userIdsNeedingLookup) {
+                        try {
+                            const userDoc = await db.collection('users').doc(uid).get();
+                            if (userDoc.exists) {
+                                const userData = userDoc.data();
+                                userMap[uid] = userData.displayName || userData.name || userData.email || null;
+                                console.log(`Found user ${uid}:`, userMap[uid]);
+                            }
+                        } catch (err) {
+                            console.warn(`Failed to lookup user ${uid}:`, err);
+                        }
+                    }
+                    
+                    // Apply looked-up names
+                    entries.forEach(entry => {
+                        if (!entry.userName && entry.userId && userMap[entry.userId]) {
+                            entry.userName = userMap[entry.userId];
+                        }
+                    });
+                }
+                
+                // Set default for any still unknown
+                entries.forEach((entry, idx) => {
+                    if (!entry.userName) entry.userName = 'Unknown';
+                    if (!entry.entryName) entry.entryName = 'Entry ' + (idx + 1);
+                });
+                
+                currentEntriesData = entries;
+                
+                // Apply default sort and render
+                sortEntriesTable('totalPoints', true);
                 
             } catch (error) {
                 console.error('Error loading entries:', error);
                 tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--accent-red);">Error loading entries: ' + error.message + '</td></tr>';
             }
+        }
+        
+        function sortEntriesTable(field, skipToggle = false) {
+            if (!currentEntriesData.length) return;
+            
+            // Toggle direction if same field, otherwise default to desc for points, asc for text
+            if (!skipToggle) {
+                if (currentSortField === field) {
+                    currentSortDir = currentSortDir === 'asc' ? 'desc' : 'asc';
+                } else {
+                    currentSortDir = (field === 'totalPoints') ? 'desc' : 'asc';
+                }
+            }
+            currentSortField = field;
+            
+            // Update header icons
+            document.querySelectorAll('#entriesTable th.sortable').forEach(th => {
+                th.classList.remove('asc', 'desc');
+                if (th.dataset.sort === field) {
+                    th.classList.add(currentSortDir);
+                }
+            });
+            
+            // Sort data
+            const sorted = [...currentEntriesData].sort((a, b) => {
+                let valA = a[field];
+                let valB = b[field];
+                
+                // Handle different types
+                if (field === 'totalPoints') {
+                    valA = Number(valA) || 0;
+                    valB = Number(valB) || 0;
+                } else if (field === 'paid') {
+                    valA = valA ? 1 : 0;
+                    valB = valB ? 1 : 0;
+                } else {
+                    valA = String(valA || '').toLowerCase();
+                    valB = String(valB || '').toLowerCase();
+                }
+                
+                if (valA < valB) return currentSortDir === 'asc' ? -1 : 1;
+                if (valA > valB) return currentSortDir === 'asc' ? 1 : -1;
+                return 0;
+            });
+            
+            renderEntriesTable(sorted);
+        }
+        
+        function renderEntriesTable(entries) {
+            const tbody = document.getElementById('entriesTableBody');
+            const pool = allPools.find(p => p.id === currentPoolId);
+            
+            // Build user count map to detect duplicates
+            const userCounts = {};
+            entries.forEach(entry => {
+                const userKey = entry.userName.toLowerCase().trim();
+                userCounts[userKey] = (userCounts[userKey] || 0) + 1;
+            });
+            
+            tbody.innerHTML = entries.map((entry) => {
+                const paidClass = entry.paid ? 'paid' : 'unpaid';
+                const paidText = entry.paid ? 'Paid' : 'Unpaid';
+                const userKey = entry.userName.toLowerCase().trim();
+                const isDuplicate = userCounts[userKey] > 1;
+                const duplicateCount = userCounts[userKey];
+                
+                return `
+                    <tr${isDuplicate ? ' style="background: rgba(255, 193, 7, 0.1);"' : ''}>
+                        <td><strong>${entry.entryName}</strong></td>
+                        <td>${entry.poolName}</td>
+                        <td>
+                            ${entry.userName}
+                            ${isDuplicate ? `<span style="margin-left: 0.5rem; padding: 2px 6px; background: var(--accent-gold); color: #000; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">${duplicateCount} entries</span>` : ''}
+                        </td>
+                        <td style="font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem;">${entry.totalPoints}</td>
+                        <td><span class="status-badge ${paidClass}">${paidText}</span></td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="action-btn" title="View" onclick="viewEntry('${currentPoolId}', '${entry.id}')">👁</button>
+                                ${!entry.paid ? `<button class="action-btn" title="Mark Paid" onclick="markEntryPaid('${currentPoolId}', '${entry.id}', this)">💵</button>` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
         
         function viewEntry(poolId, entryId) {
