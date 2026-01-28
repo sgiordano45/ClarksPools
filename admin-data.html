@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Manager | Gridiron Pools Admin</title>
+    <title>Data Manager | SportsPools Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto+Condensed:wght@300;400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
@@ -776,35 +776,15 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <a href="home.html" class="logo">
-                    <div class="logo-icon">GP</div>
-                    <span class="logo-text">Gridiron<span>Pools</span></span>
+                    <div class="logo-icon">SP</div>
+                    <span class="logo-text">Data<span>Mgr</span></span>
                 </a>
             </div>
 
             <nav class="sidebar-nav">
                 <div class="nav-section">
-                    <div class="nav-section-title">Admin Pages</div>
-                    <a class="nav-item" href="admin.html">
-                        <span class="icon">📊</span>
-                        Dashboard
-                    </a>
-                    <a class="nav-item active" href="admin-data.html">
-                        <span class="icon">📥</span>
-                        Data Manager
-                    </a>
-                    <a class="nav-item" href="admin-betting.html">
-                        <span class="icon">💰</span>
-                        Betting Pools
-                    </a>
-                    <a class="nav-item" href="admin-boxes.html">
-                        <span class="icon">🎲</span>
-                        Boxes Pools
-                    </a>
-                </div>
-
-                <div class="nav-section">
                     <div class="nav-section-title">Season Setup</div>
-                    <a class="nav-item" data-section="setup-teams">
+                    <a class="nav-item active" data-section="setup-teams">
                         <span class="icon">⚙️</span>
                         Setup Teams
                     </a>
@@ -1311,7 +1291,8 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
                             <option value="TE">TE</option>
                             <option value="K">K</option>
                         </select>
-                        <button class="btn btn-primary" onclick="recalculateAllPoints()">🔄 Recalculate All Points</button>
+                        <button class="btn btn-primary" onclick="recalculateAllPoints()">🔄 Recalculate Player Points</button>
+                        <button class="btn btn-gold" onclick="recalculateAllEntryPoints()">🏈 Recalculate Entry Points</button>
                     </div>
                 </div>
 
@@ -3381,6 +3362,109 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
             }
         }
 
+        // Recalculate all entry points based on current player stats
+        async function recalculateAllEntryPoints() {
+            if (!confirm('Recalculate points for ALL entries across ALL pools based on current player stats? This will update all entry point values.')) return;
+            
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'alert alert-info';
+            resultDiv.textContent = 'Loading players and entries...';
+            document.querySelector('#view-players .page-header').after(resultDiv);
+            
+            try {
+                // Load all players and build lookup map
+                const playersSnapshot = await db.collection('players').get();
+                const playerMap = {};
+                
+                playersSnapshot.docs.forEach(doc => {
+                    const player = doc.data();
+                    // Map by name (lowercase for matching)
+                    playerMap[player.name.toLowerCase()] = {
+                        totalPoints: player.totalPoints || 0,
+                        stats: player.stats || {},
+                        team: player.team,
+                        position: player.position
+                    };
+                });
+                
+                resultDiv.textContent = `Loaded ${Object.keys(playerMap).length} players. Processing pools...`;
+                
+                // Load all pools
+                const poolsSnapshot = await db.collection('pools').get();
+                let totalEntriesUpdated = 0;
+                let totalPoolsProcessed = 0;
+                let errors = 0;
+                
+                for (const poolDoc of poolsSnapshot.docs) {
+                    const pool = poolDoc.data();
+                    
+                    // Skip non-fantasy pools (betting pools don't have entries with rosters)
+                    if (pool.type === 'betting-pool') continue;
+                    
+                    // Load entries for this pool
+                    const entriesSnapshot = await db.collection('pools').doc(poolDoc.id)
+                        .collection('entries').get();
+                    
+                    if (entriesSnapshot.empty) continue;
+                    
+                    totalPoolsProcessed++;
+                    
+                    for (const entryDoc of entriesSnapshot.docs) {
+                        const entry = entryDoc.data();
+                        const roster = entry.roster || {};
+                        
+                        // Calculate points for each round
+                        const weekPoints = { wildCard: 0, divisional: 0, conference: 0, superBowl: 0 };
+                        let totalPoints = 0;
+                        
+                        // Go through each roster slot
+                        Object.values(roster).forEach(playerName => {
+                            if (!playerName) return;
+                            
+                            const player = playerMap[playerName.toLowerCase()];
+                            if (!player) return;
+                            
+                            const stats = player.stats || {};
+                            
+                            // Add points for each round
+                            weekPoints.wildCard += Math.max(0, stats.WC?.points || 0);
+                            weekPoints.divisional += Math.max(0, stats.DIV?.points || 0);
+                            weekPoints.conference += Math.max(0, stats.CONF?.points || 0);
+                            weekPoints.superBowl += Math.max(0, stats.SB?.points || 0);
+                        });
+                        
+                        totalPoints = weekPoints.wildCard + weekPoints.divisional + 
+                                      weekPoints.conference + weekPoints.superBowl;
+                        
+                        try {
+                            await entryDoc.ref.update({
+                                totalPoints,
+                                weekPoints,
+                                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                            totalEntriesUpdated++;
+                        } catch (e) {
+                            errors++;
+                            console.error('Error updating entry:', entryDoc.id, e);
+                        }
+                    }
+                    
+                    resultDiv.textContent = `Processing... ${totalPoolsProcessed} pools, ${totalEntriesUpdated} entries updated`;
+                }
+                
+                resultDiv.className = 'alert alert-success';
+                resultDiv.textContent = `✓ Updated ${totalEntriesUpdated} entries across ${totalPoolsProcessed} pools.${errors > 0 ? ` ${errors} errors.` : ''}`;
+                
+                // Remove alert after 10 seconds
+                setTimeout(() => resultDiv.remove(), 10000);
+                
+            } catch (error) {
+                console.error('Entry recalculation error:', error);
+                resultDiv.className = 'alert alert-error';
+                resultDiv.textContent = 'Error: ' + error.message;
+            }
+        }
+
         function deletePlayerFromEdit() {
             const playerId = document.getElementById('editPlayerId').value;
             if (!confirm('Delete this player? This cannot be undone.')) return;
@@ -3402,13 +3486,17 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
         }
 
         // =========================================
-        // AUTH CHECK - Uses events from firebase-config.js
+        // AUTH CHECK
         // =========================================
-        window.addEventListener('userLoggedIn', async (e) => {
-            const { user, userData } = e.detail;
-            console.log('Data Manager: User logged in', user.email, 'Role:', userData?.role);
-            
-            if (!userData || userData.role !== 'admin') {
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.href = 'home.html';
+                return;
+            }
+
+            // Check if admin
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (!userDoc.exists || userDoc.data().role !== 'admin') {
                 alert('Access denied. Admin privileges required.');
                 window.location.href = 'home.html';
                 return;
@@ -3425,11 +3513,6 @@ Travis Kelce,KC,TE,0,0,0,0,8,84,1,0,0,0,0,0,0,...</div>
                     input.addEventListener('input', recalculateEditStats);
                 }
             });
-        });
-        
-        window.addEventListener('userLoggedOut', () => {
-            console.log('Data Manager: User logged out, redirecting');
-            window.location.href = 'home.html';
         });
     </script>
 </body>
