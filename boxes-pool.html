@@ -1007,6 +1007,317 @@ header::before {
   font-size: 1.25rem;
 }
 
+/* Leaderboard Styles */
+.leaderboard-container {
+  background: var(--secondary-dark);
+  border-radius: 12px;
+  border: 1px solid var(--card-border);
+  margin-top: 2rem;
+  overflow: hidden;
+}
+
+.leaderboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: var(--tertiary-dark);
+  border-bottom: 1px solid var(--card-border);
+}
+
+.leaderboard-header h3 {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.25rem;
+  color: var(--accent-gold);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.leaderboard-tabs {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.leaderboard-tab {
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--card-border);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+}
+
+.leaderboard-tab.active {
+  background: var(--accent-blue);
+  color: var(--primary-dark);
+  border-color: var(--accent-blue);
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.leaderboard-table th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  background: var(--tertiary-dark);
+  border-bottom: 1px solid var(--card-border);
+}
+
+.leaderboard-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--card-border);
+  font-size: 0.9rem;
+}
+
+.leaderboard-table tr:hover {
+  background: rgba(255,255,255,0.02);
+}
+
+.leaderboard-rank {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.25rem;
+  width: 40px;
+}
+
+.leaderboard-rank.gold { color: var(--accent-gold); }
+.leaderboard-rank.silver { color: #c0c0c0; }
+.leaderboard-rank.bronze { color: #cd7f32; }
+
+.leaderboard-name {
+  font-weight: 600;
+}
+
+.leaderboard-wins {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.win-badge {
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.win-badge.q1 { background: rgba(255,82,82,0.2); color: var(--accent-red); }
+.win-badge.half { background: rgba(168,85,247,0.2); color: var(--accent-purple); }
+.win-badge.q3 { background: rgba(0,200,83,0.2); color: var(--accent-green); }
+.win-badge.final { background: rgba(255,193,7,0.2); color: var(--accent-gold); }
+
+.leaderboard-winnings {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  color: var(--accent-green);
+}
+
+/* Score Input Styles */
+.score-section {
+  background: var(--secondary-dark);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+  border: 1px solid var(--card-border);
+}
+
+.score-section h5 {
+  font-family: 'Oswald', sans-serif;
+  color: var(--accent-blue);
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.score-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+
+.score-input-box {
+  text-align: center;
+}
+
+.score-input-box label {
+  display: block;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.score-input-pair {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.score-input-pair input {
+  width: 40px;
+  padding: 0.4rem;
+  text-align: center;
+  background: var(--tertiary-dark);
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem;
+}
+
+.score-input-pair input:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+}
+
+.score-input-pair span {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.auto-winner {
+  font-size: 0.7rem;
+  color: var(--accent-green);
+  margin-top: 0.25rem;
+}
+
+/* Score Entry Section (Admin) */
+.score-entry-section {
+  background: var(--tertiary-dark);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+  border: 1px solid var(--card-border);
+}
+
+.score-entry-section h4 {
+  font-family: 'Oswald', sans-serif;
+  color: var(--accent-blue);
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.score-entry-grid {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.score-team {
+  flex: 1;
+  min-width: 200px;
+}
+
+.score-team > label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.score-team .team-name {
+  color: var(--accent-gold);
+}
+
+.score-inputs {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.score-input-group {
+  text-align: center;
+}
+
+.score-input-group label {
+  display: block;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.score-input-group input {
+  width: 50px;
+  padding: 0.5rem;
+  text-align: center;
+  background: var(--secondary-dark);
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+}
+
+.score-input-group input:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+}
+
+.calculated-winners {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--card-border);
+}
+
+.calculated-winners h5 {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.winner-preview {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+
+.winner-preview-item {
+  background: var(--secondary-dark);
+  border-radius: 6px;
+  padding: 0.75rem;
+  text-align: center;
+  border: 1px solid var(--card-border);
+}
+
+.winner-preview-item .quarter {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.winner-preview-item .score {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.25rem;
+  color: var(--accent-blue);
+}
+
+.winner-preview-item .box {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.9rem;
+  color: var(--accent-gold);
+  margin: 0.25rem 0;
+}
+
+.winner-preview-item .owner {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Link Type Tabs */
 .link-type-tabs {
   display: flex;
@@ -1240,6 +1551,37 @@ header::before {
       <div class="legend-item">
         <div class="legend-box" style="background: rgba(255,193,7,0.3); border-color: var(--accent-gold);"></div>
         <span>Final</span>
+      </div>
+    </div>
+    
+    <!-- Leaderboard (visible when locked) -->
+    <div class="leaderboard-container" id="leaderboardContainer" style="display: none;">
+      <div class="leaderboard-header">
+        <h3>🏆 Leaderboard</h3>
+        <div class="leaderboard-tabs">
+          <button class="leaderboard-tab active" onclick="showLeaderboardView('overall')">Overall</button>
+          <button class="leaderboard-tab" onclick="showLeaderboardView('byGame')">By Game</button>
+        </div>
+      </div>
+      <div id="leaderboardContent">
+        <table class="leaderboard-table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Name</th>
+              <th>Wins</th>
+              <th>Boxes</th>
+              <th>Winnings</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboardBody">
+            <tr>
+              <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                No winners yet - check back after games start!
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -1633,12 +1975,15 @@ header::before {
     const colNumbersContainer = document.getElementById('columnNumbersContainer');
     const rowNumbersContainer = document.getElementById('rowNumbersContainer');
     const winnerLegend = document.getElementById('winnerLegend');
+    const leaderboardContainer = document.getElementById('leaderboardContainer');
     
     if (currentPool.locked) {
       statusBadge.textContent = 'Locked';
       statusBadge.className = 'badge badge-locked';
       preLockMessage.classList.add('hidden');
       winnerLegend.style.display = 'flex';
+      leaderboardContainer.style.display = 'block';
+      renderLeaderboard();
       
       const games = currentPool.games || [];
       if (games.length > 0) {
@@ -1668,6 +2013,7 @@ header::before {
       numbersPendingMessage.style.display = 'none';
       gameTabs.style.display = 'none';
       winnerLegend.style.display = 'none';
+      leaderboardContainer.style.display = 'none';
       colNumbersContainer.style.display = 'none';
       rowNumbersContainer.style.display = 'none';
     }
@@ -1839,6 +2185,155 @@ header::before {
     document.getElementById('statPrizePool').textContent = '$' + prizePool;
   }
 
+  // Leaderboard Functions
+  let currentLeaderboardView = 'overall';
+  
+  window.showLeaderboardView = function(view) {
+    currentLeaderboardView = view;
+    document.querySelectorAll('.leaderboard-tab').forEach(tab => {
+      tab.classList.toggle('active', tab.textContent.toLowerCase().includes(view === 'overall' ? 'overall' : 'game'));
+    });
+    renderLeaderboard();
+  };
+
+  function renderLeaderboard() {
+    if (!currentPool || !currentPool.locked) return;
+    
+    const entries = currentPool.entries || {};
+    const games = currentPool.games || [];
+    const costPerBox = currentPool.costPerBox || 0;
+    const totalPrizePool = Object.keys(entries).length * costPerBox;
+    
+    // Calculate payouts (25% per quarter by default, or use pool's payout structure)
+    const payouts = currentPool.payoutStructure || { q1: 0.25, half: 0.25, q3: 0.25, final: 0.25 };
+    
+    // Collect all winners across all games
+    const winnerData = {};
+    
+    games.forEach((game, gameIdx) => {
+      const winners = game.winners || {};
+      const gameLabel = game.label || `Game ${gameIdx + 1}`;
+      
+      ['q1', 'half', 'q3', 'final'].forEach(period => {
+        const winner = winners[period];
+        if (winner && winner.box && entries[winner.box]) {
+          const entry = entries[winner.box];
+          const name = entry.name || 'Unknown';
+          
+          if (!winnerData[name]) {
+            winnerData[name] = {
+              name,
+              wins: [],
+              boxes: new Set(),
+              totalWinnings: 0
+            };
+          }
+          
+          winnerData[name].wins.push({
+            period,
+            game: gameLabel,
+            gameIdx,
+            box: winner.box,
+            payout: totalPrizePool * (payouts[period] || 0.25) / games.length
+          });
+          winnerData[name].boxes.add(winner.box);
+          winnerData[name].totalWinnings += totalPrizePool * (payouts[period] || 0.25) / games.length;
+        }
+      });
+    });
+    
+    // Also count boxes owned by each person
+    const boxCounts = {};
+    Object.values(entries).forEach(entry => {
+      const name = entry.name || 'Unknown';
+      boxCounts[name] = (boxCounts[name] || 0) + 1;
+    });
+    
+    // Convert to array and sort
+    let leaderboard = Object.values(winnerData)
+      .sort((a, b) => b.totalWinnings - a.totalWinnings || b.wins.length - a.wins.length);
+    
+    const tbody = document.getElementById('leaderboardBody');
+    
+    if (leaderboard.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+            No winners yet - check back after games start!
+          </td>
+        </tr>
+      `;
+      return;
+    }
+    
+    if (currentLeaderboardView === 'overall') {
+      tbody.innerHTML = leaderboard.map((player, idx) => {
+        const rankClass = idx === 0 ? 'gold' : idx === 1 ? 'silver' : idx === 2 ? 'bronze' : '';
+        const winBadges = player.wins.map(w => 
+          `<span class="win-badge ${w.period}">${w.period === 'half' ? 'H' : w.period.toUpperCase()}</span>`
+        ).join('');
+        
+        return `
+          <tr>
+            <td class="leaderboard-rank ${rankClass}">${idx + 1}</td>
+            <td class="leaderboard-name">${player.name}</td>
+            <td class="leaderboard-wins">${winBadges}</td>
+            <td>${boxCounts[player.name] || 0}</td>
+            <td class="leaderboard-winnings">$${player.totalWinnings.toFixed(0)}</td>
+          </tr>
+        `;
+      }).join('');
+    } else {
+      // By game view
+      let html = '';
+      games.forEach((game, gameIdx) => {
+        const gameLabel = game.label || `Game ${gameIdx + 1}`;
+        const winners = game.winners || {};
+        
+        html += `
+          <tr style="background: var(--tertiary-dark);">
+            <td colspan="5" style="font-family: 'Oswald', sans-serif; padding: 0.75rem 1rem; color: var(--accent-blue);">
+              ${getSportEmoji(currentPool.sport || 'nfl')} ${gameLabel}
+            </td>
+          </tr>
+        `;
+        
+        let hasWinners = false;
+        ['q1', 'half', 'q3', 'final'].forEach(period => {
+          const winner = winners[period];
+          if (winner && winner.box && entries[winner.box]) {
+            hasWinners = true;
+            const entry = entries[winner.box];
+            const periodLabel = period === 'half' ? 'Halftime' : period === 'q1' ? '1st Qtr' : period === 'q3' ? '3rd Qtr' : 'Final';
+            const payout = totalPrizePool * (payouts[period] || 0.25) / games.length;
+            
+            html += `
+              <tr>
+                <td><span class="win-badge ${period}">${periodLabel}</span></td>
+                <td class="leaderboard-name">${entry.name}</td>
+                <td>${winner.box}</td>
+                <td>${winner.score || '-'}</td>
+                <td class="leaderboard-winnings">$${payout.toFixed(0)}</td>
+              </tr>
+            `;
+          }
+        });
+        
+        if (!hasWinners) {
+          html += `
+            <tr>
+              <td colspan="5" style="text-align: center; padding: 1rem; color: var(--text-muted); font-style: italic;">
+                No winners yet for this game
+              </td>
+            </tr>
+          `;
+        }
+      });
+      
+      tbody.innerHTML = html;
+    }
+  }
+
   // Box claiming
   window.handleBoxClick = function(key) {
     if (currentPool.locked) return;
@@ -1979,6 +2474,7 @@ header::before {
   function renderGamesEditor() {
     const games = currentPool.games || [];
     const editor = document.getElementById('gamesEditor');
+    const emoji = getSportEmoji(currentPool.sport || 'nfl');
     
     if (games.length === 0) {
       editor.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 1rem;">No games yet. Add one below.</p>';
@@ -1988,7 +2484,7 @@ header::before {
     editor.innerHTML = games.map((game, idx) => `
       <div class="game-item" data-index="${idx}">
         <div class="game-item-header">
-          <h4>Game ${idx + 1}: ${game.label || 'Unnamed'}</h4>
+          <h4>${emoji} Game ${idx + 1}: ${game.label || 'Unnamed'}</h4>
           <button class="btn btn-danger" style="padding: 0.5rem 0.75rem; font-size: 0.8rem;" onclick="removeGame(${idx})">🗑️</button>
         </div>
         
@@ -1999,12 +2495,12 @@ header::before {
         
         <div class="game-teams-row">
           <div class="form-group" style="flex: 1;">
-            <label>Team 1 (Top)</label>
+            <label>Team 1 (Top - Columns)</label>
             <input type="text" class="game-team1" value="${game.team1 || ''}" placeholder="e.g., Chiefs">
           </div>
           <span class="vs-label">VS</span>
           <div class="form-group" style="flex: 1;">
-            <label>Team 2 (Left)</label>
+            <label>Team 2 (Left - Rows)</label>
             <input type="text" class="game-team2" value="${game.team2 || ''}" placeholder="e.g., 49ers">
           </div>
         </div>
@@ -2026,27 +2522,213 @@ header::before {
           <input type="text" class="game-row-numbers" value="${(game.rowNumbers || [0,1,2,3,4,5,6,7,8,9]).join(',')}" placeholder="0,1,2,3,4,5,6,7,8,9">
         </div>
         
-        <div class="winners-row">
+        <!-- Score Entry Section -->
+        <div class="score-entry-section">
+          <h4>📊 Enter Scores (Auto-calculates Winners)</h4>
+          <div class="score-entry-grid">
+            <div class="score-team">
+              <label>Team 1: <span class="team-name">${game.team1 || 'TBD'}</span></label>
+              <div class="score-inputs">
+                <div class="score-input-group">
+                  <label>Q1</label>
+                  <input type="number" class="score-t1-q1" value="${game.scores?.t1?.q1 ?? ''}" min="0" oninput="calculateWinners(${idx})">
+                </div>
+                <div class="score-input-group">
+                  <label>Q2</label>
+                  <input type="number" class="score-t1-q2" value="${game.scores?.t1?.q2 ?? ''}" min="0" oninput="calculateWinners(${idx})">
+                </div>
+                <div class="score-input-group">
+                  <label>Q3</label>
+                  <input type="number" class="score-t1-q3" value="${game.scores?.t1?.q3 ?? ''}" min="0" oninput="calculateWinners(${idx})">
+                </div>
+                <div class="score-input-group">
+                  <label>Final</label>
+                  <input type="number" class="score-t1-final" value="${game.scores?.t1?.final ?? ''}" min="0" oninput="calculateWinners(${idx})">
+                </div>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; font-size: 1.5rem; color: var(--text-muted);">-</div>
+            <div class="score-team">
+              <label>Team 2: <span class="team-name">${game.team2 || 'TBD'}</span></label>
+              <div class="score-inputs">
+                <div class="score-input-group">
+                  <label>Q1</label>
+                  <input type="number" class="score-t2-q1" value="${game.scores?.t2?.q1 ?? ''}" min="0" oninput="calculateWinners(${idx})">
+                </div>
+                <div class="score-input-group">
+                  <label>Q2</label>
+                  <input type="number" class="score-t2-q2" value="${game.scores?.t2?.q2 ?? ''}" min="0" oninput="calculateWinners(${idx})">
+                </div>
+                <div class="score-input-group">
+                  <label>Q3</label>
+                  <input type="number" class="score-t2-q3" value="${game.scores?.t2?.q3 ?? ''}" min="0" oninput="calculateWinners(${idx})">
+                </div>
+                <div class="score-input-group">
+                  <label>Final</label>
+                  <input type="number" class="score-t2-final" value="${game.scores?.t2?.final ?? ''}" min="0" oninput="calculateWinners(${idx})">
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="calculated-winners" id="calculatedWinners${idx}">
+            <h5>Calculated Winning Boxes:</h5>
+            <div class="winner-preview" id="winnerPreview${idx}">
+              ${renderWinnerPreview(game, idx)}
+            </div>
+          </div>
+        </div>
+        
+        <div class="winners-row" style="margin-top: 1rem;">
           <div class="winner-input">
             <label>Q1 Winner (row-col)</label>
-            <input type="text" class="winner-q1" value="${game.winners?.q1?.box || ''}" placeholder="e.g., 3-7">
+            <input type="text" class="winner-q1" value="${game.winners?.q1?.box || ''}" placeholder="e.g., 3-7" id="winner-q1-${idx}">
           </div>
           <div class="winner-input">
             <label>Halftime Winner</label>
-            <input type="text" class="winner-half" value="${game.winners?.half?.box || ''}" placeholder="e.g., 5-2">
+            <input type="text" class="winner-half" value="${game.winners?.half?.box || ''}" placeholder="e.g., 5-2" id="winner-half-${idx}">
           </div>
           <div class="winner-input">
             <label>Q3 Winner</label>
-            <input type="text" class="winner-q3" value="${game.winners?.q3?.box || ''}" placeholder="e.g., 1-9">
+            <input type="text" class="winner-q3" value="${game.winners?.q3?.box || ''}" placeholder="e.g., 1-9" id="winner-q3-${idx}">
           </div>
           <div class="winner-input">
             <label>Final Winner</label>
-            <input type="text" class="winner-final" value="${game.winners?.final?.box || ''}" placeholder="e.g., 8-4">
+            <input type="text" class="winner-final" value="${game.winners?.final?.box || ''}" placeholder="e.g., 8-4" id="winner-final-${idx}">
           </div>
         </div>
       </div>
     `).join('');
   }
+
+  function renderWinnerPreview(game, idx) {
+    const colNumbers = game.colNumbers || [0,1,2,3,4,5,6,7,8,9];
+    const rowNumbers = game.rowNumbers || [0,1,2,3,4,5,6,7,8,9];
+    const scores = game.scores || { t1: {}, t2: {} };
+    const entries = currentPool.entries || {};
+    
+    const quarters = [
+      { key: 'q1', label: 'Q1', t1Score: scores.t1?.q1, t2Score: scores.t2?.q1 },
+      { key: 'half', label: 'Half', t1Score: (scores.t1?.q1 || 0) + (scores.t1?.q2 || 0), t2Score: (scores.t2?.q1 || 0) + (scores.t2?.q2 || 0), needsBoth: true },
+      { key: 'q3', label: 'Q3', t1Score: (scores.t1?.q1 || 0) + (scores.t1?.q2 || 0) + (scores.t1?.q3 || 0), t2Score: (scores.t2?.q1 || 0) + (scores.t2?.q2 || 0) + (scores.t2?.q3 || 0), needsAll: true },
+      { key: 'final', label: 'Final', t1Score: scores.t1?.final, t2Score: scores.t2?.final }
+    ];
+    
+    return quarters.map(q => {
+      let t1 = q.t1Score;
+      let t2 = q.t2Score;
+      
+      // For halftime and Q3, check if we have all needed scores
+      if (q.needsBoth && (scores.t1?.q1 === undefined || scores.t1?.q2 === undefined || scores.t2?.q1 === undefined || scores.t2?.q2 === undefined)) {
+        t1 = undefined;
+        t2 = undefined;
+      }
+      if (q.needsAll && (scores.t1?.q3 === undefined || scores.t2?.q3 === undefined)) {
+        t1 = undefined;
+        t2 = undefined;
+      }
+      
+      if (t1 === undefined || t2 === undefined || t1 === '' || t2 === '') {
+        return `
+          <div class="winner-preview-item">
+            <div class="quarter">${q.label}</div>
+            <div class="score">-</div>
+            <div class="box">-</div>
+            <div class="owner">-</div>
+          </div>
+        `;
+      }
+      
+      const t1Digit = t1 % 10;
+      const t2Digit = t2 % 10;
+      
+      const colIdx = colNumbers.indexOf(t1Digit);
+      const rowIdx = rowNumbers.indexOf(t2Digit);
+      
+      if (colIdx === -1 || rowIdx === -1) {
+        return `
+          <div class="winner-preview-item">
+            <div class="quarter">${q.label}</div>
+            <div class="score">${t1}-${t2}</div>
+            <div class="box">?</div>
+            <div class="owner">Numbers not found</div>
+          </div>
+        `;
+      }
+      
+      const boxKey = `${rowIdx}-${colIdx}`;
+      const owner = entries[boxKey]?.name || 'Unclaimed';
+      
+      return `
+        <div class="winner-preview-item">
+          <div class="quarter">${q.label}</div>
+          <div class="score">${t1}-${t2}</div>
+          <div class="box">${boxKey}</div>
+          <div class="owner">${owner}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  window.calculateWinners = function(gameIdx) {
+    const gameItem = document.querySelector(`.game-item[data-index="${gameIdx}"]`);
+    if (!gameItem) return;
+    
+    const game = currentPool.games[gameIdx];
+    const colNumbers = game.colNumbers || [0,1,2,3,4,5,6,7,8,9];
+    const rowNumbers = game.rowNumbers || [0,1,2,3,4,5,6,7,8,9];
+    
+    // Get scores from inputs
+    const t1q1 = parseInt(gameItem.querySelector('.score-t1-q1').value) || undefined;
+    const t1q2 = parseInt(gameItem.querySelector('.score-t1-q2').value) || undefined;
+    const t1q3 = parseInt(gameItem.querySelector('.score-t1-q3').value) || undefined;
+    const t1final = parseInt(gameItem.querySelector('.score-t1-final').value) || undefined;
+    
+    const t2q1 = parseInt(gameItem.querySelector('.score-t2-q1').value) || undefined;
+    const t2q2 = parseInt(gameItem.querySelector('.score-t2-q2').value) || undefined;
+    const t2q3 = parseInt(gameItem.querySelector('.score-t2-q3').value) || undefined;
+    const t2final = parseInt(gameItem.querySelector('.score-t2-final').value) || undefined;
+    
+    // Update game scores
+    game.scores = {
+      t1: { q1: t1q1, q2: t1q2, q3: t1q3, final: t1final },
+      t2: { q1: t2q1, q2: t2q2, q3: t2q3, final: t2final }
+    };
+    
+    // Calculate and auto-fill winners
+    const calculateBox = (t1Score, t2Score) => {
+      if (t1Score === undefined || t2Score === undefined) return null;
+      const t1Digit = t1Score % 10;
+      const t2Digit = t2Score % 10;
+      const colIdx = colNumbers.indexOf(t1Digit);
+      const rowIdx = rowNumbers.indexOf(t2Digit);
+      if (colIdx === -1 || rowIdx === -1) return null;
+      return `${rowIdx}-${colIdx}`;
+    };
+    
+    // Q1
+    const q1Box = calculateBox(t1q1, t2q1);
+    if (q1Box) document.getElementById(`winner-q1-${gameIdx}`).value = q1Box;
+    
+    // Halftime (Q1 + Q2)
+    if (t1q1 !== undefined && t1q2 !== undefined && t2q1 !== undefined && t2q2 !== undefined) {
+      const halfBox = calculateBox(t1q1 + t1q2, t2q1 + t2q2);
+      if (halfBox) document.getElementById(`winner-half-${gameIdx}`).value = halfBox;
+    }
+    
+    // Q3 (Q1 + Q2 + Q3)
+    if (t1q1 !== undefined && t1q2 !== undefined && t1q3 !== undefined && t2q1 !== undefined && t2q2 !== undefined && t2q3 !== undefined) {
+      const q3Box = calculateBox(t1q1 + t1q2 + t1q3, t2q1 + t2q2 + t2q3);
+      if (q3Box) document.getElementById(`winner-q3-${gameIdx}`).value = q3Box;
+    }
+    
+    // Final
+    const finalBox = calculateBox(t1final, t2final);
+    if (finalBox) document.getElementById(`winner-final-${gameIdx}`).value = finalBox;
+    
+    // Update preview
+    document.getElementById(`winnerPreview${gameIdx}`).innerHTML = renderWinnerPreview(game, gameIdx);
+  };
 
   window.addGame = function() {
     if (!currentPool.games) currentPool.games = [];
@@ -2067,37 +2749,58 @@ header::before {
     const select = document.getElementById('loadGameSelect');
     if (!select) return;
     
+    const poolSport = currentPool?.sport || 'nfl';
+    const emoji = getSportEmoji(poolSport);
+    
     try {
-      const gamesSnapshot = await db.collection('games')
-        .orderBy('gameDateTime', 'asc')
-        .get();
+      // Build query based on sport
+      let gamesQuery = db.collection('games').orderBy('gameDateTime', 'asc');
       
-      select.innerHTML = '<option value="">-- Load teams from... --</option>';
+      // For NFL, filter by sport field or assume all games without sport field are NFL
+      const gamesSnapshot = await gamesQuery.get();
+      
+      select.innerHTML = `<option value="">-- Load ${getSportName(poolSport)} games... --</option>`;
       
       const roundLabels = {
         'wildcard': 'Wild Card',
         'divisional': 'Divisional',
         'conference': 'Conference',
-        'superbowl': 'Super Bowl'
+        'superbowl': 'Super Bowl',
+        'first_round': 'First Round',
+        'second_round': 'Second Round',
+        'sweet_16': 'Sweet 16',
+        'elite_8': 'Elite 8',
+        'final_four': 'Final Four',
+        'championship': 'Championship',
+        'finals': 'Finals',
+        'regular': 'Regular Season'
       };
       
+      let gameCount = 0;
       gamesSnapshot.forEach(doc => {
         const game = doc.data();
+        
+        // Filter by sport - if sport is not set, assume NFL for backwards compatibility
+        const gameSport = game.sport || 'nfl';
+        if (gameSport !== poolSport && poolSport !== 'other') return;
+        
         const awayTeam = game.awayName || game.awayTeam || '???';
         const homeTeam = game.homeName || game.homeTeam || '???';
-        const round = roundLabels[game.round] || game.round;
+        const round = roundLabels[game.round] || game.round || '';
         
         const option = document.createElement('option');
         option.value = doc.id;
-        option.textContent = `${round}: ${awayTeam} @ ${homeTeam}`;
+        option.textContent = round ? `${round}: ${awayTeam} @ ${homeTeam}` : `${awayTeam} @ ${homeTeam}`;
         option.dataset.away = awayTeam;
         option.dataset.home = homeTeam;
         option.dataset.round = round;
+        option.dataset.gameId = doc.id;
         select.appendChild(option);
+        gameCount++;
       });
       
-      if (gamesSnapshot.empty) {
-        select.innerHTML = '<option value="">No games found - add in Data Manager</option>';
+      if (gameCount === 0) {
+        select.innerHTML = `<option value="">No ${getSportName(poolSport)} games found</option>`;
       }
       
     } catch (error) {
@@ -2162,9 +2865,19 @@ header::before {
     const gameItems = document.querySelectorAll('.game-item');
     const games = [];
     
-    gameItems.forEach(item => {
+    gameItems.forEach((item, idx) => {
       const colNumbersStr = item.querySelector('.game-col-numbers').value;
       const rowNumbersStr = item.querySelector('.game-row-numbers').value;
+      
+      // Get scores
+      const t1q1 = parseInt(item.querySelector('.score-t1-q1')?.value) || undefined;
+      const t1q2 = parseInt(item.querySelector('.score-t1-q2')?.value) || undefined;
+      const t1q3 = parseInt(item.querySelector('.score-t1-q3')?.value) || undefined;
+      const t1final = parseInt(item.querySelector('.score-t1-final')?.value) || undefined;
+      const t2q1 = parseInt(item.querySelector('.score-t2-q1')?.value) || undefined;
+      const t2q2 = parseInt(item.querySelector('.score-t2-q2')?.value) || undefined;
+      const t2q3 = parseInt(item.querySelector('.score-t2-q3')?.value) || undefined;
+      const t2final = parseInt(item.querySelector('.score-t2-final')?.value) || undefined;
       
       games.push({
         label: item.querySelector('.game-label').value,
@@ -2173,6 +2886,10 @@ header::before {
         numbersDrawn: item.querySelector('.game-numbers-drawn').checked,
         colNumbers: colNumbersStr.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n)),
         rowNumbers: rowNumbersStr.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n)),
+        scores: {
+          t1: { q1: t1q1, q2: t1q2, q3: t1q3, final: t1final },
+          t2: { q1: t2q1, q2: t2q2, q3: t2q3, final: t2final }
+        },
         winners: {
           q1: { box: item.querySelector('.winner-q1').value || null },
           half: { box: item.querySelector('.winner-half').value || null },
@@ -2192,6 +2909,7 @@ header::before {
       
       updatePoolDisplay();
       renderGrid();
+      renderLeaderboard();
       
       showToast('Games saved!', 'success');
     } catch (error) {
@@ -2461,8 +3179,21 @@ header::before {
     const sport = document.getElementById('newPoolSport').value;
     const eventType = document.getElementById('newPoolEvent').value;
     
+    // Get payout percentages
+    const payoutQ1 = parseFloat(document.getElementById('newPayoutQ1')?.value) || 20;
+    const payoutHalf = parseFloat(document.getElementById('newPayoutHalf')?.value) || 20;
+    const payoutQ3 = parseFloat(document.getElementById('newPayoutQ3')?.value) || 20;
+    const payoutFinal = parseFloat(document.getElementById('newPayoutFinal')?.value) || 40;
+    
     if (!name) {
       showToast('Please enter a pool name', 'warning');
+      return;
+    }
+    
+    // Validate payouts add up to 100
+    const totalPayout = payoutQ1 + payoutHalf + payoutQ3 + payoutFinal;
+    if (Math.abs(totalPayout - 100) > 0.01) {
+      showToast(`Payouts must total 100% (currently ${totalPayout}%)`, 'warning');
       return;
     }
     
@@ -2473,6 +3204,12 @@ header::before {
         description,
         sport,
         eventType,
+        payouts: {
+          q1: payoutQ1 / 100,
+          half: payoutHalf / 100,
+          q3: payoutQ3 / 100,
+          final: payoutFinal / 100
+        },
         games: [],
         entries: {},
         locked: false,
