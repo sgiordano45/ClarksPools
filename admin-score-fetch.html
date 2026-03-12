@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Score Fetcher — SportsPools Admin</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #151821;
+    --surface2: #1c2030;
+    --border: #252a3a;
+    --accent: #3b82f6;
+    --accent2: #10b981;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: .08em;
+  }
+  .logo span { color: var(--accent); }
+  .header-title {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: .02em;
+  }
+  .back-link {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color .2s;
+  }
+  .back-link:hover { color: var(--text); }
+
+  /* ── Layout ── */
+  main { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+
+  /* ── Config Bar ── */
+  .config-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 16px;
+    align-items: end;
+    margin-bottom: 24px;
+  }
+  .field label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .field select,
+  .field input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 9px 12px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .field select:focus,
+  .field input:focus { border-color: var(--accent); }
+
+  /* ── Buttons ── */
+  .btn {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    border: none;
+    border-radius: 7px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all .15s;
+    white-space: nowrap;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+  .btn-primary:disabled { background: var(--border); color: var(--muted); transform: none; cursor: not-allowed; }
+
+  .btn-success {
+    background: var(--accent2);
+    color: #fff;
+  }
+  .btn-success:hover { background: #059669; }
+  .btn-success:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { color: var(--text); border-color: var(--text); }
+
+  .btn-sm { padding: 6px 14px; font-size: 12px; }
+  .btn-xs { padding: 4px 10px; font-size: 11px; }
+
+  /* ── Status Bar ── */
+  .status-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+  }
+  .status-bar.info { border-color: var(--accent); color: var(--accent); }
+  .status-bar.success { border-color: var(--accent2); color: var(--accent2); }
+  .status-bar.error { border-color: var(--danger); color: var(--danger); }
+  .status-bar.warn { border-color: var(--warn); color: var(--warn); }
+  .pulse {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: pulse 1.4s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .4; transform: scale(.7); }
+  }
+
+  /* ── Section headers ── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .section-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+  .badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .badge-blue { background: rgba(59,130,246,.15); color: var(--accent); }
+  .badge-green { background: rgba(16,185,129,.15); color: var(--accent2); }
+  .badge-yellow { background: rgba(245,158,11,.15); color: var(--warn); }
+  .badge-red { background: rgba(239,68,68,.15); color: var(--danger); }
+  .badge-gray { background: var(--surface2); color: var(--muted); }
+
+  /* ── ESPN Results Grid ── */
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .game-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    transition: border-color .2s;
+    position: relative;
+  }
+  .game-card:hover { border-color: #3a4255; }
+  .game-card.matched { border-color: rgba(16,185,129,.35); }
+  .game-card.unmatched { border-color: rgba(239,68,68,.25); }
+  .game-card.already-settled { border-color: rgba(245,158,11,.25); opacity: .7; }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .game-status {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .status-final { color: var(--accent2); }
+  .status-live { color: var(--warn); }
+  .status-pre { color: var(--muted); }
+
+  .matchup {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .team {
+    text-align: center;
+  }
+  .team-abbr {
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    line-height: 1;
+    margin-bottom: 3px;
+  }
+  .team-name {
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px;
+    margin: 0 auto;
+  }
+  .team-seed {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+  }
+  .score-block {
+    text-align: center;
+  }
+  .score-display {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    color: var(--text);
+  }
+  .score-sep { color: var(--muted); margin: 0 2px; }
+  .clock-display {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--warn);
+    margin-top: 2px;
+  }
+
+  .match-info {
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .match-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .match-label strong { color: var(--accent2); }
+  .match-label.no-match { color: var(--muted); }
+
+  /* ── Firestore Match Table ── */
+  .match-table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .match-table-header {
+    background: var(--surface2);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead th {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    text-align: left;
+    padding: 10px 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background .15s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+  tbody td { padding: 12px 16px; vertical-align: middle; }
+
+  .team-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+  .score-pill {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .score-away { color: var(--text); }
+  .score-home { color: var(--text); }
+
+  .checkbox-cell input[type="checkbox"] {
+    width: 16px; height: 16px;
+    accent-color: var(--accent2);
+    cursor: pointer;
+  }
+
+  /* ── Push controls ── */
+  .push-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .push-summary {
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .push-summary strong { color: var(--accent2); }
+
+  /* ── Empty / Loading states ── */
+  .empty-state {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+  .empty-icon { font-size: 36px; margin-bottom: 12px; opacity: .4; }
+
+  /* ── Spinner ── */
+  .spinner {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Log ── */
+  .log-section { margin-top: 24px; }
+  .log-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    max-height: 160px;
+    overflow-y: auto;
+    line-height: 1.8;
+  }
+  .log-box .log-ok { color: var(--accent2); }
+  .log-box .log-err { color: var(--danger); }
+  .log-box .log-info { color: var(--accent); }
+  .log-box .log-warn { color: var(--warn); }
+
+  /* ── Responsive ── */
+  @media (max-width: 700px) {
+    .config-bar { grid-template-columns: 1fr 1fr; }
+    .results-grid { grid-template-columns: 1fr; }
+    header { padding: 12px 16px; }
+    main { padding: 20px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span>SportsPools</span> / admin</div>
+  <div class="header-title">Score Fetcher</div>
+  <a href="admin.html" class="back-link">← dashboard</a>
+</header>
+
+<main>
+
+  <!-- Config -->
+  <div class="config-bar">
+    <div class="field">
+      <label>Sport</label>
+      <select id="sportSelect">
+        <option value="mens-college-basketball">NCAAB — Men's</option>
+        <option value="womens-college-basketball">NCAAB — Women's</option>
+        <option value="basketball/nba">NBA</option>
+        <option value="football/nfl">NFL</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Date (leave blank = today)</label>
+      <input type="date" id="dateInput" />
+    </div>
+    <div class="field">
+      <label>Firestore Collection</label>
+      <select id="collectionSelect">
+        <option value="games">games</option>
+        <option value="bettingLines">bettingLines</option>
+      </select>
+    </div>
+    <div>
+      <button class="btn btn-primary" id="fetchBtn" onclick="fetchScores()">
+        Fetch Scores
+      </button>
+    </div>
+  </div>
+
+  <!-- Status -->
+  <div class="status-bar" id="statusBar">
+    <span>Configure options above and click Fetch Scores to load ESPN data.</span>
+  </div>
+
+  <!-- ESPN Results -->
+  <div id="espnSection" style="display:none">
+    <div class="section-header">
+      <span class="section-label">ESPN Results</span>
+      <span id="espnBadge" class="badge badge-blue">0 games</span>
+    </div>
+    <div id="resultsGrid" class="results-grid"></div>
+  </div>
+
+  <!-- Match Table -->
+  <div id="matchSection" style="display:none">
+    <div class="match-table-wrap">
+      <div class="match-table-header">
+        <span class="section-label">Matched to Firestore — Ready to Push</span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn btn-ghost btn-sm" onclick="toggleSelectAll()">Select All</button>
+          <span id="matchBadge" class="badge badge-green">0 matched</span>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:36px"></th>
+            <th>Firestore Doc</th>
+            <th>Matchup</th>
+            <th>ESPN Score</th>
+            <th>Current Score</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="matchTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Push Bar -->
+    <div class="push-bar">
+      <div class="push-summary" id="pushSummary">Select games above to push scores to Firestore.</div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-ghost btn-sm" onclick="refreshFirestoreData()">↻ Refresh DB</button>
+        <button class="btn btn-success" id="pushBtn" onclick="pushScores()" disabled>
+          Push to Firestore
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Log -->
+  <div class="log-section">
+    <div class="section-header" style="margin-bottom:8px">
+      <span class="section-label">Activity Log</span>
+      <button class="btn btn-ghost btn-xs" onclick="clearLog()">Clear</button>
+    </div>
+    <div class="log-box" id="logBox">
+      <span class="log-info">// Score Fetcher ready. Awaiting action.</span>
+    </div>
+  </div>
+
+</main>
+
+<!-- Firebase compat SDK — same pattern as firebase-config.js -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<!-- Shared config — initializes firebase, auth, db globals -->
+<script src="firebase-config.js"></script>
+
+<script>
+  // ── State ───────────────────────────────────────────────────────────────────
+  let espnGames    = [];
+  let firestoreGames = [];
+  let matchedPairs = [];
+
+  // ── Auth check ──────────────────────────────────────────────────────────────
+  // firebase-config.js sets up auth.onAuthStateChanged globally,
+  // but we also hook in here to update the status bar for this page.
+  window.addEventListener('userLoggedIn', e => {
+    log(`Authenticated as ${e.detail.user.email}`, 'ok');
+    if (e.detail.userData && e.detail.userData.role !== 'admin') {
+      setStatus('⚠️ You are not an admin — Firestore writes will be rejected.', 'warn');
+    }
+  });
+  window.addEventListener('userLoggedOut', () => {
+    setStatus('Not signed in — Firestore writes will be rejected by security rules.', 'warn');
+    log('Not authenticated', 'warn');
+  });
+
+  // ── Default date to today ───────────────────────────────────────────────────
+  document.getElementById('dateInput').value = new Date().toISOString().slice(0, 10);
+
+  // ── Fetch from ESPN ─────────────────────────────────────────────────────────
+  async function fetchScores() {
+    const sport  = document.getElementById('sportSelect').value;
+    const dateVal = document.getElementById('dateInput').value;
+    const btn    = document.getElementById('fetchBtn');
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>';
+    setStatus('Fetching from ESPN...', 'info', true);
+    log(`Fetching ESPN — sport: ${sport}${dateVal ? ', date: ' + dateVal : ' (today)'}`, 'info');
+
+    try {
+      const sportPath = sport.includes('/') ? sport : `basketball/${sport}`;
+      let url = `https://site.api.espn.com/apis/site/v2/sports/${sportPath}/scoreboard`;
+      if (dateVal) url += `?dates=${dateVal.replace(/-/g, '')}`;
+      log(`GET ${url}`, 'info');
+
+      let data;
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        data = await res.json();
+      } catch (corsErr) {
+        // CORS fallback via allorigins proxy
+        log('Direct fetch failed, trying proxy...', 'warn');
+        const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+        const res = await fetch(proxy);
+        const wrapper = await res.json();
+        data = JSON.parse(wrapper.contents);
+      }
+
+      espnGames = parseESPN(data);
+      log(`ESPN returned ${espnGames.length} game(s)`, 'ok');
+      renderESPNCards();
+      await loadFirestoreAndMatch();
+      setStatus(
+        `Fetched ${espnGames.length} ESPN games. ${matchedPairs.length} matched to Firestore.`,
+        'success'
+      );
+    } catch (e) {
+      log(`ESPN fetch error: ${e.message}`, 'err');
+      setStatus(`Error fetching ESPN: ${e.message}`, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = 'Fetch Scores';
+    }
+  }
+
+  // ── Parse ESPN response ─────────────────────────────────────────────────────
+  function parseESPN(data) {
+    return (data.events || []).map(ev => {
+      const comp        = ev.competitions?.[0];
+      const competitors = comp?.competitors || [];
+      const home = competitors.find(c => c.homeAway === 'home') || competitors[0] || {};
+      const away = competitors.find(c => c.homeAway === 'away') || competitors[1] || {};
+      const statusType  = ev.status?.type || {};
+
+      return {
+        id:          ev.id,
+        name:        ev.name,
+        homeAbbr:    home.team?.abbreviation  || '',
+        homeName:    home.team?.displayName   || '',
+        homeSeed:    home.curatedRank?.current || null,
+        homeScore:   parseInt(home.score       || '0'),
+        awayAbbr:    away.team?.abbreviation  || '',
+        awayName:    away.team?.displayName   || '',
+        awaySeed:    away.curatedRank?.current || null,
+        awayScore:   parseInt(away.score       || '0'),
+        statusState: statusType.state         || 'pre',   // pre | in | post
+        statusName:  statusType.shortDetail   || '',
+        isCompleted: statusType.completed     || false,
+        date:        ev.date,
+      };
+    });
+  }
+
+  // ── Render ESPN game cards ──────────────────────────────────────────────────
+  function renderESPNCards() {
+    const grid    = document.getElementById('resultsGrid');
+    const section = document.getElementById('espnSection');
+    document.getElementById('espnBadge').textContent = `${espnGames.length} games`;
+    section.style.display = 'block';
+
+    if (!espnGames.length) {
+      grid.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div>No games found for this date / sport.</div>`;
+      return;
+    }
+
+    grid.innerHTML = espnGames.map(g => {
+      const stateClass = g.isCompleted ? 'status-final'
+                       : g.statusState === 'in' ? 'status-live' : 'status-pre';
+      const stateLabel = g.isCompleted ? 'FINAL'
+                       : g.statusState === 'in' ? 'LIVE' : 'UPCOMING';
+      const showScore  = g.isCompleted || g.statusState === 'in';
+      const awayWin    = g.awayScore > g.homeScore;
+      const homeWin    = g.homeScore > g.awayScore;
+
+      return `
+        <div class="game-card" id="espn-card-${g.id}">
+          <div class="card-header">
+            <span class="game-status ${stateClass}">${stateLabel}</span>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--muted)">${formatDate(g.date)}</span>
+          </div>
+          <div class="matchup">
+            <div class="team">
+              ${g.awaySeed ? `<div class="team-seed">#${g.awaySeed}</div>` : ''}
+              <div class="team-abbr">${g.awayAbbr}</div>
+              <div class="team-name">${g.awayName}</div>
+            </div>
+            <div class="score-block">
+              ${showScore
+                ? `<div class="score-display">
+                     <span style="${awayWin ? 'color:var(--accent2)' : ''}">${g.awayScore}</span>
+                     <span class="score-sep">–</span>
+                     <span style="${homeWin ? 'color:var(--accent2)' : ''}">${g.homeScore}</span>
+                   </div>`
+                : `<div class="score-display" style="color:var(--muted)">vs</div>`}
+              ${g.statusState === 'in'
+                ? `<div class="clock-display">${g.statusName}</div>` : ''}
+            </div>
+            <div class="team">
+              ${g.homeSeed ? `<div class="team-seed">#${g.homeSeed}</div>` : ''}
+              <div class="team-abbr">${g.homeAbbr}</div>
+              <div class="team-name">${g.homeName}</div>
+            </div>
+          </div>
+          <div class="match-info" id="match-info-${g.id}">
+            <span class="match-label" style="color:var(--muted)">Matching to Firestore…</span>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── Load Firestore collection and match to ESPN games ───────────────────────
+  async function loadFirestoreAndMatch() {
+    const colName = document.getElementById('collectionSelect').value;
+    log(`Loading Firestore collection: ${colName}`, 'info');
+    try {
+      const snap = await db.collection(colName).get();
+      firestoreGames = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      log(`Loaded ${firestoreGames.length} Firestore doc(s)`, 'ok');
+    } catch (e) {
+      log(`Firestore load error: ${e.message}`, 'err');
+      firestoreGames = [];
+    }
+    buildMatchPairs();
+    renderMatchTable();
+  }
+
+  async function refreshFirestoreData() {
+    setStatus('Refreshing Firestore data…', 'info', true);
+    await loadFirestoreAndMatch();
+    setStatus(`Refreshed. ${matchedPairs.length} game(s) matched.`, 'success');
+  }
+
+  // ── Match ESPN games to Firestore docs ──────────────────────────────────────
+  function buildMatchPairs() {
+    matchedPairs = [];
+
+    espnGames.forEach(eg => {
+      const eAway = eg.awayAbbr.toUpperCase();
+      const eHome = eg.homeAbbr.toUpperCase();
+
+      const fs = firestoreGames.find(fg => {
+        // Your collection uses awayTeam/homeTeam (games) OR awayAbbr/homeAbbr (bettingLines)
+        const fAway = (fg.awayTeam || fg.awayAbbr || '').toUpperCase();
+        const fHome = (fg.homeTeam || fg.homeAbbr || '').toUpperCase();
+
+        if (fAway === eAway && fHome === eHome) return true;
+
+        // Fuzzy: stored name contains ESPN abbreviation
+        const fAwayName = (fg.awayName || '').toUpperCase();
+        const fHomeName = (fg.homeName || '').toUpperCase();
+        if (fAwayName.includes(eAway) && fHomeName.includes(eHome)) return true;
+
+        // Fuzzy: last word of ESPN display name (e.g. "Gonzaga Bulldogs" → "BULLDOGS")
+        const eAwayLast = eg.awayName.split(' ').pop().toUpperCase();
+        const eHomeLast = eg.homeName.split(' ').pop().toUpperCase();
+        if (fAwayName.includes(eAwayLast) && fHomeName.includes(eHomeLast)) return true;
+
+        return false;
+      });
+
+      const infoEl = document.getElementById(`match-info-${eg.id}`);
+      const cardEl = document.getElementById(`espn-card-${eg.id}`);
+
+      if (fs) {
+        if (infoEl) infoEl.innerHTML =
+          `<span class="match-label">Matched: <strong>${fs.id}</strong></span>
+           <span class="badge badge-green" style="font-size:10px">✓ match</span>`;
+        if (cardEl) { cardEl.classList.remove('unmatched'); cardEl.classList.add('matched'); }
+        if (eg.isCompleted) matchedPairs.push({ espn: eg, firestore: fs });
+      } else {
+        if (infoEl) infoEl.innerHTML =
+          `<span class="match-label no-match">No Firestore match found</span>
+           <span class="badge badge-red" style="font-size:10px">✗ no match</span>`;
+        if (cardEl) { cardEl.classList.remove('matched'); cardEl.classList.add('unmatched'); }
+      }
+    });
+
+    document.getElementById('espnBadge').textContent = `${espnGames.length} games`;
+  }
+
+  // ── Render match table ──────────────────────────────────────────────────────
+  function renderMatchTable() {
+    const tbody   = document.getElementById('matchTableBody');
+    const section = document.getElementById('matchSection');
+    const badge   = document.getElementById('matchBadge');
+    section.style.display = 'block';
+
+    const finalPairs = matchedPairs.filter(p => p.espn.isCompleted);
+    badge.textContent = `${finalPairs.length} matched`;
+
+    if (!finalPairs.length) {
+      tbody.innerHTML = `<tr><td colspan="6"
+        style="text-align:center;padding:32px;color:var(--muted);font-family:var(--mono);font-size:12px">
+        No final games matched. Verify team abbreviations in your Firestore docs match ESPN's.
+        </td></tr>`;
+      updatePushSummary();
+      return;
+    }
+
+    tbody.innerHTML = finalPairs.map(({ espn: eg, firestore: fg }, i) => {
+      const curAway       = fg.awayScore ?? '—';
+      const curHome       = fg.homeScore ?? '—';
+      const alreadyDone   = fg.status === 'settled' || fg.status === 'final';
+
+      return `
+        <tr>
+          <td class="checkbox-cell">
+            <input type="checkbox" id="cb-${i}" data-idx="${i}"
+              ${alreadyDone ? '' : 'checked'}
+              title="${alreadyDone ? 'Already settled' : 'Include in push'}"
+              onchange="updatePushSummary()">
+          </td>
+          <td><span style="font-family:var(--mono);font-size:12px;color:var(--muted)">${fg.id}</span></td>
+          <td>
+            <span class="team-pill">
+              <span>${eg.awayAbbr}</span>
+              <span style="color:var(--muted)">@</span>
+              <span>${eg.homeAbbr}</span>
+            </span>
+          </td>
+          <td>
+            <span class="score-pill">
+              <span style="${eg.awayScore > eg.homeScore ? 'color:var(--accent2)' : ''}">${eg.awayScore}</span>
+              <span style="color:var(--muted)"> – </span>
+              <span style="${eg.homeScore > eg.awayScore ? 'color:var(--accent2)' : ''}">${eg.homeScore}</span>
+            </span>
+          </td>
+          <td><span style="font-family:var(--mono);font-size:13px;color:var(--muted)">${curAway} – ${curHome}</span></td>
+          <td>${alreadyDone
+            ? `<span class="badge badge-yellow">already settled</span>`
+            : `<span class="badge badge-blue">ready</span>`}
+          </td>
+        </tr>`;
+    }).join('');
+
+    updatePushSummary();
+  }
+
+  function toggleSelectAll() {
+    const boxes = document.querySelectorAll('#matchTableBody input[type="checkbox"]');
+    const allOn = [...boxes].every(b => b.checked);
+    boxes.forEach(b => b.checked = !allOn);
+    updatePushSummary();
+  }
+
+  function updatePushSummary() {
+    const boxes   = document.querySelectorAll('#matchTableBody input[type="checkbox"]');
+    const count   = [...boxes].filter(b => b.checked).length;
+    const pushBtn = document.getElementById('pushBtn');
+    const summary = document.getElementById('pushSummary');
+    pushBtn.disabled = count === 0;
+    summary.innerHTML = count > 0
+      ? `<strong>${count}</strong> game${count > 1 ? 's' : ''} selected — will write awayScore, homeScore, winner, status → "settled"`
+      : `Select games above to push scores to Firestore.`;
+  }
+
+  // ── Push scores to Firestore ────────────────────────────────────────────────
+  async function pushScores() {
+    const boxes   = document.querySelectorAll('#matchTableBody input[type="checkbox"]');
+    const selected = [...boxes].filter(b => b.checked).map(b => parseInt(b.dataset.idx));
+    const colName = document.getElementById('collectionSelect').value;
+    const btn     = document.getElementById('pushBtn');
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Pushing…';
+    setStatus(`Pushing ${selected.length} score(s) to Firestore…`, 'info', true);
+
+    const finalPairs = matchedPairs.filter(p => p.espn.isCompleted);
+    let ok = 0, fail = 0;
+
+    for (const idx of selected) {
+      const pair = finalPairs[idx];
+      if (!pair) continue;
+      const { espn: eg, firestore: fg } = pair;
+
+      // winner uses whatever key your collection stores the team id in
+      const winner = eg.awayScore > eg.homeScore
+        ? (fg.awayTeam || fg.awayAbbr)
+        : (fg.homeTeam || fg.homeAbbr);
+
+      try {
+        await db.collection(colName).doc(fg.id).update({
+          awayScore:     eg.awayScore,
+          homeScore:     eg.homeScore,
+          winner:        winner,
+          status:        'settled',
+          settledAt:     new Date().toISOString(),
+          settledSource: 'espn-api',
+        });
+        log(`✓ ${fg.id}: ${eg.awayAbbr} ${eg.awayScore} – ${eg.homeScore} ${eg.homeAbbr}`, 'ok');
+        ok++;
+      } catch (e) {
+        log(`✗ ${fg.id}: ${e.message}`, 'err');
+        fail++;
+      }
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = 'Push to Firestore';
+
+    if (fail === 0) {
+      setStatus(`✓ Pushed ${ok} score${ok > 1 ? 's' : ''} to Firestore.`, 'success');
+    } else {
+      setStatus(`Pushed ${ok}, failed ${fail} — see log.`, ok === 0 ? 'error' : 'warn');
+    }
+
+    await loadFirestoreAndMatch();
+  }
+
+  // ── Helpers ─────────────────────────────────────────────────────────────────
+  function setStatus(msg, type = 'default', pulse = false) {
+    const el = document.getElementById('statusBar');
+    el.className = `status-bar ${type}`;
+    el.innerHTML = pulse ? `<span class="pulse"></span> ${msg}` : msg;
+  }
+
+  function log(msg, type = 'info') {
+    const box = document.getElementById('logBox');
+    const ts  = new Date().toLocaleTimeString('en-US', { hour12: false });
+    const cls = { ok: 'log-ok', err: 'log-err', info: 'log-info', warn: 'log-warn' }[type] || '';
+    box.innerHTML += `\n<span class="${cls}">[${ts}] ${msg}</span>`;
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function clearLog() {
+    document.getElementById('logBox').innerHTML = '<span class="log-info">// Log cleared.</span>';
+  }
+
+  function formatDate(iso) {
+    if (!iso) return '';
+    try {
+      return new Date(iso).toLocaleDateString('en-US',
+        { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    } catch { return iso; }
+  }
+</script>
+</body>
+</html>
