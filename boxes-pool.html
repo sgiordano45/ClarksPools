@@ -1088,6 +1088,120 @@ header::before {
 }
 
 /* Leaderboard Styles */
+.results-game-card {
+  background: var(--tertiary-dark);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+}
+.results-game-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1rem;
+  background: var(--secondary-dark);
+  border-bottom: 1px solid var(--card-border);
+}
+.results-game-label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.85rem;
+  color: var(--accent-blue);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.results-game-round {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.results-score-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--card-border);
+}
+.results-team {
+  flex: 1;
+  text-align: center;
+}
+.results-team-name {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.results-team-score {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--text-primary);
+}
+.results-team-score.winner-score {
+  color: var(--accent-gold);
+}
+.results-vs {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+.results-winner-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1rem;
+  gap: 0.5rem;
+}
+.results-winner-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+.results-winner-box {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.9rem;
+  background: rgba(255,193,7,0.15);
+  color: var(--accent-gold);
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid rgba(255,193,7,0.3);
+}
+.results-winner-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.results-winner-payout {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  color: var(--accent-green);
+}
+.results-pending {
+  padding: 0.6rem 1rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+.standings-empty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-muted);
+}
+.standings-total-row {
+  background: rgba(0,212,255,0.05);
+  border-top: 1px solid var(--card-border);
+}
+.standings-total-row td {
+  font-weight: 700;
+  color: var(--accent-blue);
+}
+
 .leaderboard-container {
   background: var(--secondary-dark);
   border-radius: 12px;
@@ -1643,31 +1757,29 @@ header::before {
     <!-- Leaderboard (visible when locked) -->
     <div class="leaderboard-container" id="leaderboardContainer" style="display: none;">
       <div class="leaderboard-header">
-        <h3>🏆 Leaderboard</h3>
+        <h3>🏆 Results</h3>
         <div class="leaderboard-tabs">
-          <button class="leaderboard-tab active" onclick="showLeaderboardView('overall')">Overall</button>
-          <button class="leaderboard-tab" onclick="showLeaderboardView('byGame')">By Game</button>
+          <button class="leaderboard-tab active" onclick="showLeaderboardView('results')">📋 Results</button>
+          <button class="leaderboard-tab" onclick="showLeaderboardView('standings')">🏅 Standings</button>
         </div>
       </div>
       <div id="leaderboardContent">
-        <table class="leaderboard-table">
-          <thead>
-            <tr>
-              <th>Rank</th>
-              <th>Name</th>
-              <th>Wins</th>
-              <th>Boxes</th>
-              <th>Winnings</th>
-            </tr>
-          </thead>
-          <tbody id="leaderboardBody">
-            <tr>
-              <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">
-                No winners yet - check back after games start!
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <!-- Results view -->
+        <div id="resultsView"></div>
+        <!-- Standings view -->
+        <div id="standingsView" style="display:none;">
+          <table class="leaderboard-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>Wins</th>
+                <th>Total Earned</th>
+              </tr>
+            </thead>
+            <tbody id="standingsBody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -2525,29 +2637,30 @@ header::before {
     document.getElementById('statPrizePool').textContent = '$' + prizePool;
   }
 
-  // Leaderboard Functions
-  let currentLeaderboardView = 'overall';
-  
+  // ── Leaderboard / Results / Standings ────────────────────────────────────────
+  let currentLeaderboardView = 'results';
+
   window.showLeaderboardView = function(view) {
     currentLeaderboardView = view;
-    document.querySelectorAll('.leaderboard-tab').forEach(tab => {
-      tab.classList.toggle('active', tab.textContent.toLowerCase().includes(view === 'overall' ? 'overall' : 'game'));
+    document.querySelectorAll('.leaderboard-tab').forEach((tab, i) => {
+      tab.classList.toggle('active', (i === 0 && view === 'results') || (i === 1 && view === 'standings'));
     });
+    document.getElementById('resultsView').style.display   = view === 'results'   ? '' : 'none';
+    document.getElementById('standingsView').style.display = view === 'standings' ? '' : 'none';
+    // Update header title
+    document.querySelector('#leaderboardContainer .leaderboard-header h3').textContent =
+      view === 'results' ? '🏆 Results' : '🏅 Standings';
     renderLeaderboard();
   };
 
-  function renderLeaderboard() {
-    if (!currentPool || !currentPool.locked) return;
-    
-    const entries = currentPool.entries || {};
-    const games = currentPool.games || [];
-    const costPerBox = currentPool.costPerBox || 0;
+  function buildPayoutHelpers() {
+    const entries   = currentPool.entries || {};
+    const games     = currentPool.games   || [];
+    const costPerBox    = currentPool.costPerBox || 0;
     const totalPrizePool = Object.keys(entries).length * costPerBox;
-    
-    // Payout helper — supports both percentage and round-fixed modes
-    const payouts = currentPool.payoutStructure || { q1: 0.25, half: 0.25, q3: 0.25, final: 0.25 };
-    const roundPayouts = currentPool.roundPayouts || {};
-    const payoutMode = currentPool.payoutMode || 'percentage';
+    const payouts    = currentPool.payoutStructure || { q1: 0.25, half: 0.25, q3: 0.25, final: 0.25 };
+    const roundPayouts  = currentPool.roundPayouts  || {};
+    const payoutMode    = currentPool.payoutMode    || 'percentage';
 
     const MBB_ROUND_MAP = {
       'play-in': 'play-in', 'first-four': 'play-in',
@@ -2561,143 +2674,150 @@ header::before {
 
     function getGamePayout(game, period) {
       if (payoutMode === 'round-fixed') {
-        // Only 'final' pays out in round-fixed mode
         if (period !== 'final') return 0;
         const rawRound = (game.round || '').toLowerCase().replace(/\s+/g, '-');
         const roundKey = MBB_ROUND_MAP[rawRound] || rawRound;
         return roundPayouts[roundKey] || 0;
       }
-      // Standard percentage mode
       return totalPrizePool * (payouts[period] || 0.25) / games.length;
     }
 
-    // Collect all winners across all games
-    const winnerData = {};
-    
-    games.forEach((game, gameIdx) => {
-      const winners = game.winners || {};
-      const gameLabel = game.label || `Game ${gameIdx + 1}`;
-      
-      ['q1', 'half', 'q3', 'final'].forEach(period => {
-        const winner = winners[period];
-        if (winner && winner.box && entries[winner.box]) {
-          const payout = getGamePayout(game, period);
-          if (payout === 0 && payoutMode === 'round-fixed' && period !== 'final') return;
-          const entry = entries[winner.box];
-          const name = entry.name || 'Unknown';
-          
-          if (!winnerData[name]) {
-            winnerData[name] = {
-              name,
-              wins: [],
-              boxes: new Set(),
-              totalWinnings: 0
-            };
-          }
-          
-          winnerData[name].wins.push({
-            period,
-            game: gameLabel,
-            gameIdx,
-            box: winner.box,
-            payout
-          });
-          winnerData[name].boxes.add(winner.box);
-          winnerData[name].totalWinnings += payout;
-        }
-      });
-    });
-    
-    // Also count boxes owned by each person
-    const boxCounts = {};
-    Object.values(entries).forEach(entry => {
-      const name = entry.name || 'Unknown';
-      boxCounts[name] = (boxCounts[name] || 0) + 1;
-    });
-    
-    // Convert to array and sort
-    let leaderboard = Object.values(winnerData)
-      .sort((a, b) => b.totalWinnings - a.totalWinnings || b.wins.length - a.wins.length);
-    
-    const tbody = document.getElementById('leaderboardBody');
-    
-    if (leaderboard.length === 0) {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-muted);">
-            No winners yet - check back after games start!
-          </td>
-        </tr>
-      `;
+    return { entries, games, payoutMode, getGamePayout };
+  }
+
+  function renderLeaderboard() {
+    if (!currentPool || !currentPool.locked) return;
+    if (currentLeaderboardView === 'results') renderResults();
+    else renderStandings();
+  }
+
+  function renderResults() {
+    const { entries, games, payoutMode, getGamePayout } = buildPayoutHelpers();
+    const emoji = getSportEmoji(currentPool.sport || 'nfl');
+
+    // Determine which periods to show
+    const timing = currentPool.payoutTiming || (payoutMode === 'round-fixed' ? 'final-only' : '4-period');
+    const periods = timing === '4-period'   ? ['q1','half','q3','final']
+                  : timing === '2-period'   ? ['half','final']
+                  : ['final'];
+    const periodLabel = { q1: '1st Qtr', half: 'Halftime', q3: '3rd Qtr', final: 'Final' };
+
+    const container = document.getElementById('resultsView');
+
+    if (games.length === 0) {
+      container.innerHTML = '<div class="results-pending">No games configured for this pool.</div>';
       return;
     }
-    
-    if (currentLeaderboardView === 'overall') {
-      tbody.innerHTML = leaderboard.map((player, idx) => {
-        const rankClass = idx === 0 ? 'gold' : idx === 1 ? 'silver' : idx === 2 ? 'bronze' : '';
-        const winBadges = player.wins.map(w => 
-          `<span class="win-badge ${w.period}">${w.period === 'half' ? 'H' : w.period.toUpperCase()}</span>`
-        ).join('');
-        
-        return `
-          <tr>
-            <td class="leaderboard-rank ${rankClass}">${idx + 1}</td>
-            <td class="leaderboard-name">${player.name}</td>
-            <td class="leaderboard-wins">${winBadges}</td>
-            <td>${boxCounts[player.name] || 0}</td>
-            <td class="leaderboard-winnings">$${player.totalWinnings.toFixed(0)}</td>
-          </tr>
-        `;
-      }).join('');
-    } else {
-      // By game view
-      let html = '';
-      games.forEach((game, gameIdx) => {
-        const gameLabel = game.label || `Game ${gameIdx + 1}`;
-        const winners = game.winners || {};
-        
-        html += `
-          <tr style="background: var(--tertiary-dark);">
-            <td colspan="5" style="font-family: 'Oswald', sans-serif; padding: 0.75rem 1rem; color: var(--accent-blue);">
-              ${getSportEmoji(currentPool.sport || 'nfl')} ${gameLabel}
-            </td>
-          </tr>
-        `;
-        
-        let hasWinners = false;
-        ['q1', 'half', 'q3', 'final'].forEach(period => {
-          const winner = winners[period];
-          if (winner && winner.box && entries[winner.box]) {
-            hasWinners = true;
-            const entry = entries[winner.box];
-            const periodLabel = period === 'half' ? 'Halftime' : period === 'q1' ? '1st Qtr' : period === 'q3' ? '3rd Qtr' : 'Final';
-            const payout = getGamePayout(game, period);
-            
-            html += `
-              <tr>
-                <td><span class="win-badge ${period}">${periodLabel}</span></td>
-                <td class="leaderboard-name">${entry.name}</td>
-                <td>${winner.box}</td>
-                <td>${winner.score || '-'}</td>
-                <td class="leaderboard-winnings">$${payout.toFixed(0)}</td>
-              </tr>
-            `;
-          }
-        });
-        
-        if (!hasWinners) {
-          html += `
-            <tr>
-              <td colspan="5" style="text-align: center; padding: 1rem; color: var(--text-muted); font-style: italic;">
-                No winners yet for this game
-              </td>
-            </tr>
-          `;
+
+    container.innerHTML = games.map((game, gameIdx) => {
+      const winners  = game.winners || {};
+      const scores   = game.scores  || { t1: {}, t2: {} };
+      const label    = game.label   || `Game ${gameIdx + 1}`;
+      const round    = game.round   || '';
+      const team1    = game.team1   || 'Team 1';
+      const team2    = game.team2   || 'Team 2';
+
+      const hasFinal  = scores.t1?.final != null && scores.t2?.final != null;
+      const t1Final   = scores.t1?.final ?? '–';
+      const t2Final   = scores.t2?.final ?? '–';
+      const t1Wins    = hasFinal && scores.t1.final > scores.t2.final;
+      const t2Wins    = hasFinal && scores.t2.final > scores.t1.final;
+
+      // Score row
+      const scoreRow = `
+        <div class="results-score-row">
+          <div class="results-team">
+            <div class="results-team-name">${team1}</div>
+            <div class="results-team-score ${t1Wins ? 'winner-score' : ''}">${t1Final}</div>
+          </div>
+          <div class="results-vs">vs</div>
+          <div class="results-team">
+            <div class="results-team-name">${team2}</div>
+            <div class="results-team-score ${t2Wins ? 'winner-score' : ''}">${t2Final}</div>
+          </div>
+        </div>`;
+
+      // Winner rows per period
+      const winnerRows = periods.map(period => {
+        const winner = winners[period];
+        const payout = getGamePayout(game, period);
+        if (!winner?.box) {
+          return `<div class="results-pending">${periodLabel[period]}: awaiting score</div>`;
         }
+        const entry = entries[winner.box];
+        const name  = entry?.name || '(Unclaimed)';
+        const score = winner.score || '';
+        return `
+          <div class="results-winner-row">
+            <div class="results-winner-info">
+              <span style="font-size:0.75rem;color:var(--text-muted);min-width:52px;">${periodLabel[period]}</span>
+              <span class="results-winner-box">${winner.box}</span>
+              ${score ? `<span style="font-size:0.8rem;color:var(--text-muted);">${score}</span>` : ''}
+              <span class="results-winner-name">🏆 ${name}</span>
+            </div>
+            <span class="results-winner-payout">$${payout % 1 === 0 ? payout.toFixed(0) : payout.toFixed(2)}</span>
+          </div>`;
+      }).join('');
+
+      return `
+        <div class="results-game-card">
+          <div class="results-game-header">
+            <span class="results-game-label">${emoji} ${label}</span>
+            ${round ? `<span class="results-game-round">${round.replace(/-/g,' ')}</span>` : ''}
+          </div>
+          ${scoreRow}
+          ${winnerRows}
+        </div>`;
+    }).join('');
+  }
+
+  function renderStandings() {
+    const { entries, games, getGamePayout } = buildPayoutHelpers();
+
+    const totals = {};
+    let grandTotal = 0;
+
+    games.forEach(game => {
+      const winners = game.winners || {};
+      ['q1','half','q3','final'].forEach(period => {
+        const winner = winners[period];
+        if (!winner?.box) return;
+        const entry = entries[winner.box];
+        if (!entry) return;
+        const name   = entry.name || 'Unknown';
+        const payout = getGamePayout(game, period);
+        if (!totals[name]) totals[name] = { name, wins: 0, total: 0 };
+        totals[name].wins  += 1;
+        totals[name].total += payout;
+        grandTotal += payout;
       });
-      
-      tbody.innerHTML = html;
+    });
+
+    const ranked = Object.values(totals).sort((a, b) => b.total - a.total || b.wins - a.wins);
+    const tbody  = document.getElementById('standingsBody');
+
+    if (ranked.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4" class="standings-empty">No winners yet — check back after games start!</td></tr>`;
+      return;
     }
+
+    const medals = ['🥇','🥈','🥉'];
+    tbody.innerHTML = ranked.map((p, i) => {
+      const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+      const medal = medals[i] || '';
+      return `
+        <tr>
+          <td class="leaderboard-rank ${rankClass}">${medal || (i + 1)}</td>
+          <td class="leaderboard-name">${p.name}</td>
+          <td style="text-align:center;">${p.wins}</td>
+          <td class="leaderboard-winnings">$${p.total % 1 === 0 ? p.total.toFixed(0) : p.total.toFixed(2)}</td>
+        </tr>`;
+    }).join('') + `
+      <tr class="standings-total-row">
+        <td colspan="2" style="padding:0.6rem 1rem;">Total Paid Out</td>
+        <td style="text-align:center;">${ranked.reduce((s,p) => s + p.wins, 0)}</td>
+        <td class="leaderboard-winnings">$${grandTotal % 1 === 0 ? grandTotal.toFixed(0) : grandTotal.toFixed(2)}</td>
+      </tr>`;
   }
 
   // Box claiming
