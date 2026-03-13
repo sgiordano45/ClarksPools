@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Guide | SportsPools</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto+Condensed:wght@300;400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="admin-common.css">
+    <style>
+        /* Guide-specific styles */
+        .guide-hero {
+            background: linear-gradient(135deg, rgba(0,212,255,0.08) 0%, rgba(255,193,7,0.05) 100%);
+            border: 1px solid rgba(0,212,255,0.15);
+            border-radius: 16px;
+            padding: 2rem 2.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .guide-hero-icon {
+            font-size: 3rem;
+            flex-shrink: 0;
+        }
+        .guide-hero h2 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.6rem;
+            color: var(--text-primary);
+            margin: 0 0 0.35rem 0;
+        }
+        .guide-hero p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        /* Phase timeline */
+        .phase-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .phase-card {
+            background: var(--secondary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .phase-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 4px;
+            background: var(--phase-color, var(--accent-blue));
+            border-radius: 4px 0 0 4px;
+        }
+
+        .phase-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.1rem 1.5rem 1.1rem 1.75rem;
+            border-bottom: 1px solid var(--card-border);
+            background: var(--tertiary-dark);
+        }
+
+        .phase-badge {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 1.5px;
+            padding: 0.2rem 0.65rem;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.06);
+            color: var(--phase-color, var(--accent-blue));
+            border: 1px solid var(--phase-color, var(--accent-blue));
+            white-space: nowrap;
+            opacity: 0.9;
+        }
+
+        .phase-title {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .phase-timing {
+            margin-left: auto;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-align: right;
+        }
+
+        .phase-body {
+            padding: 1.25rem 1.5rem 1.25rem 1.75rem;
+        }
+
+        .step-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .step-list li {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .step-num {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 0.8rem;
+            min-width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--phase-color, var(--accent-blue));
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 1px;
+            opacity: 0.85;
+        }
+
+        .step-list li strong {
+            color: var(--text-primary);
+        }
+
+        .page-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            background: rgba(0,212,255,0.1);
+            border: 1px solid rgba(0,212,255,0.25);
+            color: var(--accent-blue);
+            font-size: 0.75rem;
+            font-family: 'Roboto Condensed', sans-serif;
+            padding: 0.1rem 0.5rem;
+            border-radius: 4px;
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+
+        .page-pill.gold {
+            background: rgba(255,193,7,0.1);
+            border-color: rgba(255,193,7,0.25);
+            color: var(--accent-gold);
+        }
+
+        .page-pill.green {
+            background: rgba(0,200,83,0.1);
+            border-color: rgba(0,200,83,0.25);
+            color: var(--accent-green);
+        }
+
+        .page-pill.red {
+            background: rgba(255,82,82,0.1);
+            border-color: rgba(255,82,82,0.25);
+            color: var(--accent-red);
+        }
+
+        .tip-box {
+            background: rgba(255,193,7,0.06);
+            border: 1px solid rgba(255,193,7,0.2);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            margin-top: 0.75rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+        .tip-box strong { color: var(--accent-gold); }
+
+        .warn-box {
+            background: rgba(255,82,82,0.06);
+            border: 1px solid rgba(255,82,82,0.2);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            margin-top: 0.75rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+        .warn-box strong { color: var(--accent-red); }
+
+        /* Quick reference table */
+        .ref-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+        .ref-table th {
+            text-align: left;
+            padding: 0.6rem 1rem;
+            background: var(--tertiary-dark);
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            border-bottom: 1px solid var(--card-border);
+        }
+        .ref-table td {
+            padding: 0.7rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: var(--text-secondary);
+            vertical-align: top;
+        }
+        .ref-table tr:last-child td { border-bottom: none; }
+        .ref-table td:first-child { color: var(--text-primary); font-weight: 600; }
+        .ref-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+        /* FAQ */
+        .faq-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .faq-item {
+            background: var(--secondary-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .faq-q {
+            padding: 1rem 1.25rem;
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.95rem;
+            color: var(--accent-blue);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+        .faq-q:hover { background: rgba(255,255,255,0.02); }
+        .faq-chevron {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+        .faq-item.open .faq-chevron { transform: rotate(180deg); }
+        .faq-a {
+            display: none;
+            padding: 0 1.25rem 1rem 1.25rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            border-top: 1px solid var(--card-border);
+        }
+        .faq-item.open .faq-a { display: block; }
+
+        @media (max-width: 768px) {
+            .guide-hero { flex-direction: column; text-align: center; }
+            .phase-timing { display: none; }
+        }
+    </style>
+</head>
+<body>
+<div class="admin-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="home.html" class="logo">
+                <div class="logo-icon">SP</div>
+                <div class="logo-text">Sports<span>Pools</span></div>
+            </a>
+            <span class="admin-badge">Admin</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-title">Admin Pages</div>
+                <a class="nav-item" href="admin.html">
+                    <span class="icon">📊</span>
+                    Dashboard
+                </a>
+                <a class="nav-item" href="admin-data.html">
+                    <span class="icon">📥</span>
+                    Data Manager
+                </a>
+                <a class="nav-item" href="admin-betting.html">
+                    <span class="icon">💰</span>
+                    Betting Pools
+                </a>
+                <a class="nav-item" href="admin-boxes.html">
+                    <span class="icon">🎲</span>
+                    Boxes Pools
+                </a>
+                <a class="nav-item" href="admin-score-fetch.html">
+                    <span class="icon">📡</span>
+                    Score Fetcher
+                </a>
+                <a class="nav-item active" href="admin-guide.html">
+                    <span class="icon">📖</span>
+                    Admin Guide
+                </a>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar" id="adminAvatar">--</div>
+                <div class="user-details">
+                    <div class="user-name" id="adminName">Loading...</div>
+                    <div class="user-role">Commissioner</div>
+                </div>
+            </div>
+            <a href="#" onclick="handleLogout()" style="display: block; margin-top: 0.75rem; font-size: 0.85rem; color: var(--text-secondary); text-decoration: none;">
+                ← Sign Out
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">📖 Admin Guide</h1>
+                <p class="page-subtitle">Step-by-step playbook for running an MBB Boxes pool</p>
+            </div>
+        </div>
+
+        <div class="guide-hero">
+            <div class="guide-hero-icon">🏀</div>
+            <div>
+                <h2>March Madness Boxes — How It Works</h2>
+                <p>
+                    Players claim squares on a 10×10 grid. Numbers are randomly drawn before the tournament starts.
+                    After each game, the winning team's last score digit (column) and the losing team's last score digit (row) determine the winning box.
+                    Each round has a fixed payout — Play-In through Championship.
+                </p>
+            </div>
+        </div>
+
+        <!-- ── PHASES ─────────────────────────────────────────────────────── -->
+        <div class="phase-list">
+
+            <!-- PHASE 1 -->
+            <div class="phase-card" style="--phase-color: #00d4ff;">
+                <div class="phase-header">
+                    <span class="phase-badge">Phase 1</span>
+                    <span class="phase-title">Create the Pool</span>
+                    <span class="phase-timing">Before entries open</span>
+                </div>
+                <div class="phase-body">
+                    <ul class="step-list">
+                        <li>
+                            <span class="step-num">1</span>
+                            <span>Go to <span class="page-pill">🎲 Boxes Pools</span> (boxes-pool.html) and click <strong>➕ Create New Pool</strong>.</span>
+                        </li>
+                        <li>
+                            <span class="step-num">2</span>
+                            <span>Set Sport to <strong>College Basketball</strong>, Event to <strong>March Madness</strong>.</span>
+                        </li>
+                        <li>
+                            <span class="step-num">3</span>
+                            <span>Set <strong>Box Winner Logic</strong> to <em>Winner's digit = Columns, Loser's digit = Rows (MBB style)</em>.</span>
+                        </li>
+                        <li>
+                            <span class="step-num">4</span>
+                            <span>Set <strong>Payout Mode</strong> to <em>Fixed amount per tournament round</em> and confirm the per-round amounts (Play-In $25 → Championship $500).</span>
+                        </li>
+                        <li>
+                            <span class="step-num">5</span>
+                            <span>Set <strong>Grid Numbers</strong> to <em>Same numbers for all games</em>.</span>
+                        </li>
+                        <li>
+                            <span class="step-num">6</span>
+                            <span>Set <strong>Payout Timing</strong> to <em>Final only</em>.</span>
+                        </li>
+                        <li>
+                            <span class="step-num">7</span>
+                            <span>Enter Cost Per Box and pool name, then click <strong>Create Pool</strong>.</span>
+                        </li>
+                    </ul>
+                    <div class="tip-box">
+                        <strong>💡 Tip:</strong> You don't need to add individual games yet — the pool grid works without them. Games are only needed to link scores later.
+                    </div>
+                </div>
+            </div>
+
+            <!-- PHASE 2 -->
+            <div class="phase-card" style="--phase-color: #a855f7;">
+                <div class="phase-header">
+                    <span class="phase-badge">Phase 2</span>
+                    <span class="phase-title">Collect Entries</span>
+                    <span class="phase-timing">Before the tournament starts</span>
+                </div>
+                <div class="phase-body">
+                    <ul class="step-list">
+                        <li>
+                            <span class="step-num">1</span>
+                            <span>Share the link to <span class="page-pill">🎲 boxes-pool.html</span> with participants. They sign in and click empty boxes to claim them.</span>
+                        </li>
+                        <li>
+                            <span class="step-num">2</span>
+                            <span>For anyone who can't self-enter, use the <strong>Admin Panel → Manual Entry</strong> tab on boxes-pool.html. Click any empty box directly on the grid to open the assign modal — no need to type coordinates.</span>
+                        </li>
+                        <li>
+                            <span class="step-num">3</span>
+                            <span>Track payments using the <strong>Paid / Unpaid</strong> toggle. Click a taken box on the grid as admin to toggle payment status at any time.</span>
+                        </li>
+                    </ul>
+                    <div class="tip-box">
+                        <strong>💡 Tip:</strong> The pool stats at the top of the page show claimed vs available boxes in real time. Share the page link — it updates live for everyone.
+                    </div>
+                </div>
+            </div>
+
+            <!-- PHASE 3 -->
+            <div class="phase-card" style="--phase-color: #ffc107;">
+                <div class="phase-header">
+                    <span class="phase-badge">Phase 3</span>
+                    <span class="phase-title">Draw Numbers &amp; Lock the Pool</span>
+                    <span class="phase-timing">Just before the first game tips off</span>
+                </div>
+                <div class="phase-body">
+                    <ul class="step-list">
+                        <li>
+                            <span class="step-num">1</span>
+                            <span>In the <strong>Admin Panel → Games</strong> tab on <span class="page-pill">🎲 boxes-pool.html</span>, click <strong>🎲 Randomize Numbers</strong>. Since the pool uses shared numbers, this sets one set of 0–9 for all games.</span>
+                        </li>
+                        <li>
+                            <span class="step-num">2</span>
+                            <span>Check the <strong>Numbers Drawn</strong> checkbox so numbers become visible to players, then click <strong>💾 Save All Games</strong>.</span>
+                        </li>
+                        <li>
+                            <span class="step-num">3</span>
+                            <span>Click <strong>🔒 Lock Pool</strong> in Pool Settings. This freezes entries — no new claims or changes. The Results and Standings tabs become visible to all signed-in users.</span>
+                        </li>
+                    </ul>
+                    <div class="warn-box">
+                        <strong>⚠️ Locking is permanent</strong> — only unlock if there was a genuine error. Unlocking re-opens claims, which is confusing for participants. Do this right before tip-off.
+                    </div>
+                </div>
+            </div>
+
+            <!-- PHASE 4 -->
+            <div class="phase-card" style="--phase-color: #00c853;">
+                <div class="phase-header">
+                    <span class="phase-badge">Phase 4</span>
+                    <span class="phase-title">During the Tournament — Settle Each Game</span>
+                    <span class="phase-timing">After each game goes final</span>
+                </div>
+                <div class="phase-body">
+                    <ul class="step-list">
+                        <li>
+                            <span class="step-num">1</span>
+                            <span>Open <span class="page-pill green">📡 Score Fetcher</span> (admin-score-fetch.html). Select <strong>NCAAB Men</strong>, pick today's date, and click <strong>Fetch Scores</strong>.</span>
+                        </li>
+                        <li>
+                            <span class="step-num">2</span>
+                            <span>Finished games appear in the <strong>Settle Section</strong> with a ✓ status. Check the box next to the game and click <strong>Push Scores</strong>. This writes the final score to <code>games/MBB/games</code> in Firestore.</span>
+                        </li>
+                        <li>
+                            <span class="step-num">3</span>
+                            <span>Switch to <span class="page-pill gold">🎲 Admin Boxes</span> (admin-boxes.html) → <strong>Update Scores</strong>. Select your pool.</span>
+                        </li>
+                        <li>
+                            <span class="step-num">4</span>
+                            <span>For each game card, open the <strong>ESPN Game dropdown</strong>, select the matching game, and click <strong>🔗 Save Link</strong> (only needed once per game — it's remembered).</span>
+                        </li>
+                        <li>
+                            <span class="step-num">5</span>
+                            <span>Click <strong>⬇ Import Final Score</strong>. The final scores auto-populate, the winning box is calculated, and results are saved to Firestore instantly.</span>
+                        </li>
+                        <li>
+                            <span class="step-num">6</span>
+                            <span>Results and Standings tabs on <span class="page-pill">🎲 boxes-pool.html</span> update automatically for all users — no further action needed.</span>
+                        </li>
+                    </ul>
+                    <div class="tip-box">
+                        <strong>💡 Tip:</strong> The ESPN link only needs to be set once per game. After that, just hit <em>Import Final Score</em> each time. You can batch multiple games in a single session during busy round days.
+                    </div>
+                    <div class="warn-box">
+                        <strong>⚠️ Team order matters:</strong> The importer tries to auto-match team names. If it can't, it shows a confirm dialog — read it carefully before clicking OK or Cancel, as it determines which team's score is the column digit vs the row digit.
+                    </div>
+                </div>
+            </div>
+
+            <!-- PHASE 5 -->
+            <div class="phase-card" style="--phase-color: #ff9800;">
+                <div class="phase-header">
+                    <span class="phase-badge">Phase 5</span>
+                    <span class="phase-title">Payouts &amp; Wrap-Up</span>
+                    <span class="phase-timing">After the Championship game</span>
+                </div>
+                <div class="phase-body">
+                    <ul class="step-list">
+                        <li>
+                            <span class="step-num">1</span>
+                            <span>Open the <strong>🏅 Standings</strong> tab on boxes-pool.html — it shows each winner's total earnings across all games. The footer row shows grand total paid out.</span>
+                        </li>
+                        <li>
+                            <span class="step-num">2</span>
+                            <span>Cross-reference with payment status. Click any taken box on the grid to check if that person was marked Paid.</span>
+                        </li>
+                        <li>
+                            <span class="step-num">3</span>
+                            <span>Use the <strong>📋 Results</strong> tab to verify every game's winner and payout before sending money — it shows the exact score, winning box, and dollar amount per game.</span>
+                        </li>
+                        <li>
+                            <span class="step-num">4</span>
+                            <span>Venmo winnings. The pool is complete — optionally archive by leaving it locked, or delete it via <strong>Admin Panel → Pool Settings → 🗑️ Delete Pool</strong>.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </div><!-- end phase-list -->
+
+        <!-- ── QUICK REFERENCE ──────────────────────────────────────────────── -->
+        <div class="data-card" style="margin-top: 2rem;">
+            <div class="data-card-header">
+                <h3 class="data-card-title">🗂 Quick Reference — Which Page Does What</h3>
+            </div>
+            <table class="ref-table">
+                <thead>
+                    <tr>
+                        <th>Page</th>
+                        <th>What you do there</th>
+                        <th>When to use it</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="page-pill">boxes-pool.html</span></td>
+                        <td>Create pools, collect entries, draw numbers, lock pool, view grid, see Results &amp; Standings</td>
+                        <td>Setup, entry period, during tournament (view)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="page-pill green">admin-score-fetch.html</span></td>
+                        <td>Pull live/final scores from ESPN API, push settled scores to <code>games/MBB/games</code></td>
+                        <td>After each game goes final</td>
+                    </tr>
+                    <tr>
+                        <td><span class="page-pill gold">admin-boxes.html</span></td>
+                        <td>Link box pool games to ESPN game docs, import final scores, view leaderboard</td>
+                        <td>After each game, after running Score Fetcher</td>
+                    </tr>
+                    <tr>
+                        <td><span class="page-pill">admin-data.html</span></td>
+                        <td>Import player rosters and stats (for fantasy pools, not boxes)</td>
+                        <td>Each playoff round for fantasy pools</td>
+                    </tr>
+                    <tr>
+                        <td><span class="page-pill">admin.html</span></td>
+                        <td>Fantasy pool dashboard and entries overview</td>
+                        <td>Fantasy pool management</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ── FAQ ──────────────────────────────────────────────────────────── -->
+        <div class="data-card" style="margin-top: 2rem;">
+            <div class="data-card-header">
+                <h3 class="data-card-title">❓ FAQ</h3>
+            </div>
+            <div style="padding: 1rem 1.5rem;">
+                <div class="faq-list">
+
+                    <div class="faq-item">
+                        <div class="faq-q" onclick="toggleFaq(this)">
+                            I ran the Score Fetcher but the Import button is still disabled. Why?
+                            <span class="faq-chevron">▼</span>
+                        </div>
+                        <div class="faq-a">
+                            The Import button enables only after you've selected a game from the ESPN Game dropdown and clicked <strong>Save Link</strong>. If you already set the link previously, re-select the pool in admin-boxes to reload — the link should auto-populate and the button should be active.
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-q" onclick="toggleFaq(this)">
+                            The score importer showed a team-order dialog. Which option should I pick?
+                            <span class="faq-chevron">▼</span>
+                        </div>
+                        <div class="faq-a">
+                            This happens when the importer can't auto-match the box pool team names to ESPN's away/home teams. Read the dialog carefully — it shows both options with their scores. In MBB-style pools, it doesn't actually matter which team is T1 vs T2 because the winner/loser logic automatically assigns the higher score to columns regardless. Just be consistent: pick the order that matches how you entered Team 1 and Team 2 when you set up the game.
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-q" onclick="toggleFaq(this)">
+                            A game isn't showing up in the Score Fetcher. What do I do?
+                            <span class="faq-chevron">▼</span>
+                        </div>
+                        <div class="faq-a">
+                            Try changing the date on the Score Fetcher to match the game date exactly — ESPN's API filters by date. If the game was played yesterday, select yesterday's date. If it still doesn't appear, the game may not be in ESPN's NCAAB Men scoreboard (e.g. it might be a women's game — check the sport selector). As a fallback, you can always enter the final score manually in admin-boxes without using the Import button.
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-q" onclick="toggleFaq(this)">
+                            Can I add a game to the pool after it's locked?
+                            <span class="faq-chevron">▼</span>
+                        </div>
+                        <div class="faq-a">
+                            Yes — adding games is handled separately from the lock. Unlock the pool briefly, go to Admin Panel → Games tab, add the game and save, then re-lock. The grid itself and all entries are unaffected. Alternatively, you can add games in admin-boxes directly without unlocking — just use the Games tab in boxes-pool.html admin panel which doesn't require the pool to be unlocked to edit game metadata.
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-q" onclick="toggleFaq(this)">
+                            Someone paid but is still showing as Unpaid. How do I fix it?
+                            <span class="faq-chevron">▼</span>
+                        </div>
+                        <div class="faq-a">
+                            As an admin, click their box directly on the grid on boxes-pool.html. A manage modal will appear showing their name and current payment status. Click <strong>Mark Paid</strong> to toggle it. The change saves immediately to Firestore.
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-q" onclick="toggleFaq(this)">
+                            A player wants to be removed / give up their box. How do I unclaim it?
+                            <span class="faq-chevron">▼</span>
+                        </div>
+                        <div class="faq-a">
+                            Unlock the pool first (if locked), then click their box on the grid as admin and choose <strong>🗑 Unclaim</strong>. Confirm the prompt. The box returns to available. Re-lock the pool once done.
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-q" onclick="toggleFaq(this)">
+                            The Standings tab shows $0 for everyone even though I imported scores. Why?
+                            <span class="faq-chevron">▼</span>
+                        </div>
+                        <div class="faq-a">
+                            This usually means the <code>round</code> field on the game doc doesn't match the expected round key. The Score Fetcher stores rounds like <code>round-of-64</code>, <code>sweet-16</code>, etc. Check the game document in Firestore (games/MBB/games) and make sure the round value matches one of: <code>play-in</code>, <code>round-of-64</code>, <code>round-of-32</code>, <code>sweet-16</code>, <code>elite-8</code>, <code>final-four</code>, <code>championship</code>.
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+
+<script>
+    // Auth — just show admin name, no content gating (guide is safe to read)
+    window.addEventListener('userLoggedIn', (e) => {
+        const { user, userData } = e.detail;
+        document.getElementById('adminName').textContent = userData?.displayName || user.email;
+        document.getElementById('adminAvatar').textContent = getUserInitials(userData?.displayName || user.email);
+    });
+
+    window.addEventListener('userLoggedOut', () => {
+        window.location.href = 'home.html';
+    });
+
+    function handleLogout() {
+        if (typeof signOut === 'function') signOut().then(() => { window.location.href = 'home.html'; });
+    }
+
+    function getUserInitials(name) {
+        if (!name) return '--';
+        const parts = name.trim().split(/\s+/);
+        if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+        return name.substring(0, 2).toUpperCase();
+    }
+
+    // FAQ toggle
+    function toggleFaq(el) {
+        const item = el.closest('.faq-item');
+        item.classList.toggle('open');
+    }
+</script>
+</body>
+</html>

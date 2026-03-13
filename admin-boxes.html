@@ -248,67 +248,6 @@
             color: var(--accent-green);
         }
 
-        /* ESPN Link Bar */
-        .espn-link-bar {
-            background: rgba(0, 212, 255, 0.05);
-            border: 1px solid rgba(0, 212, 255, 0.2);
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-
-        .espn-link-bar label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--accent-blue);
-            white-space: nowrap;
-            margin: 0;
-        }
-
-        .espn-link-bar select {
-            flex: 1;
-            min-width: 200px;
-            background: var(--secondary-dark);
-            border: 1px solid rgba(0,212,255,0.3);
-            border-radius: 6px;
-            color: var(--text-primary);
-            font-size: 0.85rem;
-            padding: 0.4rem 0.75rem;
-        }
-
-        .espn-link-bar select:focus { outline: none; border-color: var(--accent-blue); }
-
-        .btn-espn {
-            background: linear-gradient(135deg, #00d4ff, #0099cc);
-            color: #000;
-            font-weight: 700;
-            font-size: 0.8rem;
-            padding: 0.4rem 1rem;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: all 0.2s;
-        }
-        .btn-espn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,212,255,0.4); }
-        .btn-espn:disabled { background: var(--text-muted); cursor: not-allowed; transform: none; box-shadow: none; }
-
-        .espn-status {
-            font-size: 0.75rem;
-            padding: 0.25rem 0.6rem;
-            border-radius: 4px;
-            font-weight: 600;
-        }
-        .espn-status.linked   { background: rgba(0,200,83,0.15); color: var(--accent-green); }
-        .espn-status.settled  { background: rgba(0,200,83,0.2);  color: var(--accent-green); }
-        .espn-status.pending  { background: rgba(255,193,7,0.15); color: var(--accent-gold); }
-        .espn-status.unlinked { background: rgba(90,122,154,0.2); color: var(--text-muted); }
-
         @media (max-width: 1400px) {
             .boxes-stats-grid {
                 grid-template-columns: repeat(3, 1fr);
@@ -361,6 +300,10 @@
                     <a class="nav-item active" href="admin-boxes.html">
                         <span class="icon">🎲</span>
                         Boxes Pools
+                    </a>
+                    <a class="nav-item" href="admin-guide.html">
+                        <span class="icon">📖</span>
+                        Admin Guide
                     </a>
                 </div>
 
@@ -549,8 +492,7 @@
     <script>
         let currentUser = null;
         let currentPool = null;
-        let allPools    = [];
-        let mbbGames    = [];   // cache of games/MBB/games docs
+        let allPools = [];
         
         // Sport config
         const sportConfig = {
@@ -587,7 +529,6 @@
             document.getElementById('adminAvatar').textContent = getUserInitials(userData.displayName || user.email);
             
             await loadBoxesPools();
-            await loadMbbGames();
         });
         
         window.addEventListener('userLoggedOut', () => {
@@ -805,19 +746,6 @@
                             <span class="score-entry-label">${game.label || 'Game ' + (idx + 1)}</span>
                         </div>
                         <div class="score-entry-body">
-                            <!-- ESPN Game Link Bar -->
-                            <div class="espn-link-bar">
-                                <label>🔗 ESPN Game</label>
-                                <select id="espn-link-${idx}" onchange="onEspnLinkChange(${idx})">
-                                    <option value="">-- Link to games/MBB game --</option>
-                                </select>
-                                ${buildEspnStatusBadge(game)}
-                                <button class="btn-espn" id="espn-import-${idx}"
-                                    onclick="importEspnScore(${idx})"
-                                    ${game.linkedGameId ? '' : 'disabled'}>
-                                    ⬇ Import Final Score
-                                </button>
-                            </div>
                             <div class="score-inputs-grid">
                                 <div>
                                     <label style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem;">${game.team1 || 'Team 1'} Scores</label>
@@ -869,9 +797,6 @@
                             </div>
                             
                             <div class="score-entry-actions">
-                                <button class="btn btn-outline" onclick="saveLinkOnly(${idx})" style="font-size:0.85rem;">
-                                    <span>🔗</span> Save Link
-                                </button>
                                 <button class="btn btn-gold" onclick="saveGameScores(${idx})">
                                     <span>💾</span> Save Scores
                                 </button>
@@ -880,7 +805,6 @@
                     </div>
                 `;
             }).join('');
-            populateEspnDropdowns();
         }
         
         function renderWinnerPreview(game, idx) {
@@ -1002,17 +926,11 @@
             
             game.scores = scores;
             
-            // Calculate winners — support winner-loser scoreMode
-            const winnerLoserMode = currentPool.scoreMode === 'winner-loser';
+            // Calculate winners
             const calculateBox = (t1, t2) => {
                 if (t1 === undefined || t2 === undefined) return null;
-                let colScore = t1, rowScore = t2;
-                if (winnerLoserMode && t1 !== t2) {
-                    colScore = Math.max(t1, t2);
-                    rowScore = Math.min(t1, t2);
-                }
-                const colIdx = colNumbers.indexOf(colScore % 10);
-                const rowIdx = rowNumbers.indexOf(rowScore % 10);
+                const colIdx = colNumbers.indexOf(t1 % 10);
+                const rowIdx = rowNumbers.indexOf(t2 % 10);
                 if (colIdx === -1 || rowIdx === -1) return null;
                 return `${rowIdx}-${colIdx}`;
             };
@@ -1094,29 +1012,7 @@
             const costPerBox = pool.costPerBox || 0;
             const totalPrize = Object.keys(entries).length * costPerBox;
             const payouts = pool.payoutStructure || { q1: 0.25, half: 0.25, q3: 0.25, final: 0.25 };
-            const payoutMode = pool.payoutMode || 'percentage';
-            const roundPayouts = pool.roundPayouts || {};
-
-            const MBB_ROUND_MAP = {
-                'play-in': 'play-in', 'first-four': 'play-in',
-                'round-of-64': 'round-of-64', 'r64': 'round-of-64',
-                'round-of-32': 'round-of-32', 'r32': 'round-of-32', 'second-round': 'round-of-32',
-                'sweet-16': 'sweet-16', 's16': 'sweet-16',
-                'elite-8': 'elite-8', 'e8': 'elite-8',
-                'final-four': 'final-four', 'f4': 'final-four',
-                'championship': 'championship', 'national-championship': 'championship'
-            };
-
-            function getGamePayout(game, period) {
-                if (payoutMode === 'round-fixed') {
-                    if (period !== 'final') return 0;
-                    const rawRound = (game.round || '').toLowerCase().replace(/\s+/g, '-');
-                    const roundKey = MBB_ROUND_MAP[rawRound] || rawRound;
-                    return roundPayouts[roundKey] || 0;
-                }
-                return (totalPrize * (payouts[period] || 0.25)) / games.length;
-            }
-
+            
             // Count boxes per person
             const boxCounts = {};
             Object.values(entries).forEach(entry => {
@@ -1133,14 +1029,13 @@
                 ['q1', 'half', 'q3', 'final'].forEach(period => {
                     const winner = winners[period];
                     if (winner?.box && entries[winner.box]) {
-                        const payout = getGamePayout(game, period);
-                        if (payout === 0 && payoutMode === 'round-fixed' && period !== 'final') return;
                         const name = entries[winner.box].name || 'Unknown';
                         
                         if (!winnerData[name]) {
                             winnerData[name] = { name, wins: [], totalWinnings: 0 };
                         }
                         
+                        const payout = (totalPrize * (payouts[period] || 0.25)) / games.length;
                         winnerData[name].wins.push({ period, game: game.label || `Game ${gameIdx + 1}` });
                         winnerData[name].totalWinnings += payout;
                     }
@@ -1181,203 +1076,6 @@
                 `;
             }).join('');
         }
-
-        // ── Load games/MBB/games into local cache ──────────────────────────────
-        async function loadMbbGames() {
-            try {
-                const snap = await db.collection('games/MBB/games').orderBy('gameDateTime').get();
-                mbbGames = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                console.log('Loaded', mbbGames.length, 'MBB games from Firestore');
-            } catch(e) {
-                console.warn('Could not load MBB games:', e.message);
-                mbbGames = [];
-            }
-        }
-
-        // ── Populate the ESPN link dropdowns for all rendered game cards ───────
-        function populateEspnDropdowns() {
-            const games = currentPool?.games || [];
-            games.forEach((game, idx) => {
-                const sel = document.getElementById('espn-link-' + idx);
-                if (!sel) return;
-
-                // Build options
-                const opts = ['<option value="">-- Link to games/MBB game --</option>'];
-                mbbGames.forEach(mg => {
-                    const label = mg.awayTeam + ' @ ' + mg.homeTeam +
-                        (mg.round ? '  [' + mg.round + ']' : '') +
-                        (mg.status === 'settled' ? '  ✓' : '');
-                    const selected = game.linkedGameId === mg.id ? ' selected' : '';
-                    opts.push('<option value="' + mg.id + '"' + selected + '>' + label + '</option>');
-                });
-                sel.innerHTML = opts.join('');
-
-                // Update import button state
-                const btn = document.getElementById('espn-import-' + idx);
-                if (btn) btn.disabled = !game.linkedGameId;
-            });
-        }
-
-        // ── Build the status badge shown next to the dropdown ─────────────────
-        function buildEspnStatusBadge(game) {
-            if (!game.linkedGameId) {
-                return '<span class="espn-status unlinked">Not linked</span>';
-            }
-            const mg = mbbGames.find(g => g.id === game.linkedGameId);
-            if (!mg) return '<span class="espn-status unlinked">Link not found</span>';
-            if (mg.status === 'settled') {
-                return '<span class="espn-status settled">✓ Settled: ' +
-                    mg.awayScore + '–' + mg.homeScore + '</span>';
-            }
-            return '<span class="espn-status pending">Linked · Awaiting score</span>';
-        }
-
-        // ── Called when dropdown selection changes ─────────────────────────────
-        function onEspnLinkChange(idx) {
-            const sel = document.getElementById('espn-link-' + idx);
-            const btn = document.getElementById('espn-import-' + idx);
-            if (btn) btn.disabled = !sel.value;
-        }
-
-        // ── Save just the linkedGameId to Firestore (no score change) ─────────
-        async function saveLinkOnly(gameIdx) {
-            if (!currentPool) return;
-            const sel = document.getElementById('espn-link-' + gameIdx);
-            const linkedGameId = sel?.value || null;
-
-            const games = JSON.parse(JSON.stringify(currentPool.games || []));
-            if (!games[gameIdx]) return;
-            games[gameIdx].linkedGameId = linkedGameId || null;
-
-            try {
-                await db.collection('boxesPools').doc(currentPool.id).update({
-                    games: games,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                currentPool.games = games;
-                const mg = mbbGames.find(g => g.id === linkedGameId);
-                const label = mg ? mg.awayTeam + ' @ ' + mg.homeTeam : 'none';
-                alert('Link saved: ' + label);
-            } catch(e) {
-                alert('Error saving link: ' + e.message);
-            }
-        }
-
-        // ── Pull final score from linked games/MBB doc and auto-save ──────────
-        async function importEspnScore(gameIdx) {
-            if (!currentPool) return;
-
-            const sel = document.getElementById('espn-link-' + gameIdx);
-            const linkedId = sel?.value;
-            if (!linkedId) {
-                alert('No ESPN game linked. Select one from the dropdown first.');
-                return;
-            }
-
-            // Fetch the linked doc fresh from Firestore (in case it settled recently)
-            let mbbDoc;
-            try {
-                const snap = await db.collection('games/MBB/games').doc(linkedId).get();
-                if (!snap.exists) { alert('Linked game not found in Firestore.'); return; }
-                mbbDoc = { id: snap.id, ...snap.data() };
-                // Refresh cache entry
-                const cacheIdx = mbbGames.findIndex(g => g.id === linkedId);
-                if (cacheIdx >= 0) mbbGames[cacheIdx] = mbbDoc;
-                else mbbGames.push(mbbDoc);
-            } catch(e) {
-                alert('Error fetching ESPN game: ' + e.message);
-                return;
-            }
-
-            if (mbbDoc.status !== 'settled') {
-                alert('This game is not settled yet in games/MBB. Run the Score Fetcher first to push the final score.');
-                return;
-            }
-
-            if (mbbDoc.awayScore == null || mbbDoc.homeScore == null) {
-                alert('Settled game has no scores stored. Check the games/MBB document.');
-                return;
-            }
-
-            // Determine which team maps to t1/t2 using the box pool game's team names
-            const game = currentPool.games[gameIdx];
-            // team1 in box pool = columns (t1), team2 = rows (t2)
-            // We match by abbreviation — try to figure out which ESPN team is t1 vs t2
-            const t1Name = (game.team1 || '').toUpperCase();
-            const t2Name = (game.team2 || '').toUpperCase();
-            const awayAbbr = (mbbDoc.awayTeam || '').toUpperCase();
-            const homeAbbr = (mbbDoc.homeTeam || '').toUpperCase();
-
-            let t1Final, t2Final;
-
-            // Try matching team1 → away
-            if (t1Name.includes(awayAbbr) || awayAbbr.includes(t1Name) ||
-                t1Name.includes((mbbDoc.awayName||'').split(' ').pop().toUpperCase())) {
-                t1Final = mbbDoc.awayScore;
-                t2Final = mbbDoc.homeScore;
-            }
-            // Try matching team1 → home
-            else if (t1Name.includes(homeAbbr) || homeAbbr.includes(t1Name) ||
-                     t1Name.includes((mbbDoc.homeName||'').split(' ').pop().toUpperCase())) {
-                t1Final = mbbDoc.homeScore;
-                t2Final = mbbDoc.awayScore;
-            }
-            else {
-                // Ambiguous — ask user
-                const confirm_order = confirm(
-                    'Could not auto-match teams.
-
-' +
-                    'ESPN: ' + mbbDoc.awayTeam + ' (away) ' + mbbDoc.awayScore +
-                    '  vs  ' + mbbDoc.homeTeam + ' (home) ' + mbbDoc.homeScore + '
-
-' +
-                    'Box pool Team 1 (columns): ' + (game.team1 || '?') + '
-' +
-                    'Box pool Team 2 (rows):    ' + (game.team2 || '?') + '
-
-' +
-                    'Press OK to assign: Team 1 = ' + mbbDoc.awayTeam + ' (' + mbbDoc.awayScore + ')' +
-                    ',  Team 2 = ' + mbbDoc.homeTeam + ' (' + mbbDoc.homeScore + ')
-' +
-                    'Press Cancel to swap: Team 1 = ' + mbbDoc.homeTeam + ' (' + mbbDoc.homeScore + ')' +
-                    ',  Team 2 = ' + mbbDoc.awayTeam + ' (' + mbbDoc.awayScore + ')'
-                );
-                if (confirm_order) {
-                    t1Final = mbbDoc.awayScore;
-                    t2Final = mbbDoc.homeScore;
-                } else {
-                    t1Final = mbbDoc.homeScore;
-                    t2Final = mbbDoc.awayScore;
-                }
-            }
-
-            // Populate the Final inputs
-            const t1Input = document.getElementById('t1-final-' + gameIdx);
-            const t2Input = document.getElementById('t2-final-' + gameIdx);
-            if (t1Input) t1Input.value = t1Final;
-            if (t2Input) t2Input.value = t2Final;
-
-            // Trigger the winner preview update
-            updateWinnerPreview(gameIdx);
-
-            // Auto-save scores (same as clicking Save Scores)
-            await saveGameScores(gameIdx);
-
-            // Also persist the linkedGameId in the saved game
-            const games = JSON.parse(JSON.stringify(currentPool.games || []));
-            if (games[gameIdx]) {
-                games[gameIdx].linkedGameId = linkedId;
-                await db.collection('boxesPools').doc(currentPool.id).update({
-                    games: games,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                currentPool.games = games;
-            }
-
-            alert('✓ Final score imported: ' + (game.team1||'T1') + ' ' + t1Final + '  –  ' + t2Final + ' ' + (game.team2||'T2') + '\n\nWinners have been saved!');
-        }
-
     </script>
 </body>
 </html>
