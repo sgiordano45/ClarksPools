@@ -1853,6 +1853,67 @@ header::before {
       </p>
     </div>
     
+    <!-- Score Mode -->
+    <div class="form-group">
+      <label>Box Winner Logic</label>
+      <select id="newScoreMode">
+        <option value="team-fixed">Team 1 = Columns, Team 2 = Rows (standard)</option>
+        <option value="winner-loser">Winner's digit = Columns, Loser's digit = Rows (MBB style)</option>
+      </select>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+        MBB style: higher score determines the column digit each game.
+      </p>
+    </div>
+
+    <!-- Payout Mode -->
+    <div class="form-group">
+      <label>Payout Mode</label>
+      <select id="newPayoutMode" onchange="updatePayoutModeFields()">
+        <option value="percentage">% of prize pool (standard)</option>
+        <option value="round-fixed">Fixed amount per tournament round (MBB style)</option>
+      </select>
+    </div>
+    <div id="roundPayoutsContainer" style="display:none;">
+      <p style="font-size: 0.8rem; color: var(--accent-blue); margin-bottom: 0.75rem;">Enter fixed payout per game winner for each round:</p>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Play-In</label>
+          <input type="number" id="rpPlayIn" value="25" min="0" step="0.5">
+        </div>
+        <div class="form-group">
+          <label>Round of 64</label>
+          <input type="number" id="rpR64" value="50" min="0" step="0.5">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Round of 32</label>
+          <input type="number" id="rpR32" value="62.5" min="0" step="0.5">
+        </div>
+        <div class="form-group">
+          <label>Sweet 16</label>
+          <input type="number" id="rpS16" value="87.5" min="0" step="0.5">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Elite 8</label>
+          <input type="number" id="rpE8" value="137.5" min="0" step="0.5">
+        </div>
+        <div class="form-group">
+          <label>Final Four</label>
+          <input type="number" id="rpF4" value="250" min="0" step="0.5">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Championship</label>
+          <input type="number" id="rpChamp" value="500" min="0" step="0.5">
+        </div>
+        <div class="form-group"></div>
+      </div>
+    </div>
+
     <div class="form-group">
       <label>Description (optional)</label>
       <textarea id="newDescription" rows="2" placeholder="Pool rules, additional info..."></textarea>
@@ -2136,10 +2197,23 @@ header::before {
     const payouts = currentPool.payouts || { q1: 0.2, half: 0.2, q3: 0.2, final: 0.4 };
     const timing = currentPool.payoutTiming || '4-period';
     const numberMode = currentPool.numberSharing === 'shared' ? '(Same #s all games)' : '(Unique #s per game)';
+    const payoutModeDisplay = currentPool.payoutMode || 'percentage';
+    const scoreModeDisplay = currentPool.scoreMode || 'team-fixed';
     
     let payoutHTML = '';
     
-    if (timing === '4-period' || (!timing && payouts.q1 > 0)) {
+    if (payoutModeDisplay === 'round-fixed') {
+      const rp = currentPool.roundPayouts || {};
+      const roundNames = [
+        ['play-in','Play-In'], ['round-of-64','R64'], ['round-of-32','R32'],
+        ['sweet-16','S16'], ['elite-8','E8'], ['final-four','F4'], ['championship','Champ']
+      ];
+      payoutHTML = roundNames
+        .filter(([k]) => rp[k] > 0)
+        .map(([k, label]) => `<span class="payout-period"><span class="period-name">${label}:</span> <span class="period-pct">$${rp[k]}</span></span>`)
+        .join('');
+      payoutHTML += `<span style="color: var(--accent-blue); font-size: 0.8rem; margin-left: 0.5rem;">🏆 Winner/Loser boxes · Final only</span>`;
+    } else if (timing === '4-period' || (!timing && payouts.q1 > 0)) {
       payoutHTML = `
         <span class="payout-period"><span class="period-name">Q1:</span> <span class="period-pct">${Math.round(payouts.q1 * 100)}%</span></span>
         <span class="payout-period"><span class="period-name">Half:</span> <span class="period-pct">${Math.round(payouts.half * 100)}%</span></span>
@@ -2157,7 +2231,9 @@ header::before {
       `;
     }
     
-    payoutHTML += `<span style="color: var(--text-muted); font-size: 0.85rem; margin-left: 0.5rem;">${numberMode}</span>`;
+    if (payoutModeDisplay !== 'round-fixed') {
+      payoutHTML += `<span style="color: var(--text-muted); font-size: 0.85rem; margin-left: 0.5rem;">${numberMode}</span>`;
+    }
     
     payoutDisplay.innerHTML = payoutHTML;
   }
@@ -2345,9 +2421,33 @@ header::before {
     const costPerBox = currentPool.costPerBox || 0;
     const totalPrizePool = Object.keys(entries).length * costPerBox;
     
-    // Calculate payouts (25% per quarter by default, or use pool's payout structure)
+    // Payout helper — supports both percentage and round-fixed modes
     const payouts = currentPool.payoutStructure || { q1: 0.25, half: 0.25, q3: 0.25, final: 0.25 };
-    
+    const roundPayouts = currentPool.roundPayouts || {};
+    const payoutMode = currentPool.payoutMode || 'percentage';
+
+    const MBB_ROUND_MAP = {
+      'play-in': 'play-in', 'first-four': 'play-in',
+      'round-of-64': 'round-of-64', 'r64': 'round-of-64',
+      'round-of-32': 'round-of-32', 'r32': 'round-of-32', 'second-round': 'round-of-32',
+      'sweet-16': 'sweet-16', 's16': 'sweet-16',
+      'elite-8': 'elite-8', 'e8': 'elite-8',
+      'final-four': 'final-four', 'f4': 'final-four',
+      'championship': 'championship', 'national-championship': 'championship'
+    };
+
+    function getGamePayout(game, period) {
+      if (payoutMode === 'round-fixed') {
+        // Only 'final' pays out in round-fixed mode
+        if (period !== 'final') return 0;
+        const rawRound = (game.round || '').toLowerCase().replace(/\s+/g, '-');
+        const roundKey = MBB_ROUND_MAP[rawRound] || rawRound;
+        return roundPayouts[roundKey] || 0;
+      }
+      // Standard percentage mode
+      return totalPrizePool * (payouts[period] || 0.25) / games.length;
+    }
+
     // Collect all winners across all games
     const winnerData = {};
     
@@ -2358,6 +2458,8 @@ header::before {
       ['q1', 'half', 'q3', 'final'].forEach(period => {
         const winner = winners[period];
         if (winner && winner.box && entries[winner.box]) {
+          const payout = getGamePayout(game, period);
+          if (payout === 0 && payoutMode === 'round-fixed' && period !== 'final') return;
           const entry = entries[winner.box];
           const name = entry.name || 'Unknown';
           
@@ -2375,10 +2477,10 @@ header::before {
             game: gameLabel,
             gameIdx,
             box: winner.box,
-            payout: totalPrizePool * (payouts[period] || 0.25) / games.length
+            payout
           });
           winnerData[name].boxes.add(winner.box);
-          winnerData[name].totalWinnings += totalPrizePool * (payouts[period] || 0.25) / games.length;
+          winnerData[name].totalWinnings += payout;
         }
       });
     });
@@ -2446,7 +2548,7 @@ header::before {
             hasWinners = true;
             const entry = entries[winner.box];
             const periodLabel = period === 'half' ? 'Halftime' : period === 'q1' ? '1st Qtr' : period === 'q3' ? '3rd Qtr' : 'Final';
-            const payout = totalPrizePool * (payouts[period] || 0.25) / games.length;
+            const payout = getGamePayout(game, period);
             
             html += `
               <tr>
@@ -2789,11 +2891,14 @@ header::before {
         `;
       }
       
-      const t1Digit = t1 % 10;
-      const t2Digit = t2 % 10;
-      
-      const colIdx = colNumbers.indexOf(t1Digit);
-      const rowIdx = rowNumbers.indexOf(t2Digit);
+      // winner-loser mode: higher score → column
+      let colScore = t1, rowScore = t2;
+      if (currentPool?.scoreMode === 'winner-loser' && t1 !== t2) {
+        colScore = Math.max(t1, t2);
+        rowScore = Math.min(t1, t2);
+      }
+      const colIdx = colNumbers.indexOf(colScore % 10);
+      const rowIdx = rowNumbers.indexOf(rowScore % 10);
       
       if (colIdx === -1 || rowIdx === -1) {
         return `
@@ -2846,12 +2951,19 @@ header::before {
     };
     
     // Calculate and auto-fill winners
+    const winnerLoserMode = currentPool.scoreMode === 'winner-loser';
     const calculateBox = (t1Score, t2Score) => {
       if (t1Score === undefined || t2Score === undefined) return null;
-      const t1Digit = t1Score % 10;
-      const t2Digit = t2Score % 10;
-      const colIdx = colNumbers.indexOf(t1Digit);
-      const rowIdx = rowNumbers.indexOf(t2Digit);
+      // In winner-loser mode: higher score → column digit, lower → row digit
+      let colScore = t1Score, rowScore = t2Score;
+      if (winnerLoserMode && t1Score !== t2Score) {
+        colScore = Math.max(t1Score, t2Score);
+        rowScore = Math.min(t1Score, t2Score);
+      }
+      const colDigit = colScore % 10;
+      const rowDigit = rowScore % 10;
+      const colIdx = colNumbers.indexOf(colDigit);
+      const rowIdx = rowNumbers.indexOf(rowDigit);
       if (colIdx === -1 || rowIdx === -1) return null;
       return `${rowIdx}-${colIdx}`;
     };
@@ -3094,8 +3206,7 @@ header::before {
       const t2q3 = parseInt(item.querySelector('.score-t2-q3')?.value) || undefined;
       const t2final = parseInt(item.querySelector('.score-t2-final')?.value) || undefined;
       
-      const existingGame = (currentPool.games || [])[idx] || {};
-      const gameEntry = {
+      games.push({
         label: item.querySelector('.game-label').value,
         team1: item.querySelector('.game-team1').value,
         team2: item.querySelector('.game-team2').value,
@@ -3112,10 +3223,7 @@ header::before {
           q3: { box: item.querySelector('.winner-q3').value || null },
           final: { box: item.querySelector('.winner-final').value || null }
         }
-      };
-      // Preserve linkedGameId set by admin-boxes so it isn't wiped on save
-      if (existingGame.linkedGameId) gameEntry.linkedGameId = existingGame.linkedGameId;
-      games.push(gameEntry);
+      });
     });
     
     try {
@@ -3391,6 +3499,23 @@ header::before {
     document.getElementById('createPoolModal').classList.remove('visible');
   };
 
+  // Toggle round-fixed payout inputs vs percentage inputs
+  window.updatePayoutModeFields = function() {
+    const mode = document.getElementById('newPayoutMode').value;
+    const roundContainer = document.getElementById('roundPayoutsContainer');
+    const pctContainer = document.getElementById('payoutFieldsContainer');
+    const timingGroup = document.querySelector('#newPayoutTiming')?.closest('.form-group');
+    if (mode === 'round-fixed') {
+      if (roundContainer) roundContainer.style.display = 'block';
+      if (pctContainer)   pctContainer.style.display   = 'none';
+      if (timingGroup)    timingGroup.style.display     = 'none';
+    } else {
+      if (roundContainer) roundContainer.style.display = 'none';
+      if (pctContainer)   pctContainer.style.display   = 'block';
+      if (timingGroup)    timingGroup.style.display     = '';
+    }
+  };
+
   // Update payout fields based on timing selection
   window.updatePayoutFields = function() {
     const timing = document.getElementById('newPayoutTiming').value;
@@ -3489,6 +3614,8 @@ header::before {
     const eventType = document.getElementById('newPoolEvent').value;
     const payoutTiming = document.getElementById('newPayoutTiming').value;
     const numberSharing = document.getElementById('newNumberSharing').value;
+    const scoreMode = document.getElementById('newScoreMode').value;
+    const payoutMode = document.getElementById('newPayoutMode').value;
     
     // Get payout percentages based on timing
     let payoutQ1 = 0, payoutHalf = 0, payoutQ3 = 0, payoutFinal = 0;
@@ -3535,12 +3662,23 @@ header::before {
         eventType,
         payoutTiming,
         numberSharing,
+        scoreMode,
+        payoutMode,
         payouts: {
           q1: payoutQ1 / 100,
           half: payoutHalf / 100,
           q3: payoutQ3 / 100,
           final: payoutFinal / 100
         },
+        ...(payoutMode === 'round-fixed' ? { roundPayouts: {
+          'play-in':       parseFloat(document.getElementById('rpPlayIn').value)  || 25,
+          'round-of-64':   parseFloat(document.getElementById('rpR64').value)     || 50,
+          'round-of-32':   parseFloat(document.getElementById('rpR32').value)     || 62.5,
+          'sweet-16':      parseFloat(document.getElementById('rpS16').value)     || 87.5,
+          'elite-8':       parseFloat(document.getElementById('rpE8').value)      || 137.5,
+          'final-four':    parseFloat(document.getElementById('rpF4').value)      || 250,
+          'championship':  parseFloat(document.getElementById('rpChamp').value)   || 500
+        }} : {}),
         games: [],
         entries: {},
         locked: false,

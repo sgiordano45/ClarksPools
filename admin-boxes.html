@@ -1002,11 +1002,17 @@
             
             game.scores = scores;
             
-            // Calculate winners
+            // Calculate winners — support winner-loser scoreMode
+            const winnerLoserMode = currentPool.scoreMode === 'winner-loser';
             const calculateBox = (t1, t2) => {
                 if (t1 === undefined || t2 === undefined) return null;
-                const colIdx = colNumbers.indexOf(t1 % 10);
-                const rowIdx = rowNumbers.indexOf(t2 % 10);
+                let colScore = t1, rowScore = t2;
+                if (winnerLoserMode && t1 !== t2) {
+                    colScore = Math.max(t1, t2);
+                    rowScore = Math.min(t1, t2);
+                }
+                const colIdx = colNumbers.indexOf(colScore % 10);
+                const rowIdx = rowNumbers.indexOf(rowScore % 10);
                 if (colIdx === -1 || rowIdx === -1) return null;
                 return `${rowIdx}-${colIdx}`;
             };
@@ -1088,7 +1094,29 @@
             const costPerBox = pool.costPerBox || 0;
             const totalPrize = Object.keys(entries).length * costPerBox;
             const payouts = pool.payoutStructure || { q1: 0.25, half: 0.25, q3: 0.25, final: 0.25 };
-            
+            const payoutMode = pool.payoutMode || 'percentage';
+            const roundPayouts = pool.roundPayouts || {};
+
+            const MBB_ROUND_MAP = {
+                'play-in': 'play-in', 'first-four': 'play-in',
+                'round-of-64': 'round-of-64', 'r64': 'round-of-64',
+                'round-of-32': 'round-of-32', 'r32': 'round-of-32', 'second-round': 'round-of-32',
+                'sweet-16': 'sweet-16', 's16': 'sweet-16',
+                'elite-8': 'elite-8', 'e8': 'elite-8',
+                'final-four': 'final-four', 'f4': 'final-four',
+                'championship': 'championship', 'national-championship': 'championship'
+            };
+
+            function getGamePayout(game, period) {
+                if (payoutMode === 'round-fixed') {
+                    if (period !== 'final') return 0;
+                    const rawRound = (game.round || '').toLowerCase().replace(/\s+/g, '-');
+                    const roundKey = MBB_ROUND_MAP[rawRound] || rawRound;
+                    return roundPayouts[roundKey] || 0;
+                }
+                return (totalPrize * (payouts[period] || 0.25)) / games.length;
+            }
+
             // Count boxes per person
             const boxCounts = {};
             Object.values(entries).forEach(entry => {
@@ -1105,13 +1133,14 @@
                 ['q1', 'half', 'q3', 'final'].forEach(period => {
                     const winner = winners[period];
                     if (winner?.box && entries[winner.box]) {
+                        const payout = getGamePayout(game, period);
+                        if (payout === 0 && payoutMode === 'round-fixed' && period !== 'final') return;
                         const name = entries[winner.box].name || 'Unknown';
                         
                         if (!winnerData[name]) {
                             winnerData[name] = { name, wins: [], totalWinnings: 0 };
                         }
                         
-                        const payout = (totalPrize * (payouts[period] || 0.25)) / games.length;
                         winnerData[name].wins.push({ period, game: game.label || `Game ${gameIdx + 1}` });
                         winnerData[name].totalWinnings += payout;
                     }
