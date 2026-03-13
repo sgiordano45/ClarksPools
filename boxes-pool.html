@@ -1624,11 +1624,9 @@ header::before {
   <p style="margin-top: 1rem; color: var(--text-secondary);">Loading pool...</p>
 </div>
 
-<!-- Auth Gate -->
-<div class="auth-gate" id="authGate">
-  <h2>🎲 Boxes Pools</h2>
-  <p>Please sign in to view and participate in boxes pools.</p>
-  <a href="home.html">Sign In</a>
+<!-- Sign-in nudge (guests see this, signed-in users don't) -->
+<div id="signInNudge" style="display:none; background: rgba(0,212,255,0.08); border-bottom: 1px solid rgba(0,212,255,0.2); padding: 0.6rem 1.5rem; text-align: center; font-size: 0.85rem; color: var(--text-secondary);">
+  👀 Viewing as guest — <a href="home.html" style="color: var(--accent-blue); font-weight: 600;">Sign in</a> to claim boxes.
 </div>
 
 <!-- Header -->
@@ -2239,16 +2237,18 @@ header::before {
       currentUser = user;
       await loadUserProfile();
       await loadPoolsList();
-      
-      document.getElementById('loadingOverlay').classList.add('hidden');
-      document.getElementById('mainContent').style.display = 'block';
-      
+      document.getElementById('signInNudge').style.display = 'none';
       setupAdminTabs();
-      
     } else {
-      document.getElementById('loadingOverlay').classList.add('hidden');
-      document.getElementById('authGate').style.display = 'block';
+      // Guests can view read-only — load pools without auth
+      currentUser = null;
+      userProfile = null;
+      isUserAdmin = false;
+      await loadPoolsList();
+      document.getElementById('signInNudge').style.display = 'block';
     }
+    document.getElementById('loadingOverlay').classList.add('hidden');
+    document.getElementById('mainContent').style.display = 'block';
   });
 
   async function loadUserProfile() {
@@ -2824,6 +2824,11 @@ header::before {
   window.handleBoxClick = function(key) {
     const entries = currentPool.entries || {};
     const isTaken = !!entries[key];
+
+    if (!currentUser && !isUserAdmin) {
+      showToast('Sign in to claim a box', 'warning');
+      return;
+    }
 
     if (isUserAdmin) {
       if (isTaken) {
@@ -3958,7 +3963,16 @@ header::before {
           'final-four':    parseFloat(document.getElementById('rpF4').value)      || 250,
           'championship':  parseFloat(document.getElementById('rpChamp').value)   || 500
         }} : {}),
-        games: [],
+        games: [{
+          label: 'Game 1',
+          team1: '',
+          team2: '',
+          numbersDrawn: false,
+          colNumbers: numberSharing === 'shared' ? sharedColNumbers : shuffleArray([0,1,2,3,4,5,6,7,8,9]),
+          rowNumbers: numberSharing === 'shared' ? sharedRowNumbers : shuffleArray([0,1,2,3,4,5,6,7,8,9]),
+          scores: { t1: {}, t2: {} },
+          winners: {}
+        }],
         entries: {},
         locked: false,
         createdBy: currentUser.uid,
