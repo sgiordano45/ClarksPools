@@ -712,6 +712,41 @@ header::before {
 }
 
 /* Admin Panel */
+.box.admin-clickable {
+  cursor: pointer;
+}
+.box.admin-clickable:hover {
+  outline: 2px dashed var(--accent-gold);
+  outline-offset: -2px;
+  opacity: 0.85;
+}
+.box.admin-clickable.taken:hover {
+  outline-color: var(--accent-red);
+}
+
+.assign-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.assign-tab {
+  flex: 1;
+  padding: 0.4rem;
+  background: var(--tertiary-dark);
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+}
+.assign-tab.active {
+  background: rgba(0,212,255,0.15);
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+}
+
 .admin-panel {
   background: var(--secondary-dark);
   border-radius: 16px;
@@ -1942,6 +1977,85 @@ header::before {
   </div>
 </div>
 
+<!-- Admin Assign Box Modal -->
+<div class="modal-overlay" id="adminAssignModal">
+  <div class="modal" style="max-width: 480px;">
+    <h3>🎲 Assign Box <span id="assignBoxCoord" style="color:var(--accent-gold);"></span></h3>
+
+    <div class="assign-tabs">
+      <div class="assign-tab active" onclick="setAssignTab('name')">Name Only</div>
+      <div class="assign-tab" onclick="setAssignTab('search')">Search User</div>
+      <div class="assign-tab" onclick="setAssignTab('email')">By Email</div>
+    </div>
+
+    <!-- Name Only -->
+    <div id="assignTabName">
+      <div class="form-group">
+        <label>Display Name</label>
+        <input type="text" id="assignName" placeholder="Enter name">
+      </div>
+    </div>
+
+    <!-- Search User -->
+    <div id="assignTabSearch" style="display:none;">
+      <div class="form-group">
+        <label>Search Users</label>
+        <input type="text" id="assignSearchInput" placeholder="Type to search..." oninput="searchAssignUsers()">
+        <div class="user-search-results" id="assignSearchResults"></div>
+        <input type="hidden" id="assignUserId">
+        <input type="hidden" id="assignUserName">
+        <input type="hidden" id="assignUserEmail">
+      </div>
+    </div>
+
+    <!-- By Email -->
+    <div id="assignTabEmail" style="display:none;">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="assignEmail" placeholder="user@example.com">
+        </div>
+        <div class="form-group">
+          <label>Display Name</label>
+          <input type="text" id="assignNameEmail" placeholder="Enter name">
+        </div>
+      </div>
+      <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:1rem;">
+        Will auto-link when this user signs up.
+      </p>
+    </div>
+
+    <div class="form-group">
+      <label>Payment Status</label>
+      <select id="assignPaid">
+        <option value="false">Unpaid</option>
+        <option value="true">Paid</option>
+      </select>
+    </div>
+
+    <div class="modal-buttons">
+      <button class="btn btn-secondary" onclick="hideAdminAssignModal()">Cancel</button>
+      <button class="btn btn-gold" onclick="confirmAdminAssign()">✔ Assign Box</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Manage Box Modal (taken box) -->
+<div class="modal-overlay" id="adminManageModal">
+  <div class="modal" style="max-width: 400px;">
+    <h3>📋 Box <span id="manageBoxCoord" style="color:var(--accent-gold);"></span></h3>
+    <div style="margin-bottom:1.25rem;">
+      <div style="font-size:1rem;font-weight:600;margin-bottom:0.25rem;" id="manageBoxOwner"></div>
+      <div style="font-size:0.8rem;color:var(--text-muted);" id="manageBoxMeta"></div>
+    </div>
+    <div class="modal-buttons" style="flex-wrap:wrap;">
+      <button class="btn btn-secondary" onclick="hideAdminManageModal()">Cancel</button>
+      <button class="btn btn-outline" id="manageTogglePaidBtn" onclick="adminTogglePaid()">Mark Paid</button>
+      <button class="btn btn-danger" onclick="adminUnclaim()">🗑 Unclaim</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast Container -->
 <div class="toast-container" id="toastContainer"></div>
 
@@ -2373,7 +2487,13 @@ header::before {
           </div>
         ` : '';
         
-        const onClick = (!isTaken && !isLocked) ? `onclick="handleBoxClick('${key}')"` : '';
+        let onClick = '';
+        if (isUserAdmin) {
+          classes.push('admin-clickable');
+          onClick = `onclick="handleBoxClick('${key}')"`;
+        } else if (!isTaken && !isLocked) {
+          onClick = `onclick="handleBoxClick('${key}')"`;
+        }
         
         html += `<div class="${classes.join(' ')}" ${onClick}>${displayName}${dotsHtml}</div>`;
       }
@@ -2582,10 +2702,46 @@ header::before {
 
   // Box claiming
   window.handleBoxClick = function(key) {
-    if (currentPool.locked) return;
-    
     const entries = currentPool.entries || {};
-    if (entries[key]) return;
+    const isTaken = !!entries[key];
+
+    if (isUserAdmin) {
+      if (isTaken) {
+        // Admin: manage an existing entry
+        const entry = entries[key];
+        document.getElementById('manageBoxCoord').textContent = key;
+        document.getElementById('manageBoxOwner').textContent = '👤 ' + (entry.name || 'Unknown');
+        const metaParts = [];
+        if (entry.email) metaParts.push(entry.email);
+        if (entry.paid) metaParts.push('✅ Paid');
+        else metaParts.push('⏳ Unpaid');
+        if (entry.manual) metaParts.push('manually added');
+        document.getElementById('manageBoxMeta').textContent = metaParts.join(' · ');
+        document.getElementById('manageTogglePaidBtn').textContent = entry.paid ? 'Mark Unpaid' : 'Mark Paid';
+        pendingBoxClaim = key;
+        document.getElementById('adminManageModal').classList.add('visible');
+      } else {
+        // Admin: assign an empty box
+        document.getElementById('assignBoxCoord').textContent = key;
+        document.getElementById('assignName').value = '';
+        document.getElementById('assignEmail').value = '';
+        document.getElementById('assignNameEmail').value = '';
+        document.getElementById('assignUserId').value = '';
+        document.getElementById('assignUserName').value = '';
+        document.getElementById('assignUserEmail').value = '';
+        document.getElementById('assignSearchInput').value = '';
+        document.getElementById('assignSearchResults').innerHTML = '';
+        document.getElementById('assignPaid').value = 'false';
+        setAssignTab('name');
+        pendingBoxClaim = key;
+        document.getElementById('adminAssignModal').classList.add('visible');
+      }
+      return;
+    }
+
+    // Non-admin: existing claim flow
+    if (currentPool.locked) return;
+    if (isTaken) return;
     
     pendingBoxClaim = key;
     document.getElementById('confirmBoxCoord').textContent = key;
@@ -3740,6 +3896,129 @@ header::before {
     } catch (error) {
       console.error('Error deleting pool:', error);
       showToast('Error deleting pool', 'error');
+    }
+  };
+
+  // ── Admin Assign Modal ──────────────────────────────────────────────────────
+  let currentAssignTab = 'name';
+
+  window.setAssignTab = function(tab) {
+    currentAssignTab = tab;
+    ['name', 'search', 'email'].forEach(t => {
+      document.getElementById('assignTab' + t.charAt(0).toUpperCase() + t.slice(1)).style.display = t === tab ? '' : 'none';
+      document.querySelectorAll('#adminAssignModal .assign-tab').forEach((el, i) => {
+        el.classList.toggle('active', ['name','search','email'][i] === tab);
+      });
+    });
+  };
+
+  window.hideAdminAssignModal = function() {
+    document.getElementById('adminAssignModal').classList.remove('visible');
+    pendingBoxClaim = null;
+  };
+
+  window.searchAssignUsers = async function() {
+    const query = document.getElementById('assignSearchInput').value.trim().toLowerCase();
+    const resultsDiv = document.getElementById('assignSearchResults');
+    if (query.length < 2) { resultsDiv.innerHTML = ''; return; }
+    try {
+      const snap = await db.collection('users').get();
+      const matches = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter(u => (u.displayName || '').toLowerCase().includes(query) || (u.email || '').toLowerCase().includes(query))
+        .slice(0, 6);
+      if (matches.length === 0) { resultsDiv.innerHTML = '<div style="padding:0.5rem;color:var(--text-muted);font-size:0.85rem;">No users found</div>'; return; }
+      resultsDiv.innerHTML = matches.map(u => `
+        <div class="user-result" onclick="selectAssignUser('${u.id}','${(u.displayName||'').replace(/'/g,"\'")}','${(u.email||'').replace(/'/g,"\'")}')">
+          <div class="user-result-name">${u.displayName || 'No name'}</div>
+          <div class="user-result-email">${u.email || ''}</div>
+        </div>
+      `).join('');
+    } catch(e) { resultsDiv.innerHTML = '<div style="padding:0.5rem;color:var(--accent-red);font-size:0.85rem;">Error searching</div>'; }
+  };
+
+  window.selectAssignUser = function(uid, name, email) {
+    document.getElementById('assignUserId').value = uid;
+    document.getElementById('assignUserName').value = name;
+    document.getElementById('assignUserEmail').value = email;
+    document.getElementById('assignSearchInput').value = name + (email ? ' (' + email + ')' : '');
+    document.getElementById('assignSearchResults').innerHTML = '';
+  };
+
+  window.confirmAdminAssign = async function() {
+    if (!pendingBoxClaim || !currentPool) return;
+    const key = pendingBoxClaim;
+
+    let name = '', userId = null, email = null, pendingEmail = null;
+
+    if (currentAssignTab === 'name') {
+      name = document.getElementById('assignName').value.trim();
+      if (!name) { showToast('Enter a name', 'warning'); return; }
+    } else if (currentAssignTab === 'search') {
+      userId = document.getElementById('assignUserId').value;
+      name   = document.getElementById('assignUserName').value;
+      email  = document.getElementById('assignUserEmail').value;
+      if (!name) { showToast('Select a user first', 'warning'); return; }
+    } else {
+      pendingEmail = document.getElementById('assignEmail').value.trim().toLowerCase();
+      name         = document.getElementById('assignNameEmail').value.trim();
+      if (!name || !pendingEmail) { showToast('Enter both name and email', 'warning'); return; }
+    }
+
+    const paid = document.getElementById('assignPaid').value === 'true';
+
+    const entryData = { name, manual: true, paid, claimedAt: firebase.firestore.FieldValue.serverTimestamp(), addedBy: currentUser.uid };
+    if (userId)      { entryData.userId = userId; entryData.email = email; }
+    else if (pendingEmail) { entryData.userId = null; entryData.pendingEmail = pendingEmail; }
+    else             { entryData.userId = null; }
+
+    try {
+      await db.collection('boxesPools').doc(currentPool.id).update({ [`entries.${key}`]: entryData });
+      if (!currentPool.entries) currentPool.entries = {};
+      currentPool.entries[key] = { name, paid, manual: true, userId: userId || null };
+      hideAdminAssignModal();
+      renderGrid(); updateStats(); renderEntriesList();
+      showToast(`Box ${key} assigned to ${name}`, 'success');
+    } catch(e) {
+      showToast('Error assigning box: ' + e.message, 'error');
+    }
+  };
+
+  // ── Admin Manage Modal (taken box) ───────────────────────────────────────────
+  window.hideAdminManageModal = function() {
+    document.getElementById('adminManageModal').classList.remove('visible');
+    pendingBoxClaim = null;
+  };
+
+  window.adminTogglePaid = async function() {
+    if (!pendingBoxClaim || !currentPool) return;
+    const key = pendingBoxClaim;
+    const entry = currentPool.entries[key];
+    const newPaid = !entry.paid;
+    try {
+      await db.collection('boxesPools').doc(currentPool.id).update({ [`entries.${key}.paid`]: newPaid });
+      currentPool.entries[key].paid = newPaid;
+      hideAdminManageModal();
+      renderGrid(); renderEntriesList();
+      showToast(`${entry.name} marked ${newPaid ? 'paid' : 'unpaid'}`, 'success');
+    } catch(e) {
+      showToast('Error updating payment: ' + e.message, 'error');
+    }
+  };
+
+  window.adminUnclaim = async function() {
+    if (!pendingBoxClaim || !currentPool) return;
+    const key = pendingBoxClaim;
+    const entry = currentPool.entries[key];
+    if (!confirm(`Remove ${entry?.name || 'this entry'} from box ${key}?`)) return;
+    try {
+      await db.collection('boxesPools').doc(currentPool.id).update({ [`entries.${key}`]: firebase.firestore.FieldValue.delete() });
+      delete currentPool.entries[key];
+      hideAdminManageModal();
+      renderGrid(); updateStats(); renderEntriesList();
+      showToast(`Box ${key} unclaimed`, 'success');
+    } catch(e) {
+      showToast('Error unclaiming box: ' + e.message, 'error');
     }
   };
 
