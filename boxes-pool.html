@@ -3094,7 +3094,8 @@ header::before {
       const t2q3 = parseInt(item.querySelector('.score-t2-q3')?.value) || undefined;
       const t2final = parseInt(item.querySelector('.score-t2-final')?.value) || undefined;
       
-      games.push({
+      const existingGame = (currentPool.games || [])[idx] || {};
+      const gameEntry = {
         label: item.querySelector('.game-label').value,
         team1: item.querySelector('.game-team1').value,
         team2: item.querySelector('.game-team2').value,
@@ -3111,7 +3112,10 @@ header::before {
           q3: { box: item.querySelector('.winner-q3').value || null },
           final: { box: item.querySelector('.winner-final').value || null }
         }
-      });
+      };
+      // Preserve linkedGameId set by admin-boxes so it isn't wiped on save
+      if (existingGame.linkedGameId) gameEntry.linkedGameId = existingGame.linkedGameId;
+      games.push(gameEntry);
     });
     
     try {
