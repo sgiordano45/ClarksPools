@@ -926,12 +926,14 @@ header::before {
   top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0,0,0,0.8);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   z-index: 1000;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
+  padding: 2rem 1rem;
+  overflow-y: auto;
 }
 
 .modal-overlay.visible {
@@ -947,6 +949,7 @@ header::before {
   width: 90%;
   border: 1px solid var(--card-border);
   box-shadow: var(--shadow-lg);
+  margin: auto;
 }
 
 .modal h3 {
