@@ -4040,20 +4040,23 @@ header::before {
   window.searchAssignUsers = async function() {
     const query = document.getElementById('assignSearchInput').value.trim().toLowerCase();
     const resultsDiv = document.getElementById('assignSearchResults');
-    if (query.length < 2) { resultsDiv.innerHTML = ''; return; }
+    if (query.length < 2) { resultsDiv.classList.remove('visible'); return; }
     try {
-      const snap = await db.collection('users').get();
-      const matches = snap.docs
-        .map(d => ({ id: d.id, ...d.data() }))
-        .filter(u => (u.displayName || '').toLowerCase().includes(query) || (u.email || '').toLowerCase().includes(query))
+      await loadUsersForSearch(); // reuse allUsers cache
+      const matches = allUsers
+        .filter(u => u.name.toLowerCase().includes(query) || u.email.toLowerCase().includes(query))
         .slice(0, 6);
-      if (matches.length === 0) { resultsDiv.innerHTML = '<div style="padding:0.5rem;color:var(--text-muted);font-size:0.85rem;">No users found</div>'; return; }
-      resultsDiv.innerHTML = matches.map(u => `
-        <div class="user-result" onclick="selectAssignUser('${u.id}','${(u.displayName||'').replace(/'/g,"\'")}','${(u.email||'').replace(/'/g,"\'")}')">
-          <div class="user-result-name">${u.displayName || 'No name'}</div>
-          <div class="user-result-email">${u.email || ''}</div>
-        </div>
-      `).join('');
+      if (matches.length === 0) {
+        resultsDiv.innerHTML = '<div style="padding:1rem;color:var(--text-secondary);text-align:center;">No users found</div>';
+      } else {
+        resultsDiv.innerHTML = matches.map(u => `
+          <div class="user-search-result" onclick="selectAssignUser('${u.id}','${u.name.replace(/'/g, "\\'")}','${u.email.replace(/'/g, "\\'")}')">
+            <div class="user-name">${u.name}</div>
+            <div class="user-email">${u.email}</div>
+          </div>
+        `).join('');
+      }
+      resultsDiv.classList.add('visible');
     } catch(e) { resultsDiv.innerHTML = '<div style="padding:0.5rem;color:var(--accent-red);font-size:0.85rem;">Error searching</div>'; }
   };
 
@@ -4061,8 +4064,22 @@ header::before {
     document.getElementById('assignUserId').value = uid;
     document.getElementById('assignUserName').value = name;
     document.getElementById('assignUserEmail').value = email;
-    document.getElementById('assignSearchInput').value = name + (email ? ' (' + email + ')' : '');
+    document.getElementById('assignSearchInput').value = '';
+    document.getElementById('assignSearchResults').innerHTML = `
+      <div class="selected-user-badge">
+        <span>✅ <strong>${name}</strong> (${email})</span>
+        <button class="remove-btn" onclick="clearAssignUserSelection()">✕</button>
+      </div>
+    `;
+    document.getElementById('assignSearchResults').classList.remove('visible');
+  };
+
+  window.clearAssignUserSelection = function() {
+    document.getElementById('assignUserId').value = '';
+    document.getElementById('assignUserName').value = '';
+    document.getElementById('assignUserEmail').value = '';
     document.getElementById('assignSearchResults').innerHTML = '';
+    document.getElementById('assignSearchInput').value = '';
   };
 
   window.confirmAdminAssign = async function() {
