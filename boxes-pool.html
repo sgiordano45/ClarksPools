@@ -3364,11 +3364,25 @@ header::before {
     const emoji = getSportEmoji(poolSport);
     
     try {
-      // Build query based on sport
-      let gamesQuery = db.collection('games').orderBy('gameDateTime', 'asc');
-      
-      // For NFL, filter by sport field or assume all games without sport field are NFL
-      const gamesSnapshot = await gamesQuery.get();
+      // Build query based on sport — MBB and other sports use subcollection paths
+      let gamesSnapshot;
+      const sportSubcollectionMap = {
+        'ncaa_basketball': 'MBB',
+        'nba': 'NBA',
+        'nhl': 'NHL',
+        'mlb': 'MLB',
+        'nfl': null   // root collection
+      };
+      const subcollection = sportSubcollectionMap[poolSport] || null;
+
+      if (subcollection) {
+        // Sport uses subcollection path: games/{SPORT}/games
+        gamesSnapshot = await db.collection('games').doc(subcollection)
+          .collection('games').orderBy('gameDateTime', 'asc').get();
+      } else {
+        // NFL uses root games collection
+        gamesSnapshot = await db.collection('games').orderBy('gameDateTime', 'asc').get();
+      }
       
       select.innerHTML = `<option value="">-- Load ${getSportName(poolSport)} games... --</option>`;
       
@@ -3391,9 +3405,11 @@ header::before {
       gamesSnapshot.forEach(doc => {
         const game = doc.data();
         
-        // Filter by sport - if sport is not set, assume NFL for backwards compatibility
-        const gameSport = game.sport || 'nfl';
-        if (gameSport !== poolSport && poolSport !== 'other') return;
+        // If loaded from a sport subcollection, no need to filter by sport field
+        if (!subcollection) {
+          const gameSport = game.sport || 'nfl';
+          if (gameSport !== poolSport && poolSport !== 'other') return;
+        }
         
         const awayTeam = game.awayName || game.awayTeam || '???';
         const homeTeam = game.homeName || game.homeTeam || '???';
