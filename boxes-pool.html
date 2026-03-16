@@ -2999,147 +2999,179 @@ header::before {
   };
 
   // Games Editor
-  function buildGameEditorHTML(game, idx, isMBB, emoji, numberSharing) {
-    var MBB_ROUNDS = [
-      { value: 'play-in',      label: 'Play-In' },
-      { value: 'round-of-64', label: 'Round of 64' },
-      { value: 'round-of-32', label: 'Round of 32' },
-      { value: 'sweet-16',    label: 'Sweet 16' },
-      { value: 'elite-8',     label: 'Elite 8' },
-      { value: 'final-four',  label: 'Final Four' },
-      { value: 'championship',label: 'National Championship' }
-    ];
-
-    var teamSection = '';
-    if (isMBB) {
-      var roundOptions = '<option value="">-- Select Round --</option>';
-      MBB_ROUNDS.forEach(function(r) {
-        var sel = game.round === r.value ? ' selected' : '';
-        roundOptions += '<option value="' + r.value + '"' + sel + '>' + r.label + '</option>';
-      });
-      teamSection = '<div class="form-group">'
-        + '<label>Round</label>'
-        + '<select class="game-round-select" style="width:100%;padding:0.6rem;background:var(--tertiary-dark);border:1px solid var(--card-border);border-radius:6px;color:var(--text-primary);font-size:0.95rem;">'
-        + roundOptions + '</select>'
-        + '<p style="font-size:0.8rem;color:var(--text-secondary);margin-top:0.35rem;">ℹ️ MBB pools use Winner vs. Loser digits — specific team names are not needed.</p>'
-        + '</div>'
-        + '<input type="hidden" class="game-team1" value="' + (game.team1 || '') + '">'
-        + '<input type="hidden" class="game-team2" value="' + (game.team2 || '') + '">';
-    } else {
-      teamSection = '<div class="game-teams-row">'
-        + '<div class="form-group" style="flex:1;">'
-        + '<label>Team 1 (Top - Columns)</label>'
-        + '<input type="text" class="game-team1" value="' + (game.team1 || '') + '" placeholder="e.g., Chiefs"></div>'
-        + '<span class="vs-label">VS</span>'
-        + '<div class="form-group" style="flex:1;">'
-        + '<label>Team 2 (Left - Rows)</label>'
-        + '<input type="text" class="game-team2" value="' + (game.team2 || '') + '" placeholder="e.g., 49ers"></div>'
-        + '</div>';
-    }
-
-    var colNums = (game.colNumbers || [0,1,2,3,4,5,6,7,8,9]).join(',');
-    var rowNums = (game.rowNumbers || [0,1,2,3,4,5,6,7,8,9]).join(',');
-    var labelPlaceholder = isMBB ? 'e.g., Round of 64' : 'e.g., Super Bowl LIX';
-    var col1Label = isMBB ? 'Winner' : 'Team 1';
-    var col2Label = isMBB ? 'Loser' : 'Team 2';
-    var team1Name = isMBB ? 'Winner' : (game.team1 || 'TBD');
-    var team2Name = isMBB ? 'Loser' : (game.team2 || 'TBD');
-    var numbersDrawnChecked = game.numbersDrawn !== false ? ' checked' : '';
-    var sharedNote = numberSharing === 'shared'
-      ? '<p style="font-size:0.8rem;color:var(--accent-blue);margin-bottom:0.5rem;">ℹ️ This pool uses shared numbers - randomizing will update ALL games.</p>'
-      : '';
-
-    var t1q1 = (game.scores && game.scores.t1 && game.scores.t1.q1 !== undefined) ? game.scores.t1.q1 : '';
-    var t1q2 = (game.scores && game.scores.t1 && game.scores.t1.q2 !== undefined) ? game.scores.t1.q2 : '';
-    var t1q3 = (game.scores && game.scores.t1 && game.scores.t1.q3 !== undefined) ? game.scores.t1.q3 : '';
-    var t1final = (game.scores && game.scores.t1 && game.scores.t1.final !== undefined) ? game.scores.t1.final : '';
-    var t2q1 = (game.scores && game.scores.t2 && game.scores.t2.q1 !== undefined) ? game.scores.t2.q1 : '';
-    var t2q2 = (game.scores && game.scores.t2 && game.scores.t2.q2 !== undefined) ? game.scores.t2.q2 : '';
-    var t2q3 = (game.scores && game.scores.t2 && game.scores.t2.q3 !== undefined) ? game.scores.t2.q3 : '';
-    var t2final = (game.scores && game.scores.t2 && game.scores.t2.final !== undefined) ? game.scores.t2.final : '';
-
-    var wq1   = (game.winners && game.winners.q1   && game.winners.q1.box)   ? game.winners.q1.box   : '';
-    var whalf = (game.winners && game.winners.half  && game.winners.half.box) ? game.winners.half.box : '';
-    var wq3   = (game.winners && game.winners.q3   && game.winners.q3.box)   ? game.winners.q3.box   : '';
-    var wfinal= (game.winners && game.winners.final && game.winners.final.box)? game.winners.final.box: '';
-
-    var winnerPreviewHTML = renderWinnerPreview(game, idx);
-
-    return '<div class="game-item" data-index="' + idx + '">'
-      + '<div class="game-item-header">'
-      + '<h4>' + emoji + ' Game ' + (idx+1) + ': ' + (game.label || 'Unnamed') + '</h4>'
-      + '<button class="btn btn-danger" style="padding:0.5rem 0.75rem;font-size:0.8rem;" onclick="removeGame(' + idx + ')">🗑️</button>'
-      + '</div>'
-      + '<div class="form-group"><label>Game Label</label>'
-      + '<input type="text" class="game-label" value="' + (game.label || '') + '" placeholder="' + labelPlaceholder + '"></div>'
-      + teamSection
-      + '<div class="form-group" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">'
-      + '<label style="display:flex;align-items:center;gap:0.5rem;margin:0;">'
-      + '<input type="checkbox" class="game-numbers-drawn"' + numbersDrawnChecked + '> Numbers Drawn (visible to players)</label>'
-      + '<button type="button" class="btn btn-gold" style="padding:0.5rem 1rem;font-size:0.8rem;" onclick="randomizeGameNumbers(' + idx + ')">🎲 Randomize Numbers</button>'
-      + '</div>'
-      + sharedNote
-      + '<div class="form-group"><label>Column Numbers (' + col1Label + ' digits, comma-separated)</label>'
-      + '<input type="text" class="game-col-numbers" value="' + colNums + '" placeholder="0,1,2,3,4,5,6,7,8,9"></div>'
-      + '<div class="form-group"><label>Row Numbers (' + col2Label + ' digits, comma-separated)</label>'
-      + '<input type="text" class="game-row-numbers" value="' + rowNums + '" placeholder="0,1,2,3,4,5,6,7,8,9"></div>'
-      + '<div class="score-entry-section">'
-      + '<h4>📊 Enter Scores (Auto-calculates Winners)</h4>'
-      + '<div class="score-entry-grid">'
-      + '<div class="score-team">'
-      + '<label>' + col1Label + ': <span class="team-name">' + team1Name + '</span></label>'
-      + '<div class="score-inputs">'
-      + '<div class="score-input-group"><label>Q1</label><input type="number" class="score-t1-q1" value="' + t1q1 + '" min="0" oninput="calculateWinners(' + idx + ')"></div>'
-      + '<div class="score-input-group"><label>Q2</label><input type="number" class="score-t1-q2" value="' + t1q2 + '" min="0" oninput="calculateWinners(' + idx + ')"></div>'
-      + '<div class="score-input-group"><label>Q3</label><input type="number" class="score-t1-q3" value="' + t1q3 + '" min="0" oninput="calculateWinners(' + idx + ')"></div>'
-      + '<div class="score-input-group"><label>Final</label><input type="number" class="score-t1-final" value="' + t1final + '" min="0" oninput="calculateWinners(' + idx + ')"></div>'
-      + '</div></div>'
-      + '<div style="display:flex;align-items:center;font-size:1.5rem;color:var(--text-muted);">-</div>'
-      + '<div class="score-team">'
-      + '<label>' + col2Label + ': <span class="team-name">' + team2Name + '</span></label>'
-      + '<div class="score-inputs">'
-      + '<div class="score-input-group"><label>Q1</label><input type="number" class="score-t2-q1" value="' + t2q1 + '" min="0" oninput="calculateWinners(' + idx + ')"></div>'
-      + '<div class="score-input-group"><label>Q2</label><input type="number" class="score-t2-q2" value="' + t2q2 + '" min="0" oninput="calculateWinners(' + idx + ')"></div>'
-      + '<div class="score-input-group"><label>Q3</label><input type="number" class="score-t2-q3" value="' + t2q3 + '" min="0" oninput="calculateWinners(' + idx + ')"></div>'
-      + '<div class="score-input-group"><label>Final</label><input type="number" class="score-t2-final" value="' + t2final + '" min="0" oninput="calculateWinners(' + idx + ')"></div>'
-      + '</div></div>'
-      + '</div>'
-      + '<div class="calculated-winners" id="calculatedWinners' + idx + '">'
-      + '<h5>Calculated Winning Boxes:</h5>'
-      + '<div class="winner-preview" id="winnerPreview' + idx + '">' + winnerPreviewHTML + '</div>'
-      + '</div>'
-      + '</div>'
-      + '<div class="winners-row" style="margin-top:1rem;">'
-      + '<div class="winner-input"><label>Q1 Winner (row-col)</label><input type="text" class="winner-q1" value="' + wq1 + '" placeholder="e.g., 3-7" id="winner-q1-' + idx + '"></div>'
-      + '<div class="winner-input"><label>Halftime Winner</label><input type="text" class="winner-half" value="' + whalf + '" placeholder="e.g., 5-2" id="winner-half-' + idx + '"></div>'
-      + '<div class="winner-input"><label>Q3 Winner</label><input type="text" class="winner-q3" value="' + wq3 + '" placeholder="e.g., 1-9" id="winner-q3-' + idx + '"></div>'
-      + '<div class="winner-input"><label>Final Winner</label><input type="text" class="winner-final" value="' + wfinal + '" placeholder="e.g., 8-4" id="winner-final-' + idx + '"></div>'
-      + '</div>'
-      + '</div>';
-  }
-
   function renderGamesEditor() {
-    var games = currentPool.games || [];
-    var editor = document.getElementById('gamesEditor');
-    var sport = currentPool.sport || 'nfl';
-    var isMBB = sport === 'ncaa_basketball';
-    var emoji = getSportEmoji(sport);
+    const games = currentPool.games || [];
+    const editor = document.getElementById('gamesEditor');
+    const sport = currentPool.sport || 'nfl';
+    const isMBB = sport === 'ncaa_basketball';
+    const emoji = getSportEmoji(sport);
 
-    var bulkBtn = document.getElementById('bulkAddMBBBtn');
-    var loadBtn = document.getElementById('loadGameBtn');
+    // Show/hide MBB bulk button and update Load button emoji
+    const bulkBtn = document.getElementById('bulkAddMBBBtn');
+    const loadBtn = document.getElementById('loadGameBtn');
     if (bulkBtn) bulkBtn.style.display = isMBB ? '' : 'none';
     if (loadBtn) loadBtn.textContent = isMBB ? '🏀 Load' : '🏈 Load';
-
+    
     if (games.length === 0) {
-      editor.innerHTML = '<p style="color:var(--text-secondary);text-align:center;padding:1rem;">No games yet. Add one below.</p>';
+      editor.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 1rem;">No games yet. Add one below.</p>';
       return;
     }
 
-    var html = '';
-    for (var i = 0; i < games.length; i++) {
-      html += buildGameEditorHTML(games[i], i, isMBB, emoji, currentPool.numberSharing);
-    }
-    editor.innerHTML = html;
+    const MBB_ROUNDS = [
+      { value: 'play-in',        label: 'Play-In' },
+      { value: 'round-of-64',    label: 'Round of 64' },
+      { value: 'round-of-32',    label: 'Round of 32' },
+      { value: 'sweet-16',       label: 'Sweet 16' },
+      { value: 'elite-8',        label: 'Elite 8' },
+      { value: 'final-four',     label: 'Final Four' },
+      { value: 'championship',   label: 'National Championship' },
+    ];
+    
+    editor.innerHTML = games.map((game, idx) => {
+      const teamSection = isMBB ? `
+        <div class="form-group">
+          <label>Round</label>
+          <select class="game-round-select" style="width:100%; padding:0.6rem; background:var(--tertiary-dark); border:1px solid var(--card-border); border-radius:6px; color:var(--text-primary); font-size:0.95rem;">
+            <option value="">-- Select Round --</option>
+            ${MBB_ROUNDS.map(r => `<option value="${r.value}" ${game.round === r.value ? 'selected' : ''}>${r.label}</option>`).join('')}
+          </select>
+          <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.35rem;">
+            ℹ️ MBB pools use Winner vs. Loser digits — specific team names are not needed.
+          </p>
+        </div>
+        <input type="hidden" class="game-team1" value="${game.team1 || ''}">
+        <input type="hidden" class="game-team2" value="${game.team2 || ''}">
+      ` : `
+        <div class="game-teams-row">
+          <div class="form-group" style="flex: 1;">
+            <label>Team 1 (Top - Columns)</label>
+            <input type="text" class="game-team1" value="${game.team1 || ''}" placeholder="e.g., Chiefs">
+          </div>
+          <span class="vs-label">VS</span>
+          <div class="form-group" style="flex: 1;">
+            <label>Team 2 (Left - Rows)</label>
+            <input type="text" class="game-team2" value="${game.team2 || ''}" placeholder="e.g., 49ers">
+          </div>
+        </div>
+      `;
+
+      return `
+      <div class="game-item" data-index="${idx}">
+        <div class="game-item-header">
+          <h4>${emoji} Game ${idx + 1}: ${game.label || 'Unnamed'}</h4>
+          <button class="btn btn-danger" style="padding: 0.5rem 0.75rem; font-size: 0.8rem;" onclick="removeGame(${idx})">🗑️</button>
+        </div>
+        
+        <div class="form-group">
+          <label>Game Label</label>
+          <input type="text" class="game-label" value="${game.label || ''}" placeholder="${isMBB ? 'e.g., Round of 64' : 'e.g., Super Bowl LIX'}">
+        </div>
+        
+        ${teamSection}
+        
+        <div class="form-group" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+          <label style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+            <input type="checkbox" class="game-numbers-drawn" ${game.numbersDrawn !== false ? 'checked' : ''}>
+            Numbers Drawn (visible to players)
+          </label>
+          <button type="button" class="btn btn-gold" style="padding: 0.5rem 1rem; font-size: 0.8rem;" onclick="randomizeGameNumbers(${idx})">
+            🎲 Randomize Numbers
+          </button>
+        </div>
+        
+        ${currentPool.numberSharing === 'shared' ? `
+        <p style="font-size: 0.8rem; color: var(--accent-blue); margin-bottom: 0.5rem;">
+          ℹ️ This pool uses shared numbers - randomizing will update ALL games.
+        </p>
+        ` : ''}
+        
+        <div class="form-group">
+          <label>Column Numbers (${isMBB ? 'Winner' : 'Team 1'} digits, comma-separated)</label>
+          <input type="text" class="game-col-numbers" value="${(game.colNumbers || [0,1,2,3,4,5,6,7,8,9]).join(',')}" placeholder="0,1,2,3,4,5,6,7,8,9">
+        </div>
+        
+        <div class="form-group">
+          <label>Row Numbers (${isMBB ? 'Loser' : 'Team 2'} digits, comma-separated)</label>
+          <input type="text" class="game-row-numbers" value="${(game.rowNumbers || [0,1,2,3,4,5,6,7,8,9]).join(',')}" placeholder="0,1,2,3,4,5,6,7,8,9">
+        </div>
+        
+        <!-- Score Entry Section -->
+        <div class="score-entry-section">
+          <h4>📊 Enter Scores (Auto-calculates Winners)</h4>
+          <div class="score-entry-grid">
+            <div class="score-team">
+              <label>${isMBB ? 'Winner' : 'Team 1'}: <span class="team-name">${isMBB ? 'Winner' : (game.team1 || 'TBD')}</span></label>
+              <div class="score-inputs">
+                <div class="score-input-group">
+                  <label>Q1</label>
+                  <input type="number" class="score-t1-q1" value="${game.scores?.t1?.q1 ?? ''}" min="0" oninput="calculateWinners(${idx})">
+                </div>
+                <div class="score-input-group">
+                  <label>Q2</label>
+                  <input type="number" class="score-t1-q2" value="${game.scores?.t1?.q2 ?? ''}" min="0" oninput="calculateWinners(${idx})">
+                </div>
+                <div class="score-input-group">
+                  <label>Q3</label>
+                  <input type="number" class="score-t1-q3" value="${game.scores?.t1?.q3 ?? ''}" min="0" oninput="calculateWinners(${idx})">
+                </div>
+                <div class="score-input-group">
+                  <label>Final</label>
+                  <input type="number" class="score-t1-final" value="${game.scores?.t1?.final ?? ''}" min="0" oninput="calculateWinners(${idx})">
+                </div>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; font-size: 1.5rem; color: var(--text-muted);">-</div>
+            <div class="score-team">
+              <label>${isMBB ? 'Loser' : 'Team 2'}: <span class="team-name">${isMBB ? 'Loser' : (game.team2 || 'TBD')}</span></label>
+              <div class="score-inputs">
+                <div class="score-input-group">
+                  <label>Q1</label>
+                  <input type="number" class="score-t2-q1" value="${game.scores?.t2?.q1 ?? ''}" min="0" oninput="calculateWinners(${idx})">
+                </div>
+                <div class="score-input-group">
+                  <label>Q2</label>
+                  <input type="number" class="score-t2-q2" value="${game.scores?.t2?.q2 ?? ''}" min="0" oninput="calculateWinners(${idx})">
+                </div>
+                <div class="score-input-group">
+                  <label>Q3</label>
+                  <input type="number" class="score-t2-q3" value="${game.scores?.t2?.q3 ?? ''}" min="0" oninput="calculateWinners(${idx})">
+                </div>
+                <div class="score-input-group">
+                  <label>Final</label>
+                  <input type="number" class="score-t2-final" value="${game.scores?.t2?.final ?? ''}" min="0" oninput="calculateWinners(${idx})">
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="calculated-winners" id="calculatedWinners${idx}">
+            <h5>Calculated Winning Boxes:</h5>
+            <div class="winner-preview" id="winnerPreview${idx}">
+              ${renderWinnerPreview(game, idx)}
+            </div>
+          </div>
+        </div>
+        
+        <div class="winners-row" style="margin-top: 1rem;">
+          <div class="winner-input">
+            <label>Q1 Winner (row-col)</label>
+            <input type="text" class="winner-q1" value="${game.winners?.q1?.box || ''}" placeholder="e.g., 3-7" id="winner-q1-${idx}">
+          </div>
+          <div class="winner-input">
+            <label>Halftime Winner</label>
+            <input type="text" class="winner-half" value="${game.winners?.half?.box || ''}" placeholder="e.g., 5-2" id="winner-half-${idx}">
+          </div>
+          <div class="winner-input">
+            <label>Q3 Winner</label>
+            <input type="text" class="winner-q3" value="${game.winners?.q3?.box || ''}" placeholder="e.g., 1-9" id="winner-q3-${idx}">
+          </div>
+          <div class="winner-input">
+            <label>Final Winner</label>
+            <input type="text" class="winner-final" value="${game.winners?.final?.box || ''}" placeholder="e.g., 8-4" id="winner-final-${idx}">
+          </div>
+        </div>
+      </div>
+    `).join('');
   }
 
   function renderWinnerPreview(game, idx) {
@@ -3283,81 +3315,67 @@ header::before {
 
   window.addGame = function() {
     if (!currentPool.games) currentPool.games = [];
+    
+    // Check if pool uses shared numbers
     const useShared = currentPool.numberSharing === 'shared';
-    const colNumbers = useShared && currentPool.sharedColNumbers ? [...currentPool.sharedColNumbers] : [0,1,2,3,4,5,6,7,8,9];
-    const rowNumbers = useShared && currentPool.sharedRowNumbers ? [...currentPool.sharedRowNumbers] : [0,1,2,3,4,5,6,7,8,9];
+    const colNumbers = useShared && currentPool.sharedColNumbers 
+      ? [...currentPool.sharedColNumbers] 
+      : [0,1,2,3,4,5,6,7,8,9];
+    const rowNumbers = useShared && currentPool.sharedRowNumbers 
+      ? [...currentPool.sharedRowNumbers] 
+      : [0,1,2,3,4,5,6,7,8,9];
     const numbersDrawn = useShared && currentPool.sharedNumbersDrawn;
+    
     currentPool.games.push({
-      label: 'New Game', round: '', team1: '', team2: '',
-      colNumbers: colNumbers, rowNumbers: rowNumbers,
-      numbersDrawn: numbersDrawn, winners: {}
+      label: 'New Game',
+      team1: '',
+      team2: '',
+      colNumbers: colNumbers,
+      rowNumbers: rowNumbers,
+      numbersDrawn: numbersDrawn,
+      winners: {}
     });
     renderGamesEditor();
   };
 
-  window.bulkAddMBBGames = async function() {
+  // Bulk-add all MBB bracket rounds at once
+  window.bulkAddMBBGames = function() {
     if (!currentPool.games) currentPool.games = [];
+    if (currentPool.games.length > 0 && !confirm('This will add 7 MBB bracket rounds to the existing games. Continue?')) return;
+
     const useShared = currentPool.numberSharing === 'shared';
     const baseCol = useShared && currentPool.sharedColNumbers ? [...currentPool.sharedColNumbers] : [0,1,2,3,4,5,6,7,8,9];
     const baseRow = useShared && currentPool.sharedRowNumbers ? [...currentPool.sharedRowNumbers] : [0,1,2,3,4,5,6,7,8,9];
     const numbersDrawn = useShared && currentPool.sharedNumbersDrawn;
 
-    let availableGames = [];
-    try {
-      const snap = await db.collection('games').doc('MBB').collection('games').orderBy('gameDateTime', 'asc').get();
-      snap.forEach(function(doc) { availableGames.push(Object.assign({ id: doc.id }, doc.data())); });
-    } catch(e) {
-      console.error('Error fetching MBB games:', e);
-      showToast('Error loading games from Firestore', 'error');
-      return;
-    }
+    const MBB_BRACKET_ROUNDS = [
+      { round: 'play-in',      label: 'Play-In' },
+      { round: 'round-of-64', label: 'Round of 64' },
+      { round: 'round-of-32', label: 'Round of 32' },
+      { round: 'sweet-16',    label: 'Sweet 16' },
+      { round: 'elite-8',     label: 'Elite 8' },
+      { round: 'final-four',  label: 'Final Four' },
+      { round: 'championship',label: 'National Championship' },
+    ];
 
-    if (availableGames.length === 0) {
-      showToast('No MBB games found in Firestore.', 'warning');
-      return;
-    }
-
-    const ROUND_ORDER = ['play-in','first-four','round-of-64','round-of-32','sweet-16','elite-8','final-four','championship'];
-    const seenRounds = new Set();
-    const roundsToAdd = [];
-
-    availableGames.sort(function(a, b) {
-      const ai = ROUND_ORDER.indexOf(a.round || '');
-      const bi = ROUND_ORDER.indexOf(b.round || '');
-      return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
-    });
-
-    availableGames.forEach(function(g) {
-      const rk = g.round || '';
-      if (!seenRounds.has(rk)) {
-        seenRounds.add(rk);
-        roundsToAdd.push({ round: rk, label: formatRoundLabel(rk) });
-      }
-    });
-
-    const existingRounds = new Set((currentPool.games || []).map(function(g) { return g.round; }).filter(Boolean));
-    const newRounds = roundsToAdd.filter(function(r) { return !existingRounds.has(r.round); });
-
-    if (newRounds.length === 0) {
-      showToast('All available rounds are already in this pool.', 'warning');
-      return;
-    }
-
-    if (currentPool.games.length > 0 && !confirm('Add ' + newRounds.length + ' round(s) from available games?\n\n' + newRounds.map(function(r){return r.label;}).join(', '))) return;
-
-    newRounds.forEach(function(r) {
+    MBB_BRACKET_ROUNDS.forEach(r => {
       currentPool.games.push({
-        label: r.label, round: r.round, team1: '', team2: '',
-        colNumbers: [...baseCol], rowNumbers: [...baseRow],
-        numbersDrawn: numbersDrawn, scores: { t1: {}, t2: {} }, winners: {}
+        label: r.label,
+        round: r.round,
+        team1: '',
+        team2: '',
+        colNumbers: useShared ? [...baseCol] : [...[0,1,2,3,4,5,6,7,8,9]],
+        rowNumbers: useShared ? [...baseRow] : [...[0,1,2,3,4,5,6,7,8,9]],
+        numbersDrawn: numbersDrawn,
+        scores: { t1: {}, t2: {} },
+        winners: {}
       });
     });
 
     renderGamesEditor();
-    showToast(newRounds.length + ' round(s) added! Save when ready.', 'success');
+    showToast('7 MBB bracket rounds added! Save when ready.', 'success');
   };
 
-  // Bulk-add all MBB bracket rounds at once
   // Randomize numbers for a game (or all games if shared mode)
   window.randomizeGameNumbers = async function(gameIdx) {
     if (!currentPool || !isUserAdmin) return;
@@ -3413,23 +3431,6 @@ header::before {
   };
 
   // Populate the game selector dropdown with games from the games collection
-  const ROUND_LABELS = {
-    'wildcard': 'Wild Card', 'divisional': 'Divisional',
-    'conference': 'Conference Championship', 'superbowl': 'Super Bowl',
-    'play-in': 'Play-In', 'first-four': 'First Four',
-    'round-of-64': 'Round of 64', 'round-of-32': 'Round of 32',
-    'sweet-16': 'Sweet 16', 'elite-8': 'Elite 8',
-    'final-four': 'Final Four', 'championship': 'National Championship',
-    'first_round': 'First Round', 'second_round': 'Second Round',
-    'sweet_16': 'Sweet 16', 'elite_8': 'Elite 8',
-    'final_four': 'Final Four', 'finals': 'Finals', 'regular': 'Regular Season'
-  };
-  function formatRoundLabel(raw) {
-    if (!raw) return '';
-    if (ROUND_LABELS[raw]) return ROUND_LABELS[raw];
-    return raw.replace(/[-_]/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
-  }
-
   async function populateGameSelect() {
     const select = document.getElementById('loadGameSelect');
     if (!select) return;
@@ -3459,6 +3460,39 @@ header::before {
       }
       
       select.innerHTML = `<option value="">-- Load ${getSportName(poolSport)} games... --</option>`;
+      
+      const roundLabels = {
+        // NFL
+        'wildcard': 'Wild Card',
+        'divisional': 'Divisional',
+        'conference': 'Conference Championship',
+        'superbowl': 'Super Bowl',
+        // MBB / NCAA
+        'play-in': 'Play-In',
+        'first-four': 'First Four',
+        'round-of-64': 'Round of 64',
+        'round-of-32': 'Round of 32',
+        'sweet-16': 'Sweet 16',
+        'elite-8': 'Elite 8',
+        'final-four': 'Final Four',
+        'championship': 'National Championship',
+        // Generic
+        'first_round': 'First Round',
+        'second_round': 'Second Round',
+        'sweet_16': 'Sweet 16',
+        'elite_8': 'Elite 8',
+        'final_four': 'Final Four',
+        'finals': 'Finals',
+        'regular': 'Regular Season'
+      };
+      
+      // Helper to prettify any unlisted round key
+      function formatRoundLabel(raw) {
+        if (!raw) return '';
+        if (roundLabels[raw]) return roundLabels[raw];
+        // Convert kebab/snake to Title Case
+        return raw.replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      }
       
       let gameCount = 0;
       gamesSnapshot.forEach(doc => {
@@ -3558,15 +3592,16 @@ header::before {
       const colNumbersStr = item.querySelector('.game-col-numbers').value;
       const rowNumbersStr = item.querySelector('.game-row-numbers').value;
       
-      // Get scores
-      const t1q1 = parseInt(item.querySelector('.score-t1-q1')?.value) || undefined;
-      const t1q2 = parseInt(item.querySelector('.score-t1-q2')?.value) || undefined;
-      const t1q3 = parseInt(item.querySelector('.score-t1-q3')?.value) || undefined;
-      const t1final = parseInt(item.querySelector('.score-t1-final')?.value) || undefined;
-      const t2q1 = parseInt(item.querySelector('.score-t2-q1')?.value) || undefined;
-      const t2q2 = parseInt(item.querySelector('.score-t2-q2')?.value) || undefined;
-      const t2q3 = parseInt(item.querySelector('.score-t2-q3')?.value) || undefined;
-      const t2final = parseInt(item.querySelector('.score-t2-final')?.value) || undefined;
+      // Get scores — use null (not undefined) for empty fields; Firestore rejects undefined
+      const parseScore = v => { const n = parseInt(v); return isNaN(n) ? null : n; };
+      const t1q1   = parseScore(item.querySelector('.score-t1-q1')?.value);
+      const t1q2   = parseScore(item.querySelector('.score-t1-q2')?.value);
+      const t1q3   = parseScore(item.querySelector('.score-t1-q3')?.value);
+      const t1final= parseScore(item.querySelector('.score-t1-final')?.value);
+      const t2q1   = parseScore(item.querySelector('.score-t2-q1')?.value);
+      const t2q2   = parseScore(item.querySelector('.score-t2-q2')?.value);
+      const t2q3   = parseScore(item.querySelector('.score-t2-q3')?.value);
+      const t2final= parseScore(item.querySelector('.score-t2-final')?.value);
       
       const isMBB = (currentPool.sport || 'nfl') === 'ncaa_basketball';
       const roundSelect = item.querySelector('.game-round-select');
