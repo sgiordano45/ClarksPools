@@ -1830,11 +1830,12 @@ header::before {
       
       <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem; align-items: center;">
         <button class="btn btn-secondary" onclick="addGame()">➕ Add Game</button>
+        <button class="btn btn-gold" id="bulkAddMBBBtn" style="display:none;" onclick="bulkAddMBBGames()">🏀 Add Full MBB Bracket</button>
         <div style="display: flex; gap: 0.5rem; align-items: center;">
           <select id="loadGameSelect" style="padding: 0.5rem; background: var(--secondary-dark); border: 1px solid var(--card-border); border-radius: 4px; color: var(--text-primary); font-size: 0.9rem;">
             <option value="">-- Load teams from... --</option>
           </select>
-          <button class="btn btn-secondary" onclick="loadTeamsFromGame()">🏈 Load</button>
+          <button class="btn btn-secondary" id="loadGameBtn" onclick="loadTeamsFromGame()">🏈 Load</button>
         </div>
         <button class="btn btn-primary" onclick="saveGames()">💾 Save All Games</button>
       </div>
@@ -3001,25 +3002,46 @@ header::before {
   function renderGamesEditor() {
     const games = currentPool.games || [];
     const editor = document.getElementById('gamesEditor');
-    const emoji = getSportEmoji(currentPool.sport || 'nfl');
+    const sport = currentPool.sport || 'nfl';
+    const isMBB = sport === 'ncaa_basketball';
+    const emoji = getSportEmoji(sport);
+
+    // Show/hide MBB bulk button and update Load button emoji
+    const bulkBtn = document.getElementById('bulkAddMBBBtn');
+    const loadBtn = document.getElementById('loadGameBtn');
+    if (bulkBtn) bulkBtn.style.display = isMBB ? '' : 'none';
+    if (loadBtn) loadBtn.textContent = isMBB ? '🏀 Load' : '🏈 Load';
     
     if (games.length === 0) {
       editor.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 1rem;">No games yet. Add one below.</p>';
       return;
     }
+
+    const MBB_ROUNDS = [
+      { value: 'play-in',        label: 'Play-In' },
+      { value: 'round-of-64',    label: 'Round of 64' },
+      { value: 'round-of-32',    label: 'Round of 32' },
+      { value: 'sweet-16',       label: 'Sweet 16' },
+      { value: 'elite-8',        label: 'Elite 8' },
+      { value: 'final-four',     label: 'Final Four' },
+      { value: 'championship',   label: 'National Championship' },
+    ];
     
-    editor.innerHTML = games.map((game, idx) => `
-      <div class="game-item" data-index="${idx}">
-        <div class="game-item-header">
-          <h4>${emoji} Game ${idx + 1}: ${game.label || 'Unnamed'}</h4>
-          <button class="btn btn-danger" style="padding: 0.5rem 0.75rem; font-size: 0.8rem;" onclick="removeGame(${idx})">🗑️</button>
-        </div>
-        
+    editor.innerHTML = games.map((game, idx) => {
+      const teamSection = isMBB ? `
         <div class="form-group">
-          <label>Game Label</label>
-          <input type="text" class="game-label" value="${game.label || ''}" placeholder="e.g., Super Bowl LIX">
+          <label>Round</label>
+          <select class="game-round-select" style="width:100%; padding:0.6rem; background:var(--tertiary-dark); border:1px solid var(--card-border); border-radius:6px; color:var(--text-primary); font-size:0.95rem;">
+            <option value="">-- Select Round --</option>
+            ${MBB_ROUNDS.map(r => `<option value="${r.value}" ${game.round === r.value ? 'selected' : ''}>${r.label}</option>`).join('')}
+          </select>
+          <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.35rem;">
+            ℹ️ MBB pools use Winner vs. Loser digits — specific team names are not needed.
+          </p>
         </div>
-        
+        <input type="hidden" class="game-team1" value="${game.team1 || ''}">
+        <input type="hidden" class="game-team2" value="${game.team2 || ''}">
+      ` : `
         <div class="game-teams-row">
           <div class="form-group" style="flex: 1;">
             <label>Team 1 (Top - Columns)</label>
@@ -3031,6 +3053,21 @@ header::before {
             <input type="text" class="game-team2" value="${game.team2 || ''}" placeholder="e.g., 49ers">
           </div>
         </div>
+      `;
+
+      return `
+      <div class="game-item" data-index="${idx}">
+        <div class="game-item-header">
+          <h4>${emoji} Game ${idx + 1}: ${game.label || 'Unnamed'}</h4>
+          <button class="btn btn-danger" style="padding: 0.5rem 0.75rem; font-size: 0.8rem;" onclick="removeGame(${idx})">🗑️</button>
+        </div>
+        
+        <div class="form-group">
+          <label>Game Label</label>
+          <input type="text" class="game-label" value="${game.label || ''}" placeholder="${isMBB ? 'e.g., Round of 64' : 'e.g., Super Bowl LIX'}">
+        </div>
+        
+        ${teamSection}
         
         <div class="form-group" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
           <label style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
@@ -3049,12 +3086,12 @@ header::before {
         ` : ''}
         
         <div class="form-group">
-          <label>Column Numbers (Team 1 digits, comma-separated)</label>
+          <label>Column Numbers (${isMBB ? 'Winner' : 'Team 1'} digits, comma-separated)</label>
           <input type="text" class="game-col-numbers" value="${(game.colNumbers || [0,1,2,3,4,5,6,7,8,9]).join(',')}" placeholder="0,1,2,3,4,5,6,7,8,9">
         </div>
         
         <div class="form-group">
-          <label>Row Numbers (Team 2 digits, comma-separated)</label>
+          <label>Row Numbers (${isMBB ? 'Loser' : 'Team 2'} digits, comma-separated)</label>
           <input type="text" class="game-row-numbers" value="${(game.rowNumbers || [0,1,2,3,4,5,6,7,8,9]).join(',')}" placeholder="0,1,2,3,4,5,6,7,8,9">
         </div>
         
@@ -3063,7 +3100,7 @@ header::before {
           <h4>📊 Enter Scores (Auto-calculates Winners)</h4>
           <div class="score-entry-grid">
             <div class="score-team">
-              <label>Team 1: <span class="team-name">${game.team1 || 'TBD'}</span></label>
+              <label>${isMBB ? 'Winner' : 'Team 1'}: <span class="team-name">${isMBB ? 'Winner' : (game.team1 || 'TBD')}</span></label>
               <div class="score-inputs">
                 <div class="score-input-group">
                   <label>Q1</label>
@@ -3085,7 +3122,7 @@ header::before {
             </div>
             <div style="display: flex; align-items: center; font-size: 1.5rem; color: var(--text-muted);">-</div>
             <div class="score-team">
-              <label>Team 2: <span class="team-name">${game.team2 || 'TBD'}</span></label>
+              <label>${isMBB ? 'Loser' : 'Team 2'}: <span class="team-name">${isMBB ? 'Loser' : (game.team2 || 'TBD')}</span></label>
               <div class="score-inputs">
                 <div class="score-input-group">
                   <label>Q1</label>
@@ -3301,6 +3338,44 @@ header::before {
     renderGamesEditor();
   };
 
+  // Bulk-add all MBB bracket rounds at once
+  window.bulkAddMBBGames = function() {
+    if (!currentPool.games) currentPool.games = [];
+    if (currentPool.games.length > 0 && !confirm('This will add 7 MBB bracket rounds to the existing games. Continue?')) return;
+
+    const useShared = currentPool.numberSharing === 'shared';
+    const baseCol = useShared && currentPool.sharedColNumbers ? [...currentPool.sharedColNumbers] : [0,1,2,3,4,5,6,7,8,9];
+    const baseRow = useShared && currentPool.sharedRowNumbers ? [...currentPool.sharedRowNumbers] : [0,1,2,3,4,5,6,7,8,9];
+    const numbersDrawn = useShared && currentPool.sharedNumbersDrawn;
+
+    const MBB_BRACKET_ROUNDS = [
+      { round: 'play-in',      label: 'Play-In' },
+      { round: 'round-of-64', label: 'Round of 64' },
+      { round: 'round-of-32', label: 'Round of 32' },
+      { round: 'sweet-16',    label: 'Sweet 16' },
+      { round: 'elite-8',     label: 'Elite 8' },
+      { round: 'final-four',  label: 'Final Four' },
+      { round: 'championship',label: 'National Championship' },
+    ];
+
+    MBB_BRACKET_ROUNDS.forEach(r => {
+      currentPool.games.push({
+        label: r.label,
+        round: r.round,
+        team1: '',
+        team2: '',
+        colNumbers: useShared ? [...baseCol] : [...[0,1,2,3,4,5,6,7,8,9]],
+        rowNumbers: useShared ? [...baseRow] : [...[0,1,2,3,4,5,6,7,8,9]],
+        numbersDrawn: numbersDrawn,
+        scores: { t1: {}, t2: {} },
+        winners: {}
+      });
+    });
+
+    renderGamesEditor();
+    showToast('7 MBB bracket rounds added! Save when ready.', 'success');
+  };
+
   // Randomize numbers for a game (or all games if shared mode)
   window.randomizeGameNumbers = async function(gameIdx) {
     if (!currentPool || !isUserAdmin) return;
@@ -3387,19 +3462,37 @@ header::before {
       select.innerHTML = `<option value="">-- Load ${getSportName(poolSport)} games... --</option>`;
       
       const roundLabels = {
+        // NFL
         'wildcard': 'Wild Card',
         'divisional': 'Divisional',
-        'conference': 'Conference',
+        'conference': 'Conference Championship',
         'superbowl': 'Super Bowl',
+        // MBB / NCAA
+        'play-in': 'Play-In',
+        'first-four': 'First Four',
+        'round-of-64': 'Round of 64',
+        'round-of-32': 'Round of 32',
+        'sweet-16': 'Sweet 16',
+        'elite-8': 'Elite 8',
+        'final-four': 'Final Four',
+        'championship': 'National Championship',
+        // Generic
         'first_round': 'First Round',
         'second_round': 'Second Round',
         'sweet_16': 'Sweet 16',
         'elite_8': 'Elite 8',
         'final_four': 'Final Four',
-        'championship': 'Championship',
         'finals': 'Finals',
         'regular': 'Regular Season'
       };
+      
+      // Helper to prettify any unlisted round key
+      function formatRoundLabel(raw) {
+        if (!raw) return '';
+        if (roundLabels[raw]) return roundLabels[raw];
+        // Convert kebab/snake to Title Case
+        return raw.replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      }
       
       let gameCount = 0;
       gamesSnapshot.forEach(doc => {
@@ -3413,7 +3506,7 @@ header::before {
         
         const awayTeam = game.awayName || game.awayTeam || '???';
         const homeTeam = game.homeName || game.homeTeam || '???';
-        const round = roundLabels[game.round] || game.round || '';
+        const round = formatRoundLabel(game.round);
         
         const option = document.createElement('option');
         option.value = doc.id;
@@ -3421,6 +3514,7 @@ header::before {
         option.dataset.away = awayTeam;
         option.dataset.home = homeTeam;
         option.dataset.round = round;
+        option.dataset.roundKey = game.round || '';
         option.dataset.gameId = doc.id;
         select.appendChild(option);
         gameCount++;
@@ -3459,6 +3553,7 @@ header::before {
     if (!currentPool.games || currentPool.games.length === 0) {
       currentPool.games = [{
         label: round,
+        round: selectedOption.dataset.roundKey || '',
         team1: awayTeam,
         team2: homeTeam,
         colNumbers: [0,1,2,3,4,5,6,7,8,9],
@@ -3470,6 +3565,7 @@ header::before {
       // Update first game with selected teams
       currentPool.games[0].team1 = awayTeam;
       currentPool.games[0].team2 = homeTeam;
+      currentPool.games[0].round = selectedOption.dataset.roundKey || currentPool.games[0].round || '';
       if (!currentPool.games[0].label || currentPool.games[0].label === 'New Game') {
         currentPool.games[0].label = round;
       }
@@ -3506,8 +3602,13 @@ header::before {
       const t2q3 = parseInt(item.querySelector('.score-t2-q3')?.value) || undefined;
       const t2final = parseInt(item.querySelector('.score-t2-final')?.value) || undefined;
       
+      const isMBB = (currentPool.sport || 'nfl') === 'ncaa_basketball';
+      const roundSelect = item.querySelector('.game-round-select');
+      const roundVal = roundSelect ? roundSelect.value : (currentPool.games[idx]?.round || '');
+
       games.push({
         label: item.querySelector('.game-label').value,
+        round: roundVal,
         team1: item.querySelector('.game-team1').value,
         team2: item.querySelector('.game-team2').value,
         numbersDrawn: item.querySelector('.game-numbers-drawn').checked,
