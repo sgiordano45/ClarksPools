@@ -3104,19 +3104,19 @@ header::before {
               <div class="score-inputs">
                 <div class="score-input-group">
                   <label>Q1</label>
-                  <input type="number" class="score-t1-q1" value="${game.scores?.t1?.q1 ?? ''}" min="0" oninput="calculateWinners(${idx})">
+                  <input type="number" class="score-t1-q1" value="${game.scores?.t1?.q1 || ''}" min="0" oninput="calculateWinners(${idx})">
                 </div>
                 <div class="score-input-group">
                   <label>Q2</label>
-                  <input type="number" class="score-t1-q2" value="${game.scores?.t1?.q2 ?? ''}" min="0" oninput="calculateWinners(${idx})">
+                  <input type="number" class="score-t1-q2" value="${game.scores?.t1?.q2 || ''}" min="0" oninput="calculateWinners(${idx})">
                 </div>
                 <div class="score-input-group">
                   <label>Q3</label>
-                  <input type="number" class="score-t1-q3" value="${game.scores?.t1?.q3 ?? ''}" min="0" oninput="calculateWinners(${idx})">
+                  <input type="number" class="score-t1-q3" value="${game.scores?.t1?.q3 || ''}" min="0" oninput="calculateWinners(${idx})">
                 </div>
                 <div class="score-input-group">
                   <label>Final</label>
-                  <input type="number" class="score-t1-final" value="${game.scores?.t1?.final ?? ''}" min="0" oninput="calculateWinners(${idx})">
+                  <input type="number" class="score-t1-final" value="${game.scores?.t1?.final || ''}" min="0" oninput="calculateWinners(${idx})">
                 </div>
               </div>
             </div>
@@ -3126,19 +3126,19 @@ header::before {
               <div class="score-inputs">
                 <div class="score-input-group">
                   <label>Q1</label>
-                  <input type="number" class="score-t2-q1" value="${game.scores?.t2?.q1 ?? ''}" min="0" oninput="calculateWinners(${idx})">
+                  <input type="number" class="score-t2-q1" value="${game.scores?.t2?.q1 || ''}" min="0" oninput="calculateWinners(${idx})">
                 </div>
                 <div class="score-input-group">
                   <label>Q2</label>
-                  <input type="number" class="score-t2-q2" value="${game.scores?.t2?.q2 ?? ''}" min="0" oninput="calculateWinners(${idx})">
+                  <input type="number" class="score-t2-q2" value="${game.scores?.t2?.q2 || ''}" min="0" oninput="calculateWinners(${idx})">
                 </div>
                 <div class="score-input-group">
                   <label>Q3</label>
-                  <input type="number" class="score-t2-q3" value="${game.scores?.t2?.q3 ?? ''}" min="0" oninput="calculateWinners(${idx})">
+                  <input type="number" class="score-t2-q3" value="${game.scores?.t2?.q3 || ''}" min="0" oninput="calculateWinners(${idx})">
                 </div>
                 <div class="score-input-group">
                   <label>Final</label>
-                  <input type="number" class="score-t2-final" value="${game.scores?.t2?.final ?? ''}" min="0" oninput="calculateWinners(${idx})">
+                  <input type="number" class="score-t2-final" value="${game.scores?.t2?.final || ''}" min="0" oninput="calculateWinners(${idx})">
                 </div>
               </div>
             </div>
