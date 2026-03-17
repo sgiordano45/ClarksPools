@@ -1759,6 +1759,7 @@ header::before {
         <div class="leaderboard-tabs">
           <button class="leaderboard-tab active" onclick="showLeaderboardView('results')">📋 Results</button>
           <button class="leaderboard-tab" onclick="showLeaderboardView('standings')">🏅 Standings</button>
+          <button class="leaderboard-tab" onclick="renderLeaderboard()" style="margin-left:auto;">🔄 Refresh</button>
         </div>
       </div>
       <div id="leaderboardContent">
@@ -2366,10 +2367,12 @@ header::before {
     const winnerLegend = document.getElementById('winnerLegend');
     const leaderboardContainer = document.getElementById('leaderboardContainer');
     
-    if (currentPool.locked) {
-      statusBadge.textContent = 'Locked';
-      statusBadge.className = 'badge badge-locked';
-      preLockMessage.classList.add('hidden');
+    const isMBBPool = (currentPool.sport || 'nfl') === 'ncaa_basketball';
+
+    if (currentPool.locked || isMBBPool) {
+      statusBadge.textContent = currentPool.locked ? 'Locked' : 'Open';
+      statusBadge.className = currentPool.locked ? 'badge badge-locked' : 'badge badge-open';
+      if (currentPool.locked) preLockMessage.classList.add('hidden');
       winnerLegend.style.display = 'flex';
       leaderboardContainer.style.display = 'block';
       renderLeaderboard();
@@ -2687,138 +2690,339 @@ header::before {
   }
 
   function renderLeaderboard() {
-    if (!currentPool || !currentPool.locked) return;
-    if (currentLeaderboardView === 'results') renderResults();
-    else renderStandings();
+    if (!currentPool) return;
+    const isMBB = (currentPool.sport || 'nfl') === 'ncaa_basketball';
+    if (isMBB) {
+      // MBB: load live scores from games/MBB/games and compute results
+      if (currentLeaderboardView === 'results') renderMBBResults();
+      else renderMBBStandings();
+    } else {
+      if (!currentPool.locked) return;
+      if (currentLeaderboardView === 'results') renderResults();
+      else renderStandings();
+    }
   }
 
+  // ── MBB Results: reads settled games from games/MBB/games per round ──────────
+  async function renderMBBResults() {
+    const container = document.getElementById('resultsView');
+    const { entries, games, getGamePayout } = buildPayoutHelpers();
+    const emoji = getSportEmoji('ncaa_basketball');
+
+    if (!games.length) {
+      container.innerHTML = '<div class="results-pending">No rounds configured for this pool.</div>';
+      return;
+    }
+
+    container.innerHTML = '<div class="results-pending">Loading scores...</div>';
+
+    // Fetch all settled MBB games from Firestore
+    let allSettled = [];
+    try {
+      const snap = await db.collection('games').doc('MBB').collection('games')
+        .where('status', 'in', ['settled', 'final'])
+        .orderBy('gameDateTime', 'asc').get();
+      snap.forEach(function(doc) { allSettled.push(Object.assign({ id: doc.id }, doc.data())); });
+    } catch(e) {
+      // status filter may need index — fall back to full fetch and filter client-side
+      try {
+        const snap2 = await db.collection('games').doc('MBB').collection('games')
+          .orderBy('gameDateTime', 'asc').get();
+        snap2.forEach(function(doc) {
+          const d = doc.data();
+          if (d.status === 'settled' || d.status === 'final') {
+            allSettled.push(Object.assign({ id: doc.id }, d));
+          }
+        });
+      } catch(e2) {
+        container.innerHTML = '<div class="results-pending">Error loading scores: ' + e2.message + '</div>';
+        return;
+      }
+    }
+
+    // Helper: compute winning box key from winner/loser scores using pool shared numbers
+    function computeBox(winScore, loseScore, colNumbers, rowNumbers) {
+      var colDigit = winScore % 10;
+      var rowDigit = loseScore % 10;
+      var colIdx = colNumbers.indexOf(colDigit);
+      var rowIdx = rowNumbers.indexOf(rowDigit);
+      if (colIdx === -1 || rowIdx === -1) return null;
+      return rowIdx + '-' + colIdx;
+    }
+
+    // Get shared numbers (same grid for all rounds)
+    var colNumbers = currentPool.sharedColNumbers || (games[0] && games[0].colNumbers) || [0,1,2,3,4,5,6,7,8,9];
+    var rowNumbers = currentPool.sharedRowNumbers || (games[0] && games[0].rowNumbers) || [0,1,2,3,4,5,6,7,8,9];
+    var numbersDrawn = currentPool.sharedNumbersDrawn || false;
+
+    // Build HTML: one card per round slot
+    var html = '';
+    games.forEach(function(roundSlot) {
+      var roundKey = roundSlot.round || '';
+      var roundLabel = formatRoundLabel(roundKey) || roundSlot.label || roundKey;
+      var payout = getGamePayout(roundSlot, 'final');
+      var payoutStr = payout > 0 ? ('$' + (payout % 1 === 0 ? payout.toFixed(0) : payout.toFixed(2)) + ' / game') : '';
+
+      // Find all settled games for this round
+      var roundGames = allSettled.filter(function(g) {
+        return (g.round || '') === roundKey;
+      });
+
+      // Also include upcoming games for this round (for display)
+      var pendingCount = 0;
+
+      var gameRows = '';
+      if (!numbersDrawn) {
+        gameRows = '<div class="results-pending" style="padding:0.75rem;">Numbers not yet drawn for this pool.</div>';
+      } else if (roundGames.length === 0) {
+        gameRows = '<div class="results-pending" style="padding:0.75rem;">No results yet for this round.</div>';
+      } else {
+        roundGames.forEach(function(g) {
+          var awayScore = g.awayScore != null ? g.awayScore : null;
+          var homeScore = g.homeScore != null ? g.homeScore : null;
+          var awayName = g.awayName || g.awayTeam || '???';
+          var homeName = g.homeName || g.homeTeam || '???';
+          var awaySeed = g.awaySeed ? ('#' + g.awaySeed + ' ') : '';
+          var homeSeed = g.homeSeed ? ('#' + g.homeSeed + ' ') : '';
+
+          if (awayScore === null || homeScore === null) {
+            gameRows += '<div class="results-score-row" style="opacity:0.5;">'
+              + '<div class="results-team"><div class="results-team-name">' + awaySeed + awayName + '</div></div>'
+              + '<div class="results-vs">vs</div>'
+              + '<div class="results-team"><div class="results-team-name">' + homeSeed + homeName + '</div></div>'
+              + '</div>';
+            return;
+          }
+
+          var winScore  = Math.max(awayScore, homeScore);
+          var loseScore = Math.min(awayScore, homeScore);
+          var awayWins  = awayScore > homeScore;
+          var boxKey    = computeBox(winScore, loseScore, colNumbers, rowNumbers);
+          var entry     = boxKey ? entries[boxKey] : null;
+          var winner    = entry ? entry.name : (boxKey ? '(Unclaimed)' : '?');
+          var winnerTeam = awayWins ? awayName : homeName;
+          var loserTeam  = awayWins ? homeName : awayName;
+
+          gameRows += '<div class="results-score-row">'
+            + '<div class="results-team">'
+            + '<div class="results-team-name">' + awaySeed + awayName + '</div>'
+            + '<div class="results-team-score' + (awayWins ? ' winner-score' : '') + '">' + awayScore + '</div>'
+            + '</div>'
+            + '<div class="results-vs">vs</div>'
+            + '<div class="results-team">'
+            + '<div class="results-team-name">' + homeSeed + homeName + '</div>'
+            + '<div class="results-team-score' + (!awayWins ? ' winner-score' : '') + '">' + homeScore + '</div>'
+            + '</div>'
+            + '</div>';
+
+          if (boxKey) {
+            gameRows += '<div class="results-winner-row">'
+              + '<div class="results-winner-info">'
+              + '<span style="font-size:0.75rem;color:var(--text-muted);">' + winnerTeam + ' ' + winScore + ' – ' + loserTeam + ' ' + loseScore + '</span>'
+              + '<span class="results-winner-box">' + boxKey + '</span>'
+              + '<span style="font-size:0.75rem;color:var(--text-muted);">digits ' + (winScore%10) + '-' + (loseScore%10) + '</span>'
+              + '<span class="results-winner-name">🏆 ' + winner + '</span>'
+              + '</div>'
+              + (payoutStr ? '<span class="results-winner-payout">' + payoutStr + '</span>' : '')
+              + '</div>';
+          }
+        });
+      }
+
+      html += '<div class="results-game-card">'
+        + '<div class="results-game-header">'
+        + '<span class="results-game-label">' + emoji + ' ' + roundLabel + '</span>'
+        + (payoutStr ? '<span class="results-game-round">' + payoutStr + '</span>' : '')
+        + '</div>'
+        + '<div style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:0.5rem;">'
+        + roundGames.length + ' result' + (roundGames.length !== 1 ? 's' : '') + ' settled'
+        + '</div>'
+        + gameRows
+        + '</div>';
+    });
+
+    container.innerHTML = html || '<div class="results-pending">No results yet.</div>';
+  }
+
+  // ── MBB Standings: aggregate winnings per box holder across all settled games ─
+  async function renderMBBStandings() {
+    const { entries, games, getGamePayout } = buildPayoutHelpers();
+    const tbody = document.getElementById('standingsBody');
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:1rem;color:var(--text-secondary);">Loading...</td></tr>';
+
+    var colNumbers = currentPool.sharedColNumbers || (games[0] && games[0].colNumbers) || [0,1,2,3,4,5,6,7,8,9];
+    var rowNumbers = currentPool.sharedRowNumbers || (games[0] && games[0].rowNumbers) || [0,1,2,3,4,5,6,7,8,9];
+
+    var allSettled = [];
+    try {
+      const snap = await db.collection('games').doc('MBB').collection('games')
+        .orderBy('gameDateTime', 'asc').get();
+      snap.forEach(function(doc) {
+        const d = doc.data();
+        if (d.status === 'settled' || d.status === 'final') allSettled.push(Object.assign({ id: doc.id }, d));
+      });
+    } catch(e) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:1rem;color:var(--accent-red);">Error: ' + e.message + '</td></tr>';
+      return;
+    }
+
+    var totals = {};
+    var grandTotal = 0;
+
+    // Map round keys to pool round slots to get payout
+    var roundSlotMap = {};
+    games.forEach(function(slot) { roundSlotMap[slot.round || ''] = slot; });
+
+    allSettled.forEach(function(g) {
+      if (g.awayScore == null || g.homeScore == null) return;
+      var winScore  = Math.max(g.awayScore, g.homeScore);
+      var loseScore = Math.min(g.awayScore, g.homeScore);
+      var colDigit  = winScore % 10;
+      var rowDigit  = loseScore % 10;
+      var colIdx    = colNumbers.indexOf(colDigit);
+      var rowIdx    = rowNumbers.indexOf(rowDigit);
+      if (colIdx === -1 || rowIdx === -1) return;
+      var boxKey = rowIdx + '-' + colIdx;
+      var entry  = entries[boxKey];
+      if (!entry) return;
+      var name   = entry.name || 'Unknown';
+      var slot   = roundSlotMap[g.round || ''];
+      var payout = slot ? getGamePayout(slot, 'final') : 0;
+      if (!totals[name]) totals[name] = { name: name, wins: 0, total: 0 };
+      totals[name].wins  += 1;
+      totals[name].total += payout;
+      grandTotal += payout;
+    });
+
+    var ranked = Object.values(totals).sort(function(a,b){ return b.total - a.total || b.wins - a.wins; });
+
+    if (ranked.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" class="standings-empty">No winners yet — check back after games start!</td></tr>';
+      return;
+    }
+
+    var medals = ['🥇','🥈','🥉'];
+    tbody.innerHTML = ranked.map(function(p, i) {
+      var rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+      var medal = medals[i] || '';
+      return '<tr>'
+        + '<td class="leaderboard-rank ' + rankClass + '">' + (medal || (i+1)) + '</td>'
+        + '<td class="leaderboard-name">' + p.name + '</td>'
+        + '<td style="text-align:center;">' + p.wins + '</td>'
+        + '<td class="leaderboard-winnings">$' + (p.total % 1 === 0 ? p.total.toFixed(0) : p.total.toFixed(2)) + '</td>'
+        + '</tr>';
+    }).join('') + '<tr class="standings-total-row">'
+      + '<td colspan="2" style="padding:0.6rem 1rem;">Total Paid Out</td>'
+      + '<td style="text-align:center;">' + ranked.reduce(function(s,p){return s+p.wins;},0) + '</td>'
+      + '<td class="leaderboard-winnings">$' + (grandTotal % 1 === 0 ? grandTotal.toFixed(0) : grandTotal.toFixed(2)) + '</td>'
+      + '</tr>';
+  }
+
+  // ── Non-MBB Results (NFL etc.) ────────────────────────────────────────────────
   function renderResults() {
     const { entries, games, payoutMode, getGamePayout } = buildPayoutHelpers();
     const emoji = getSportEmoji(currentPool.sport || 'nfl');
 
-    // Determine which periods to show
     const timing = currentPool.payoutTiming || (payoutMode === 'round-fixed' ? 'final-only' : '4-period');
-    const periods = timing === '4-period'   ? ['q1','half','q3','final']
-                  : timing === '2-period'   ? ['half','final']
-                  : ['final'];
+    const periods = timing === '4-period' ? ['q1','half','q3','final']
+                  : timing === '2-period' ? ['half','final'] : ['final'];
     const periodLabel = { q1: '1st Qtr', half: 'Halftime', q3: '3rd Qtr', final: 'Final' };
 
     const container = document.getElementById('resultsView');
-
     if (games.length === 0) {
       container.innerHTML = '<div class="results-pending">No games configured for this pool.</div>';
       return;
     }
 
-    container.innerHTML = games.map((game, gameIdx) => {
-      const winners  = game.winners || {};
-      const scores   = game.scores  || { t1: {}, t2: {} };
-      const label    = game.label   || `Game ${gameIdx + 1}`;
-      const round    = game.round   || '';
-      const team1    = game.team1   || 'Team 1';
-      const team2    = game.team2   || 'Team 2';
+    var html = '';
+    games.forEach(function(game, gameIdx) {
+      var winners = game.winners || {};
+      var scores  = game.scores  || { t1: {}, t2: {} };
+      var label   = game.label   || ('Game ' + (gameIdx+1));
+      var round   = game.round   || '';
+      var team1   = game.team1   || 'Team 1';
+      var team2   = game.team2   || 'Team 2';
+      var t1f = scores.t1 && scores.t1.final != null ? scores.t1.final : '–';
+      var t2f = scores.t2 && scores.t2.final != null ? scores.t2.final : '–';
+      var t1Wins = t1f !== '–' && t2f !== '–' && t1f > t2f;
+      var t2Wins = t1f !== '–' && t2f !== '–' && t2f > t1f;
 
-      const hasFinal  = scores.t1?.final != null && scores.t2?.final != null;
-      const t1Final   = scores.t1?.final ?? '–';
-      const t2Final   = scores.t2?.final ?? '–';
-      const t1Wins    = hasFinal && scores.t1.final > scores.t2.final;
-      const t2Wins    = hasFinal && scores.t2.final > scores.t1.final;
+      var scoreRow = '<div class="results-score-row">'
+        + '<div class="results-team"><div class="results-team-name">' + team1 + '</div>'
+        + '<div class="results-team-score' + (t1Wins?' winner-score':'') + '">' + t1f + '</div></div>'
+        + '<div class="results-vs">vs</div>'
+        + '<div class="results-team"><div class="results-team-name">' + team2 + '</div>'
+        + '<div class="results-team-score' + (t2Wins?' winner-score':'') + '">' + t2f + '</div></div>'
+        + '</div>';
 
-      // Score row
-      const scoreRow = `
-        <div class="results-score-row">
-          <div class="results-team">
-            <div class="results-team-name">${team1}</div>
-            <div class="results-team-score ${t1Wins ? 'winner-score' : ''}">${t1Final}</div>
-          </div>
-          <div class="results-vs">vs</div>
-          <div class="results-team">
-            <div class="results-team-name">${team2}</div>
-            <div class="results-team-score ${t2Wins ? 'winner-score' : ''}">${t2Final}</div>
-          </div>
-        </div>`;
-
-      // Winner rows per period
-      const winnerRows = periods.map(period => {
-        const winner = winners[period];
-        const payout = getGamePayout(game, period);
-        if (!winner?.box) {
-          return `<div class="results-pending">${periodLabel[period]}: awaiting score</div>`;
+      var winnerRows = '';
+      periods.forEach(function(period) {
+        var winner = winners[period];
+        var payout = getGamePayout(game, period);
+        if (!winner || !winner.box) {
+          winnerRows += '<div class="results-pending">' + periodLabel[period] + ': awaiting score</div>';
+          return;
         }
-        const entry = entries[winner.box];
-        const name  = entry?.name || '(Unclaimed)';
-        const score = winner.score || '';
-        return `
-          <div class="results-winner-row">
-            <div class="results-winner-info">
-              <span style="font-size:0.75rem;color:var(--text-muted);min-width:52px;">${periodLabel[period]}</span>
-              <span class="results-winner-box">${winner.box}</span>
-              ${score ? `<span style="font-size:0.8rem;color:var(--text-muted);">${score}</span>` : ''}
-              <span class="results-winner-name">🏆 ${name}</span>
-            </div>
-            <span class="results-winner-payout">$${payout % 1 === 0 ? payout.toFixed(0) : payout.toFixed(2)}</span>
-          </div>`;
-      }).join('');
+        var entry = entries[winner.box];
+        var name  = entry ? (entry.name || '(Unclaimed)') : '(Unclaimed)';
+        var score = winner.score || '';
+        winnerRows += '<div class="results-winner-row">'
+          + '<div class="results-winner-info">'
+          + '<span style="font-size:0.75rem;color:var(--text-muted);min-width:52px;">' + periodLabel[period] + '</span>'
+          + '<span class="results-winner-box">' + winner.box + '</span>'
+          + (score ? '<span style="font-size:0.8rem;color:var(--text-muted);">' + score + '</span>' : '')
+          + '<span class="results-winner-name">🏆 ' + name + '</span>'
+          + '</div>'
+          + '<span class="results-winner-payout">$' + (payout%1===0?payout.toFixed(0):payout.toFixed(2)) + '</span>'
+          + '</div>';
+      });
 
-      return `
-        <div class="results-game-card">
-          <div class="results-game-header">
-            <span class="results-game-label">${emoji} ${label}</span>
-            ${round ? `<span class="results-game-round">${round.replace(/-/g,' ')}</span>` : ''}
-          </div>
-          ${scoreRow}
-          ${winnerRows}
-        </div>`;
-    }).join('');
+      html += '<div class="results-game-card">'
+        + '<div class="results-game-header">'
+        + '<span class="results-game-label">' + emoji + ' ' + label + '</span>'
+        + (round ? '<span class="results-game-round">' + round.replace(/-/g,' ') + '</span>' : '')
+        + '</div>'
+        + scoreRow + winnerRows + '</div>';
+    });
+    container.innerHTML = html;
   }
 
   function renderStandings() {
     const { entries, games, getGamePayout } = buildPayoutHelpers();
-
     const totals = {};
-    let grandTotal = 0;
-
-    games.forEach(game => {
-      const winners = game.winners || {};
-      ['q1','half','q3','final'].forEach(period => {
-        const winner = winners[period];
-        if (!winner?.box) return;
-        const entry = entries[winner.box];
+    var grandTotal = 0;
+    games.forEach(function(game) {
+      var winners = game.winners || {};
+      ['q1','half','q3','final'].forEach(function(period) {
+        var winner = winners[period];
+        if (!winner || !winner.box) return;
+        var entry = entries[winner.box];
         if (!entry) return;
-        const name   = entry.name || 'Unknown';
-        const payout = getGamePayout(game, period);
-        if (!totals[name]) totals[name] = { name, wins: 0, total: 0 };
+        var name   = entry.name || 'Unknown';
+        var payout = getGamePayout(game, period);
+        if (!totals[name]) totals[name] = { name: name, wins: 0, total: 0 };
         totals[name].wins  += 1;
         totals[name].total += payout;
         grandTotal += payout;
       });
     });
-
-    const ranked = Object.values(totals).sort((a, b) => b.total - a.total || b.wins - a.wins);
+    const ranked = Object.values(totals).sort(function(a,b){ return b.total-a.total||b.wins-a.wins; });
     const tbody  = document.getElementById('standingsBody');
-
     if (ranked.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="4" class="standings-empty">No winners yet — check back after games start!</td></tr>`;
+      tbody.innerHTML = '<tr><td colspan="4" class="standings-empty">No winners yet — check back after games start!</td></tr>';
       return;
     }
-
-    const medals = ['🥇','🥈','🥉'];
-    tbody.innerHTML = ranked.map((p, i) => {
-      const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
-      const medal = medals[i] || '';
-      return `
-        <tr>
-          <td class="leaderboard-rank ${rankClass}">${medal || (i + 1)}</td>
-          <td class="leaderboard-name">${p.name}</td>
-          <td style="text-align:center;">${p.wins}</td>
-          <td class="leaderboard-winnings">$${p.total % 1 === 0 ? p.total.toFixed(0) : p.total.toFixed(2)}</td>
-        </tr>`;
-    }).join('') + `
-      <tr class="standings-total-row">
-        <td colspan="2" style="padding:0.6rem 1rem;">Total Paid Out</td>
-        <td style="text-align:center;">${ranked.reduce((s,p) => s + p.wins, 0)}</td>
-        <td class="leaderboard-winnings">$${grandTotal % 1 === 0 ? grandTotal.toFixed(0) : grandTotal.toFixed(2)}</td>
-      </tr>`;
+    var medals = ['🥇','🥈','🥉'];
+    tbody.innerHTML = ranked.map(function(p,i) {
+      var rc = i===0?'gold':i===1?'silver':i===2?'bronze':'';
+      return '<tr><td class="leaderboard-rank '+rc+'">'+(medals[i]||(i+1))+'</td>'
+        +'<td class="leaderboard-name">'+p.name+'</td>'
+        +'<td style="text-align:center;">'+p.wins+'</td>'
+        +'<td class="leaderboard-winnings">$'+(p.total%1===0?p.total.toFixed(0):p.total.toFixed(2))+'</td></tr>';
+    }).join('')
+    +'<tr class="standings-total-row"><td colspan="2" style="padding:0.6rem 1rem;">Total Paid Out</td>'
+    +'<td style="text-align:center;">'+ranked.reduce(function(s,p){return s+p.wins;},0)+'</td>'
+    +'<td class="leaderboard-winnings">$'+(grandTotal%1===0?grandTotal.toFixed(0):grandTotal.toFixed(2))+'</td></tr>';
   }
 
   // Box claiming
