@@ -1819,13 +1819,6 @@ header::before {
         <button class="btn btn-warning" id="toggleLockBtn" onclick="togglePoolLock()">🔒 Lock Pool</button>
         <button class="btn btn-danger" onclick="confirmDeletePool()">🗑️ Delete Pool</button>
       </div>
-      <div id="syncNumbersSection" style="display:none;margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--card-border);">
-        <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.75rem;">
-          ⚠️ If shared numbers don't match game slot numbers, use this to sync them from the first game slot.
-        </p>
-        <button class="btn btn-gold" onclick="syncSharedNumbers()">🔄 Sync Shared Numbers from Game Slots</button>
-        <span id="syncNumbersStatus" style="font-size:0.8rem;color:var(--accent-green);margin-left:1rem;"></span>
-      </div>
     </div>
 
     <!-- Games Tab -->
@@ -2444,13 +2437,20 @@ header::before {
     
     if (payoutModeDisplay === 'round-fixed') {
       const rp = currentPool.roundPayouts || {};
+      // first-four and play-in are the same — use whichever key has a value, label as "First Four"
+      const firstFourPayout = rp['first-four'] || rp['play-in'] || 0;
       const roundNames = [
-        ['play-in','Play-In'], ['round-of-64','R64'], ['round-of-32','R32'],
-        ['sweet-16','S16'], ['elite-8','E8'], ['final-four','F4'], ['championship','Champ']
+        ['first-four', 'First Four', firstFourPayout],
+        ['round-of-64','R64', rp['round-of-64'] || 0],
+        ['round-of-32','R32', rp['round-of-32'] || 0],
+        ['sweet-16',   'S16', rp['sweet-16']    || 0],
+        ['elite-8',    'E8',  rp['elite-8']      || 0],
+        ['final-four', 'F4',  rp['final-four']   || 0],
+        ['championship','Champ', rp['championship'] || 0]
       ];
       payoutHTML = roundNames
-        .filter(([k]) => rp[k] > 0)
-        .map(([k, label]) => `<span class="payout-period"><span class="period-name">${label}:</span> <span class="period-pct">$${rp[k]}</span></span>`)
+        .filter(function(r) { return r[2] > 0; })
+        .map(function(r) { return '<span class="payout-period"><span class="period-name">' + r[1] + ':</span> <span class="period-pct">$' + r[2] + '</span></span>'; })
         .join('');
       payoutHTML += `<span style="color: var(--accent-blue); font-size: 0.8rem; margin-left: 0.5rem;">🏆 Winner/Loser boxes · Final only</span>`;
     } else if (timing === '4-period' || (!timing && payouts.q1 > 0)) {
@@ -2723,23 +2723,28 @@ header::before {
 
     container.innerHTML = '<div class="results-pending">Loading scores...</div>';
 
-    // Fetch ALL MBB games from Firestore (settled and upcoming)
+    // Fetch all settled MBB games from Firestore
     let allSettled = [];
-    let allPending = [];
     try {
       const snap = await db.collection('games').doc('MBB').collection('games')
+        .where('status', 'in', ['settled', 'final'])
         .orderBy('gameDateTime', 'asc').get();
-      snap.forEach(function(doc) {
-        const d = Object.assign({ id: doc.id }, doc.data());
-        if (d.status === 'settled' || d.status === 'final') {
-          allSettled.push(d);
-        } else {
-          allPending.push(d);
-        }
-      });
+      snap.forEach(function(doc) { allSettled.push(Object.assign({ id: doc.id }, doc.data())); });
     } catch(e) {
-      container.innerHTML = '<div class="results-pending">Error loading scores: ' + e.message + '</div>';
-      return;
+      // status filter may need index — fall back to full fetch and filter client-side
+      try {
+        const snap2 = await db.collection('games').doc('MBB').collection('games')
+          .orderBy('gameDateTime', 'asc').get();
+        snap2.forEach(function(doc) {
+          const d = doc.data();
+          if (d.status === 'settled' || d.status === 'final') {
+            allSettled.push(Object.assign({ id: doc.id }, d));
+          }
+        });
+      } catch(e2) {
+        container.innerHTML = '<div class="results-pending">Error loading scores: ' + e2.message + '</div>';
+        return;
+      }
     }
 
     // Helper: compute winning box key from winner/loser scores using pool shared numbers
@@ -2752,13 +2757,9 @@ header::before {
       return rowIdx + '-' + colIdx;
     }
 
-    // Use first game slot's numbers as source of truth (most recently set by admin)
-    var colNumbers = (games[0] && games[0].colNumbers && games[0].colNumbers.length === 10)
-      ? games[0].colNumbers
-      : (currentPool.sharedColNumbers || [0,1,2,3,4,5,6,7,8,9]);
-    var rowNumbers = (games[0] && games[0].rowNumbers && games[0].rowNumbers.length === 10)
-      ? games[0].rowNumbers
-      : (currentPool.sharedRowNumbers || [0,1,2,3,4,5,6,7,8,9]);
+    // Get shared numbers (same grid for all rounds)
+    var colNumbers = currentPool.sharedColNumbers || (games[0] && games[0].colNumbers) || [0,1,2,3,4,5,6,7,8,9];
+    var rowNumbers = currentPool.sharedRowNumbers || (games[0] && games[0].rowNumbers) || [0,1,2,3,4,5,6,7,8,9];
     var numbersDrawn = currentPool.sharedNumbersDrawn || false;
 
     // Build HTML: one card per round slot
@@ -2769,19 +2770,19 @@ header::before {
       var payout = getGamePayout(roundSlot, 'final');
       var payoutStr = payout > 0 ? ('$' + (payout % 1 === 0 ? payout.toFixed(0) : payout.toFixed(2)) + ' / game') : '';
 
-      // Find settled and pending games for this round
+      // Find all settled games for this round
       var roundGames = allSettled.filter(function(g) {
         return (g.round || '') === roundKey;
       });
-      var roundPending = allPending.filter(function(g) {
-        return (g.round || '') === roundKey;
-      });
+
+      // Also include upcoming games for this round (for display)
+      var pendingCount = 0;
 
       var gameRows = '';
       if (!numbersDrawn) {
         gameRows = '<div class="results-pending" style="padding:0.75rem;">Numbers not yet drawn for this pool.</div>';
-      } else if (roundGames.length === 0 && roundPending.length === 0) {
-        gameRows = '<div class="results-pending" style="padding:0.75rem;">No games found for this round.</div>';
+      } else if (roundGames.length === 0) {
+        gameRows = '<div class="results-pending" style="padding:0.75rem;">No results yet for this round.</div>';
       } else {
         roundGames.forEach(function(g) {
           var awayScore = g.awayScore != null ? g.awayScore : null;
@@ -2835,31 +2836,6 @@ header::before {
         });
       }
 
-      // Add pending games rows
-      var pendingRows = '';
-      if (roundPending.length > 0) {
-        pendingRows += '<div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--card-border);">'
-          + '<div style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:0.5rem;">⏳ '
-          + roundPending.length + ' game' + (roundPending.length !== 1 ? 's' : '') + ' upcoming</div>';
-        roundPending.forEach(function(g) {
-          var awayName = g.awayName || g.awayTeam || '???';
-          var homeName = g.homeName || g.homeTeam || '???';
-          var awaySeed = g.awaySeed ? ('#' + g.awaySeed + ' ') : '';
-          var homeSeed = g.homeSeed ? ('#' + g.homeSeed + ' ') : '';
-          var gameTime = g.gameDateTime ? new Date(g.gameDateTime).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZone:'America/New_York'}) : '';
-          pendingRows += '<div class="results-score-row" style="opacity:0.55;">'
-            + '<div class="results-team">'
-            + '<div class="results-team-name">' + awaySeed + awayName + '</div>'
-            + '</div>'
-            + '<div class="results-vs" style="font-size:0.75rem;color:var(--text-muted);">' + (gameTime || 'vs') + '</div>'
-            + '<div class="results-team">'
-            + '<div class="results-team-name">' + homeSeed + homeName + '</div>'
-            + '</div>'
-            + '</div>';
-        });
-        pendingRows += '</div>';
-      }
-
       html += '<div class="results-game-card">'
         + '<div class="results-game-header">'
         + '<span class="results-game-label">' + emoji + ' ' + roundLabel + '</span>'
@@ -2867,10 +2843,8 @@ header::before {
         + '</div>'
         + '<div style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:0.5rem;">'
         + roundGames.length + ' result' + (roundGames.length !== 1 ? 's' : '') + ' settled'
-        + (roundPending.length > 0 ? ' · ' + roundPending.length + ' upcoming' : '')
         + '</div>'
         + gameRows
-        + pendingRows
         + '</div>';
     });
 
@@ -2883,12 +2857,8 @@ header::before {
     const tbody = document.getElementById('standingsBody');
     tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:1rem;color:var(--text-secondary);">Loading...</td></tr>';
 
-    var colNumbers = (games[0] && games[0].colNumbers && games[0].colNumbers.length === 10)
-      ? games[0].colNumbers
-      : (currentPool.sharedColNumbers || [0,1,2,3,4,5,6,7,8,9]);
-    var rowNumbers = (games[0] && games[0].rowNumbers && games[0].rowNumbers.length === 10)
-      ? games[0].rowNumbers
-      : (currentPool.sharedRowNumbers || [0,1,2,3,4,5,6,7,8,9]);
+    var colNumbers = currentPool.sharedColNumbers || (games[0] && games[0].colNumbers) || [0,1,2,3,4,5,6,7,8,9];
+    var rowNumbers = currentPool.sharedRowNumbers || (games[0] && games[0].rowNumbers) || [0,1,2,3,4,5,6,7,8,9];
 
     var allSettled = [];
     try {
@@ -3187,56 +3157,9 @@ header::before {
     const lockBtn = document.getElementById('toggleLockBtn');
     lockBtn.textContent = currentPool.locked ? '🔓 Unlock Pool' : '🔒 Lock Pool';
     
-    updateSyncButtonVisibility();
     renderGamesEditor();
     renderEntriesList();
   }
-
-  // Show sync button only for MBB pools with shared numbers
-  function updateSyncButtonVisibility() {
-    const section = document.getElementById('syncNumbersSection');
-    if (!section) return;
-    const isMBB = (currentPool.sport || 'nfl') === 'ncaa_basketball';
-    const isShared = currentPool.numberSharing === 'shared';
-    section.style.display = (isMBB && isShared) ? '' : 'none';
-  }
-
-  window.syncSharedNumbers = async function() {
-    if (!currentPool || !isUserAdmin) return;
-    const games = currentPool.games || [];
-    if (!games.length) { showToast('No game slots to sync from', 'error'); return; }
-
-    // Use first game slot's numbers as the source of truth
-    const srcCol = games[0].colNumbers;
-    const srcRow = games[0].rowNumbers;
-    if (!srcCol || !srcRow || srcCol.length !== 10 || srcRow.length !== 10) {
-      showToast('First game slot has invalid numbers', 'error'); return;
-    }
-
-    // Update all game slots and shared numbers to match
-    games.forEach(function(g) {
-      g.colNumbers = [...srcCol];
-      g.rowNumbers = [...srcRow];
-      g.numbersDrawn = true;
-    });
-    currentPool.sharedColNumbers = [...srcCol];
-    currentPool.sharedRowNumbers = [...srcRow];
-    currentPool.sharedNumbersDrawn = true;
-
-    try {
-      await db.collection('boxesPools').doc(currentPool.id).update({
-        sharedColNumbers: srcCol,
-        sharedRowNumbers: srcRow,
-        sharedNumbersDrawn: true,
-        games: games,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      document.getElementById('syncNumbersStatus').textContent = '✅ Synced! Col: [' + srcCol.join(',') + ']';
-      showToast('Shared numbers synced from game slots', 'success');
-    } catch(e) {
-      showToast('Error syncing: ' + e.message, 'error');
-    }
-  };
 
   window.savePoolSettings = async function() {
     if (!currentPool || !isUserAdmin) return;
