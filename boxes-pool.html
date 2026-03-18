@@ -2528,10 +2528,15 @@ header::before {
 
   function updateTeamLabels() {
     const games = currentPool.games || [];
+    const isMBB = (currentPool.sport || 'nfl') === 'ncaa_basketball';
     let team1 = 'TEAM 1';
     let team2 = 'TEAM 2';
-    
-    if (currentPool.locked && games.length > 0 && games[selectedGameIndex]) {
+
+    if (isMBB) {
+      // MBB uses winner/loser digits — team names never change
+      team1 = 'WINNER';
+      team2 = 'LOSER';
+    } else if (currentPool.locked && games.length > 0 && games[selectedGameIndex]) {
       const game = games[selectedGameIndex];
       team1 = game.team1 || 'TBD';
       team2 = game.team2 || 'TBD';
@@ -2539,7 +2544,7 @@ header::before {
       team1 = '← Numbers Hidden →';
       team2 = '↑';
     }
-    
+
     document.getElementById('topTeamLabel').textContent = team1;
     document.getElementById('leftTeamLabel').textContent = team2;
   }
