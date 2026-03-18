@@ -2667,7 +2667,7 @@ header::before {
     const payoutMode    = currentPool.payoutMode    || 'percentage';
 
     const MBB_ROUND_MAP = {
-      'play-in': 'play-in', 'first-four': 'play-in',
+      'play-in': 'play-in', 'first-four': 'first-four',
       'round-of-64': 'round-of-64', 'r64': 'round-of-64',
       'round-of-32': 'round-of-32', 'r32': 'round-of-32', 'second-round': 'round-of-32',
       'sweet-16': 'sweet-16', 's16': 'sweet-16',
@@ -3205,13 +3205,14 @@ header::before {
   // Games Editor
   function buildGameEditorHTML(game, idx, isMBB, emoji, numberSharing) {
     var MBB_ROUNDS = [
-      { value: 'play-in',      label: 'Play-In' },
-      { value: 'round-of-64', label: 'Round of 64' },
-      { value: 'round-of-32', label: 'Round of 32' },
-      { value: 'sweet-16',    label: 'Sweet 16' },
-      { value: 'elite-8',     label: 'Elite 8' },
-      { value: 'final-four',  label: 'Final Four' },
-      { value: 'championship',label: 'National Championship' }
+      { value: 'first-four',   label: 'First Four / Play-In' },
+      { value: 'play-in',      label: 'Play-In (legacy)' },
+      { value: 'round-of-64',  label: 'Round of 64' },
+      { value: 'round-of-32',  label: 'Round of 32' },
+      { value: 'sweet-16',     label: 'Sweet 16' },
+      { value: 'elite-8',      label: 'Elite 8' },
+      { value: 'final-four',   label: 'Final Four' },
+      { value: 'championship', label: 'National Championship' }
     ];
 
     var teamSection = '';
@@ -3583,7 +3584,7 @@ header::before {
   // Populate the game selector dropdown with games from the games collection
   const ROUND_LABELS_MAP = {
     'wildcard':'Wild Card','divisional':'Divisional','conference':'Conference Championship','superbowl':'Super Bowl',
-    'play-in':'Play-In','first-four':'First Four','round-of-64':'Round of 64','round-of-32':'Round of 32',
+    'play-in':'Play-In','first-four':'First Four / Play-In','round-of-64':'Round of 64','round-of-32':'Round of 32',
     'sweet-16':'Sweet 16','elite-8':'Elite 8','final-four':'Final Four','championship':'National Championship',
     'first_round':'First Round','second_round':'Second Round','sweet_16':'Sweet 16','elite_8':'Elite 8',
     'final_four':'Final Four','finals':'Finals','regular':'Regular Season'
@@ -4204,6 +4205,7 @@ header::before {
         },
         ...(payoutMode === 'round-fixed' ? { roundPayouts: {
           'play-in':       parseFloat(document.getElementById('rpPlayIn').value)  || 25,
+          'first-four':    parseFloat(document.getElementById('rpPlayIn').value)  || 25,
           'round-of-64':   parseFloat(document.getElementById('rpR64').value)     || 50,
           'round-of-32':   parseFloat(document.getElementById('rpR32').value)     || 62.5,
           'sweet-16':      parseFloat(document.getElementById('rpS16').value)     || 87.5,
