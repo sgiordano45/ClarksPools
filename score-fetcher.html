@@ -576,8 +576,9 @@
       });
       const json = await res.json();
       if (json.ok) {
-        log('Pushed ' + json.written + ' row(s) to tab "' + tabName + '"', 'ok');
-        setStatus('Done! Pushed ' + json.written + ' game' + (json.written!==1?'s':'') + ' to the "' + tabName + '" tab.', 'success');
+        const skippedMsg = json.skipped > 0 ? ' (' + json.skipped + ' duplicate' + (json.skipped>1?'s':'') + ' skipped)' : '';
+        log('Pushed ' + json.written + ' row(s) to tab "' + tabName + '"' + (json.skipped > 0 ? ', skipped ' + json.skipped + ' duplicate(s)' : ''), 'ok');
+        setStatus('Done! Pushed ' + json.written + ' game' + (json.written!==1?'s':'') + ' to the "' + tabName + '" tab.' + skippedMsg, 'success');
       } else {
         throw new Error(json.error || 'Unknown error from Apps Script');
       }
