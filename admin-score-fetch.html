@@ -21,7 +21,7 @@
   .back-link{font-family:var(--mono);font-size:12px;color:var(--muted);text-decoration:none;transition:color .2s}
   .back-link:hover{color:var(--text)}
   main{max-width:1100px;margin:0 auto;padding:32px 24px}
-  .config-bar{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px 24px;display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:16px;align-items:end;margin-bottom:24px}
+  .config-bar{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px 24px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:16px;align-items:end;margin-bottom:24px}
   .field label{display:block;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
   .field select,.field input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:9px 12px;outline:none;transition:border-color .2s}
   .field select:focus,.field input:focus{border-color:var(--accent)}
@@ -136,6 +136,10 @@
         <option value="championship">Championship</option>
       </select>
     </div>
+    <div class="field">
+      <label>Sheets Web App URL</label>
+      <input type="text" id="sheetsUrl" placeholder="https://script.google.com/macros/s/..." style="font-size:11px" />
+    </div>
     <div>
       <button class="btn btn-primary" id="fetchBtn" onclick="fetchScores()">Fetch from ESPN</button>
     </div>
@@ -219,6 +223,7 @@
       <div class="push-summary" id="pushSummary">Select games above to push scores to Firestore.</div>
       <div style="display:flex;gap:10px">
         <button class="btn btn-ghost btn-sm" onclick="refreshFirestoreData()">&#8635; Refresh DB</button>
+        <button class="btn btn-ghost btn-sm" id="sheetsBtn" onclick="pushToSheets()" disabled>&#9654; Push to Sheets</button>
         <button class="btn btn-success" id="pushBtn" onclick="pushScores()" disabled>Push Scores</button>
       </div>
     </div>
@@ -538,8 +543,10 @@
     const boxes  = document.querySelectorAll('#matchTableBody input[type="checkbox"]');
     const count  = [...boxes].filter(b=>b.checked).length;
     const btn    = document.getElementById('pushBtn');
+    const sheetsBtn = document.getElementById('sheetsBtn');
     const sumEl  = document.getElementById('pushSummary');
     btn.disabled = count===0;
+    if (sheetsBtn) sheetsBtn.disabled = count===0;
     sumEl.innerHTML = count>0
       ? '<strong>'+count+'</strong> game'+(count>1?'s':'')+' selected - will write awayScore, homeScore, winner, status &#8594; "settled"'
       : 'Select games above to push scores to Firestore.';
@@ -575,6 +582,55 @@
     if (fail===0) setStatus('Pushed ' + ok + ' score'+(ok>1?'s':'')+' to games/MBB.', 'success');
     else setStatus('Pushed ' + ok + ', failed ' + fail + ' - see log.', ok===0?'error':'warn');
     await loadFirestoreAndMatch();
+  }
+
+  async function pushToSheets() {
+    const url = document.getElementById('sheetsUrl').value.trim();
+    if (!url) { setStatus('Paste your Google Apps Script Web App URL in the Sheets URL field first.', 'warn'); return; }
+
+    const boxes    = document.querySelectorAll('#matchTableBody input[type="checkbox"]');
+    const selected = [...boxes].filter(b => b.checked).map(b => parseInt(b.dataset.idx));
+    if (!selected.length) { setStatus('No games selected to push.', 'warn'); return; }
+
+    const round = document.getElementById('roundSelect').value;
+    const btn   = document.getElementById('sheetsBtn');
+    btn.disabled  = true;
+    btn.innerHTML = '<span class="spinner"></span>';
+    setStatus('Pushing to Google Sheets...', 'info', true);
+
+    const games = selected.map(idx => {
+      const {espn: eg, firestore: fg} = matchedPairs[idx];
+      const winnerIsAway = eg.awayScore > eg.homeScore;
+      return {
+        round:       round,
+        winner:      winnerIsAway ? eg.awayAbbr : eg.homeAbbr,
+        winnerScore: winnerIsAway ? eg.awayScore : eg.homeScore,
+        loser:       winnerIsAway ? eg.homeAbbr : eg.awayAbbr,
+        loserScore:  winnerIsAway ? eg.homeScore : eg.awayScore,
+        docId:       fg.id
+      };
+    });
+
+    try {
+      const res  = await fetch(url, {
+        method:  'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body:    JSON.stringify({ games })
+      });
+      const json = await res.json();
+      if (json.ok) {
+        log('Pushed ' + json.written + ' row(s) to Google Sheets', 'ok');
+        setStatus('Pushed ' + json.written + ' game(s) to Google Sheets.', 'success');
+      } else {
+        throw new Error(json.error || 'Unknown error');
+      }
+    } catch(e) {
+      log('Sheets push failed: ' + e.message, 'err');
+      setStatus('Sheets push failed: ' + e.message, 'error');
+    }
+
+    btn.disabled  = false;
+    btn.innerHTML = '&#9654; Push to Sheets';
   }
 
   function setStatus(msg, type, pulse) {
