@@ -650,7 +650,193 @@
 }
 
 /* ----------------------------------------
-   LEADERBOARDS - MOBILE
+   RESULTS / STANDINGS / LEADERBOARD (boxes-pool)
+   ---------------------------------------- */
+@media (max-width: 768px) {
+
+    /* Container */
+    .leaderboard-container {
+        margin-top: 1.25rem;
+        border-radius: 10px;
+    }
+
+    /* Header: stack title above tab row */
+    .leaderboard-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.6rem;
+        padding: 0.75rem;
+    }
+
+    .leaderboard-header h3 {
+        font-size: 1rem;
+        justify-content: center;
+    }
+
+    /* Tab row: Results | Standings | 🔄 side-by-side, full width */
+    .leaderboard-tabs {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
+        gap: 0.4rem;
+        width: 100%;
+    }
+
+    .leaderboard-tab {
+        padding: 0.55rem 0.5rem;
+        font-size: 0.78rem;
+        white-space: nowrap;
+        text-align: center;
+        min-height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Refresh button same height as tabs */
+    .leaderboard-tabs button[onclick*="renderLeaderboard"] {
+        margin-left: 0 !important;
+        min-height: 38px;
+        padding: 0.55rem 0.75rem;
+        font-size: 0.78rem;
+    }
+
+    /* ── Results view: game cards ── */
+
+    .results-game-card {
+        border-radius: 8px;
+        margin-bottom: 0.6rem;
+    }
+
+    .results-game-header {
+        padding: 0.5rem 0.75rem;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+
+    .results-game-label {
+        font-size: 0.8rem;
+    }
+
+    .results-game-round {
+        font-size: 0.65rem;
+    }
+
+    /* Score row: keep horizontal but tighter */
+    .results-score-row {
+        padding: 0.6rem 0.75rem;
+        gap: 0.5rem;
+    }
+
+    .results-team-name {
+        font-size: 0.82rem;
+    }
+
+    .results-team-score {
+        font-size: 1.6rem;
+    }
+
+    /* Winner row: stack info + payout on two lines if narrow */
+    .results-winner-row {
+        padding: 0.5rem 0.75rem;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+    }
+
+    .results-winner-info {
+        font-size: 0.8rem;
+        flex-wrap: wrap;
+        min-width: 0;
+    }
+
+    .results-winner-name {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 140px;
+    }
+
+    .results-winner-payout {
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .results-pending {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.78rem;
+    }
+
+    /* ── Standings view: card rows instead of table ── */
+
+    /* Hide the table header on mobile */
+    .leaderboard-table thead {
+        display: none;
+    }
+
+    /* Each row becomes a card */
+    .leaderboard-table tbody tr {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        padding: 0.65rem 0.75rem;
+        border-bottom: 1px solid var(--card-border);
+        gap: 0.4rem;
+    }
+
+    /* All <td> inline in the card row */
+    .leaderboard-table td {
+        padding: 0;
+        border: none;
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
+
+    /* Rank — big number on the left */
+    .leaderboard-table td:first-child {
+        width: 32px;
+        flex-shrink: 0;
+    }
+
+    /* Name — takes remaining space */
+    .leaderboard-table td:nth-child(2) {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Wins badges — wrap as needed */
+    .leaderboard-table td:nth-child(3) {
+        flex-shrink: 0;
+    }
+
+    .leaderboard-wins {
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+
+    .win-badge {
+        font-size: 0.65rem;
+        padding: 0.15rem 0.35rem;
+    }
+
+    /* Earnings — right-aligned */
+    .leaderboard-table td:nth-child(4) {
+        margin-left: auto;
+        flex-shrink: 0;
+    }
+
+    .leaderboard-winnings {
+        font-size: 1rem;
+    }
+
+    /* Total row */
+    .standings-total-row td {
+        font-size: 0.85rem;
+    }
+}
+
+/* ----------------------------------------
+   LEADERBOARDS - MOBILE (generic)
    ---------------------------------------- */
 @media (max-width: 768px) {
     .leaderboard {
