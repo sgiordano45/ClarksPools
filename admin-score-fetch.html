@@ -417,7 +417,9 @@
       // Require both teams to be non-empty before attempting team match
       if (!fAway || !fHome) return false;
       // If both docs have a date, they must match (prevents stale round cross-matching)
-      const fDate = fg.date ? fg.date.slice(0,10).replace(/-/g,'') : null;
+      // Firestore docs may store date as 'date' or 'gameDateTime'
+      const fDateRaw = fg.date || fg.gameDateTime || null;
+      const fDate = fDateRaw ? fDateRaw.slice(0,10).replace(/-/g,'') : null;
       if (eDate && fDate && eDate !== fDate) return false;
       if (fAway===eAway && fHome===eHome) return true;
       const fAN = (fg.awayName||'').toUpperCase();
