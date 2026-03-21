@@ -409,9 +409,16 @@
   function findFirestoreMatch(eg) {
     const eAway = eg.awayAbbr.toUpperCase();
     const eHome = eg.homeAbbr.toUpperCase();
+    // Extract date string from ESPN game (YYYYMMDD) for date-based filtering
+    const eDate = eg.date ? eg.date.slice(0,10).replace(/-/g,'') : null;
     return firestoreGames.find(fg => {
       const fAway = (fg.awayTeam || fg.awayAbbr || '').toUpperCase();
       const fHome = (fg.homeTeam || fg.homeAbbr || '').toUpperCase();
+      // Require both teams to be non-empty before attempting team match
+      if (!fAway || !fHome) return false;
+      // If both docs have a date, they must match (prevents stale round cross-matching)
+      const fDate = fg.date ? fg.date.slice(0,10).replace(/-/g,'') : null;
+      if (eDate && fDate && eDate !== fDate) return false;
       if (fAway===eAway && fHome===eHome) return true;
       const fAN = (fg.awayName||'').toUpperCase();
       const fHN = (fg.homeName||'').toUpperCase();
