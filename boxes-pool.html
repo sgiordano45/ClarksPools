@@ -1088,6 +1088,21 @@ header::before {
 }
 
 /* Leaderboard Styles */
+.round-filter-pill {
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  border: 1px solid var(--card-border);
+  background: var(--tertiary-dark);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.round-filter-pill:hover {
+  background: var(--secondary-dark);
+  color: var(--text-primary);
+}
+
 .results-game-card {
   background: var(--tertiary-dark);
   border: 1px solid var(--card-border);
@@ -2662,6 +2677,7 @@ header::before {
 
   // ── Leaderboard / Results / Standings ────────────────────────────────────────
   let currentLeaderboardView = 'results';
+  let selectedResultsRound = null; // null = show all rounds
 
   window.showLeaderboardView = function(view) {
     currentLeaderboardView = view;
@@ -2674,6 +2690,11 @@ header::before {
     document.querySelector('#leaderboardContainer .leaderboard-header h3').textContent =
       view === 'results' ? '🏆 Results' : '🏅 Standings';
     renderLeaderboard();
+  };
+
+  window._setResultsRound = function(roundKey) {
+    selectedResultsRound = roundKey;
+    renderMBBResults();
   };
 
   function buildPayoutHelpers() {
@@ -2776,9 +2797,22 @@ header::before {
       || colNumbers.join(',') !== defaultSeq
       || (games.length > 0 && games.some(function(g){ return g.numbersDrawn === true; }));
 
-    // Build HTML: one card per round slot
-    var html = '';
+    // Build round filter pills
+    var pillsHtml = '<div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:1rem;">';
+    var allPill = selectedResultsRound === null ? ' style="background:var(--accent-blue);color:#fff;border-color:var(--accent-blue);"' : '';
+    pillsHtml += '<button onclick="window._setResultsRound(null)" class="round-filter-pill"' + allPill + '>All Rounds</button>';
+    games.forEach(function(rs) {
+      var rKey = rs.round || '';
+      var rLabel = formatRoundLabel(rKey) || rs.label || rKey;
+      var active = selectedResultsRound === rKey ? ' style="background:var(--accent-blue);color:#fff;border-color:var(--accent-blue);"' : '';
+      pillsHtml += '<button onclick="window._setResultsRound(\'' + rKey + '\')" class="round-filter-pill"' + active + '>' + rLabel + '</button>';
+    });
+    pillsHtml += '</div>';
+
+    // Build HTML: one card per round slot (filtered by selectedResultsRound)
+    var html = pillsHtml;
     games.forEach(function(roundSlot) {
+      if (selectedResultsRound !== null && roundSlot.round !== selectedResultsRound) return;
       var roundKey = roundSlot.round || '';
       var roundLabel = formatRoundLabel(roundKey) || roundSlot.label || roundKey;
       var payout = getGamePayout(roundSlot, 'final');
