@@ -401,55 +401,6 @@ main { position:relative; z-index:1; max-width:1200px; margin:0 auto; padding:0 
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="js/firebase-config.js"></script>
 <script>
-// ── TIER DATA (9 tiers, ~10 golfers each, ordered by odds rank) ──
-const TIERS = [
-  { id:'tier1', name:'Tier 1', label:'ELITE', odds:'Favorites', golfers:[
-    {name:'Scottie Scheffler',odds:'+400'},{name:'Rory McIlroy',odds:'+900'},
-    {name:'Jon Rahm',odds:'+1000'},{name:'Ludvig Åberg',odds:'+1200'},
-    {name:'Bryson DeChambeau',odds:'+1400'},{name:'Xander Schauffele',odds:'+1600'},
-  ]},
-  { id:'tier2', name:'Tier 2', label:'TOP 10', odds:'Strong Contenders', golfers:[
-    {name:'Collin Morikawa',odds:'+2000'},{name:'Tommy Fleetwood',odds:'+2200'},
-    {name:'Patrick Cantlay',odds:'+2500'},{name:'Viktor Hovland',odds:'+2800'},
-    {name:'Min Woo Lee',odds:'+2800'},{name:'Robert MacIntyre',odds:'+3000'},
-  ]},
-  { id:'tier3', name:'Tier 3', label:'CONTENDERS', odds:'20–30 Range', golfers:[
-    {name:'Jordan Spieth',odds:'+3500'},{name:'Shane Lowry',odds:'+3500'},
-    {name:'Justin Rose',odds:'+3800'},{name:'Adam Scott',odds:'+4000'},
-    {name:'Patrick Reed',odds:'+4000'},{name:'Hideki Matsuyama',odds:'+4500'},
-  ]},
-  { id:'tier4', name:'Tier 4', label:'DARK HORSES', odds:'30–45 Range', golfers:[
-    {name:'Brooks Koepka',odds:'+5000'},{name:'Sepp Straka',odds:'+5000'},
-    {name:'Russell Henley',odds:'+5500'},{name:'Nicolai Højgaard',odds:'+5500'},
-    {name:'Tony Finau',odds:'+6000'},{name:'Keegan Bradley',odds:'+6500'},
-  ]},
-  { id:'tier5', name:'Tier 5', label:'SLEEPERS', odds:'50–70 Range', golfers:[
-    {name:'Sahith Theegala',odds:'+7000'},{name:'Harris English',odds:'+7500'},
-    {name:'Taylor Pendrith',odds:'+8000'},{name:'Sungjae Im',odds:'+8000'},
-    {name:'J.J. Spaun',odds:'+8000'},{name:'Corey Conners',odds:'+8500'},
-  ]},
-  { id:'tier6', name:'Tier 6', label:'LONGSHOTS', odds:'80–120 Range', golfers:[
-    {name:'Tom Kim',odds:'+9000'},{name:'Wyndham Clark',odds:'+9000'},
-    {name:'Brian Harman',odds:'+10000'},{name:'Joaquin Niemann',odds:'+10000'},
-    {name:'Max Homa',odds:'+10000'},{name:'Ryan Fox',odds:'+10500'},
-  ]},
-  { id:'tier7', name:'Tier 7', label:'LONG SHOTS', odds:'120–200 Range', golfers:[
-    {name:'Dustin Johnson',odds:'+12000'},{name:'Cameron Smith',odds:'+12000'},
-    {name:'Lucas Glover',odds:'+12500'},{name:'Aaron Rai',odds:'+14000'},
-    {name:'Stephan Jaeger',odds:'+15000'},{name:'Aldrich Potgieter',odds:'+15000'},
-  ]},
-  { id:'tier8', name:'Tier 8', label:'DEEP VALUE', odds:'200–400 Range', golfers:[
-    {name:'Sergio Garcia',odds:'+20000'},{name:'Bubba Watson',odds:'+25000'},
-    {name:'Zach Johnson',odds:'+25000'},{name:'Matt McCarty',odds:'+25000'},
-    {name:'Marco Penge',odds:'+30000'},{name:'Tom McKibbin',odds:'+30000'},
-  ]},
-  { id:'tier9', name:'Tier 9', label:'FIELD', odds:'400+', golfers:[
-    {name:'Fred Couples',odds:'+50000'},{name:'Sandy Lyle (MC era)',odds:'+50000'},
-    {name:'Charl Schwartzel',odds:'+50000'},{name:'Danny Willett',odds:'+50000'},
-    {name:'Vijay Singh',odds:'+75000'},{name:'Amateur Field Pick',odds:'+99000'},
-  ]},
-];
-
 // ── STATE ──
 let TIERS = []; // loaded from Firestore
 let currentUser = null;
