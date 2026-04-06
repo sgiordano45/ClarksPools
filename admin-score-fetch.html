@@ -119,6 +119,7 @@
         <option value="basketball/nba">NBA</option>
         <option value="football/nfl">NFL</option>
         <option value="golf/masters">⛳ Masters Golf Pool</option>
+        <option value="golf/pga-box-pool">🏌️ Golf Box Pool (Round Scores)</option>
       </select>
     </div>
     <div class="field">
@@ -228,6 +229,70 @@
         <button class="btn btn-success" id="pushBtn" onclick="pushScores()" disabled>Push Scores</button>
       </div>
     </div>
+  </div>
+
+  <!-- GOLF BOX POOL PANEL -->
+  <div id="golfBoxPanel" style="display:none;margin-bottom:28px;">
+    <div class="section-header" style="margin-bottom:12px;">
+      <span class="section-label">🏌️ Golf Box Pool — Round Score Push</span>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button class="btn btn-sm btn-ghost" onclick="fetchGolfBoxLeaderboard()">↻ Refresh Leaderboard</button>
+        <a href="golf-pool.html" class="btn btn-sm btn-ghost" style="text-decoration:none;">Golf Pool Admin →</a>
+      </div>
+    </div>
+
+    <!-- Pool + Round selector -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:16px;display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;">
+      <div class="field" style="min-width:220px;">
+        <label>Golf Pool</label>
+        <select id="golfPoolSelect" onchange="onGolfPoolChange()">
+          <option value="">Loading pools...</option>
+        </select>
+      </div>
+      <div class="field" style="min-width:160px;">
+        <label>Round to Update</label>
+        <select id="golfRoundSelect" onchange="checkGolfPushReady()">
+          <option value="">-- select pool first --</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:6px;">Auto-Settle Round</label>
+        <label style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;cursor:pointer;">
+          <input type="checkbox" id="golfAutoSettle" style="width:16px;height:16px;accent-color:var(--accent2);">
+          Settle after push
+        </label>
+      </div>
+      <div>
+        <button class="btn btn-primary" onclick="pushGolfRoundScores()" id="golfPushBtn" disabled>Push Round Scores</button>
+      </div>
+    </div>
+
+    <!-- Leaderboard table -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+      <div style="background:var(--surface2);padding:10px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;">ESPN PGA Leaderboard</span>
+        <span id="golfLbBadge" class="badge badge-gray">--</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Pos</th>
+            <th>Player</th>
+            <th>In Pool?</th>
+            <th>Status</th>
+            <th>Score (Total)</th>
+            <th>R1</th><th>R2</th><th>R3</th><th>R4</th>
+            <th>Thru</th>
+          </tr>
+        </thead>
+        <tbody id="golfLbTable">
+          <tr><td colspan="10" style="padding:32px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:12px;">Select "Golf Box Pool" above — leaderboard loads automatically.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:10px;">
+      💡 Select a pool, pick which round to push, then click <strong>Push Round Scores</strong>. Scores are written to <code>golfPools/{poolId}.rounds[n].scores</code>. Enable "Settle after push" to auto-compute the winner for that round.
+    </p>
   </div>
 
   <!-- MASTERS GOLF PANEL -->
@@ -681,13 +746,17 @@
 
   function handleSportChange() {
     const sport = document.getElementById('sportSelect').value;
-    const isMasters = sport === 'golf/masters';
-    document.getElementById('mastersPanel').style.display = isMasters ? 'block' : 'none';
-    document.getElementById('fetchBtn').style.display = isMasters ? 'none' : 'inline-block';
-    document.getElementById('espnSection').style.display = 'none';
+    const isMasters   = sport === 'golf/masters';
+    const isGolfBox   = sport === 'golf/pga-box-pool';
+    const isOther     = !isMasters && !isGolfBox;
+    document.getElementById('mastersPanel').style.display  = isMasters ? 'block' : 'none';
+    document.getElementById('golfBoxPanel').style.display  = isGolfBox ? 'block' : 'none';
+    document.getElementById('fetchBtn').style.display      = isOther   ? 'inline-block' : 'none';
+    document.getElementById('espnSection').style.display   = 'none';
     document.getElementById('createSection') && (document.getElementById('createSection').style.display='none');
-    document.getElementById('matchSection') && (document.getElementById('matchSection').style.display='none');
+    document.getElementById('matchSection')  && (document.getElementById('matchSection').style.display='none');
     if (isMasters) fetchMastersLeaderboard();
+    if (isGolfBox) initGolfBoxPanel();
   }
 
   async function fetchMastersLeaderboard() {
@@ -767,7 +836,302 @@
   }
   // ─────────────────────────────────────────────────────────────────────────
 
-  function setStatus(msg, type, pulse) {
+  // ── GOLF BOX POOL ROUND SCORES ────────────────────────────────────────────
+  // ESPN PGA scoreboard — works for any active PGA Tour event
+  const GOLF_ESPN_URL = 'https://site.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=pga';
+
+  let golfBoxPools      = [];   // loaded from golfPools collection
+  let golfEspnPlayers   = [];   // parsed from ESPN leaderboard
+  let currentGolfPool   = null; // the selected pool doc
+
+  async function initGolfBoxPanel() {
+    setStatus('Loading golf pools from Firestore...', 'info', true);
+    try {
+      const snap = await db.collection('golfPools').orderBy('createdAt', 'desc').get();
+      golfBoxPools = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+      const sel = document.getElementById('golfPoolSelect');
+      if (golfBoxPools.length === 0) {
+        sel.innerHTML = '<option value="">No golf pools found</option>';
+        setStatus('No golf pools found in Firestore. Create one in golf-pool.html first.', 'warn');
+        return;
+      }
+      sel.innerHTML = '<option value="">-- Select a pool --</option>' +
+        golfBoxPools.map(p => '<option value="' + p.id + '">' + (p.name || p.id) + '</option>').join('');
+      log('Loaded ' + golfBoxPools.length + ' golf pool(s)', 'ok');
+      await fetchGolfBoxLeaderboard();
+    } catch(e) {
+      log('Error loading golf pools: ' + e.message, 'err');
+      setStatus('Error loading golf pools: ' + e.message, 'error');
+    }
+  }
+
+  function onGolfPoolChange() {
+    const poolId = document.getElementById('golfPoolSelect').value;
+    currentGolfPool = golfBoxPools.find(p => p.id === poolId) || null;
+    buildGolfRoundSelect();
+    matchGolfPlayers();
+    checkGolfPushReady();
+  }
+
+  function buildGolfRoundSelect() {
+    const sel = document.getElementById('golfRoundSelect');
+    if (!currentGolfPool) {
+      sel.innerHTML = '<option value="">-- select pool first --</option>';
+      return;
+    }
+    const rounds = currentGolfPool.rounds || [];
+    if (rounds.length === 0) {
+      sel.innerHTML = '<option value="">No rounds configured in this pool</option>';
+      return;
+    }
+    sel.innerHTML = rounds.map((r, i) =>
+      '<option value="' + i + '"' + (r.settled ? ' style="color:var(--warn)"' : '') + '>' +
+      (r.label || ('Round ' + (i+1))) + (r.settled ? ' ✓ settled' : '') +
+      '</option>'
+    ).join('');
+  }
+
+  async function fetchGolfBoxLeaderboard() {
+    setStatus('Fetching PGA leaderboard from ESPN...', 'info', true);
+    const tableEl = document.getElementById('golfLbTable');
+    tableEl.innerHTML = '<tr><td colspan="10" style="padding:24px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:12px;">Loading...</td></tr>';
+    try {
+      let data;
+      try {
+        const res = await fetch(GOLF_ESPN_URL);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        data = await res.json();
+      } catch(_) {
+        const proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(GOLF_ESPN_URL);
+        const res   = await fetch(proxy);
+        const wrap  = await res.json();
+        data = JSON.parse(wrap.contents);
+      }
+
+      const events = data.events || [];
+      if (!events.length) {
+        tableEl.innerHTML = '<tr><td colspan="10" style="padding:24px;text-align:center;color:var(--muted);">No active PGA event found on ESPN.</td></tr>';
+        setStatus('No active PGA event found. Try again closer to tournament time.', 'warn');
+        return;
+      }
+
+      const event = events[0];
+      const comps = (event.competitions || [])[0] || {};
+      const competitors = comps.competitors || [];
+
+      golfEspnPlayers = competitors.map(c => {
+        const name      = (c.athlete && c.athlete.displayName) || '?';
+        const posStr    = (c.status && c.status.position && c.status.position.displayName) || '--';
+        const thru      = (c.status && c.status.thru) || '--';
+        const statusName= (c.status && c.status.type && c.status.type.name) || '';
+        const isMC      = statusName.toLowerCase().includes('cut') || statusName.toLowerCase().includes('wd');
+        const isWD      = statusName.toLowerCase().includes('wd');
+        const totalScore= c.score || 'E';
+        // Parse per-round linescores
+        const linescores = (c.linescores || []);
+        const rounds = {};
+        linescores.forEach((ls, i) => {
+          const val = parseInt(ls.value);
+          if (!isNaN(val)) rounds[i] = val;
+        });
+        return { name, posStr, thru, isMC, isWD, totalScore, rounds };
+      });
+
+      log('ESPN returned ' + golfEspnPlayers.length + ' golfers for: ' + (event.name || 'current event'), 'ok');
+      document.getElementById('golfLbBadge').textContent = golfEspnPlayers.length + ' golfers';
+      document.getElementById('golfLbBadge').className = 'badge badge-green';
+
+      matchGolfPlayers();
+      setStatus('Leaderboard loaded (' + golfEspnPlayers.length + ' golfers). Select a pool and round, then push scores.', 'success');
+    } catch(e) {
+      log('Golf ESPN error: ' + e.message, 'err');
+      setStatus('Error fetching leaderboard: ' + e.message, 'error');
+      tableEl.innerHTML = '<tr><td colspan="10" style="padding:24px;text-align:center;color:var(--danger);font-family:var(--mono);font-size:12px;">' + e.message + '</td></tr>';
+    }
+  }
+
+  function matchGolfPlayers() {
+    // Match ESPN player names to the pool's golfer list (case-insensitive, last-name fallback)
+    const tableEl = document.getElementById('golfLbTable');
+    if (!golfEspnPlayers.length) return;
+
+    const poolGolfers = currentGolfPool ? (currentGolfPool.golfers || []) : [];
+
+    function findPoolMatch(espnName) {
+      if (!poolGolfers.length) return null;
+      const en = espnName.toLowerCase();
+      // Exact match
+      let m = poolGolfers.findIndex(g => g.name.toLowerCase() === en);
+      if (m >= 0) return m;
+      // Last name match
+      const last = en.split(' ').pop();
+      m = poolGolfers.findIndex(g => g.name.toLowerCase().split(' ').pop() === last);
+      return m >= 0 ? m : null;
+    }
+
+    tableEl.innerHTML = golfEspnPlayers.map(p => {
+      const poolIdx = findPoolMatch(p.name);
+      const inPool  = poolIdx !== null;
+      const poolG   = inPool ? poolGolfers[poolIdx] : null;
+      const poolStatus = poolG ? (poolG.status || 'active') : '--';
+      const statusMismatch = inPool && (
+        (p.isMC && poolStatus === 'active') ||
+        (!p.isMC && poolStatus !== 'active')
+      );
+
+      const sc = parseInt(p.totalScore) || 0;
+      const scoreStyle = p.isMC ? 'color:var(--danger)' : sc < 0 ? 'color:var(--accent2)' : sc > 0 ? 'color:var(--danger)' : 'color:var(--muted)';
+
+      const statusLabel = p.isWD ? '<span class="badge badge-red">WD</span>' :
+                          p.isMC ? '<span class="badge badge-yellow">MC</span>' :
+                                   '<span class="badge badge-green">Active</span>';
+
+      const inPoolLabel = inPool
+        ? '<span class="badge badge-green" title="Pool index ' + poolIdx + '">#' + (poolIdx+1) + ' ' + (poolG ? poolG.name.split(' ').pop() : '') + '</span>'
+        : '<span class="badge badge-gray">—</span>';
+
+      const poolStatusLabel = inPool
+        ? (statusMismatch
+            ? '<span class="badge badge-red" title="Mismatch: update golfer status in golf-pool.html">⚠ ' + poolStatus + '</span>'
+            : '<span class="badge badge-gray">' + poolStatus + '</span>')
+        : '';
+
+      return '<tr' + (inPool ? '' : ' style="opacity:0.5"') + '>' +
+        '<td style="font-family:var(--mono);font-size:12px;color:var(--muted)">' + p.posStr + '</td>' +
+        '<td style="font-weight:600">' + p.name + '</td>' +
+        '<td>' + inPoolLabel + ' ' + poolStatusLabel + '</td>' +
+        '<td>' + statusLabel + '</td>' +
+        '<td style="font-family:var(--mono);' + scoreStyle + '">' + (p.isMC ? 'MC' : p.totalScore) + '</td>' +
+        [0,1,2,3].map(i => {
+          const val = p.rounds[i];
+          return '<td style="font-family:var(--mono);font-size:12px;text-align:center;color:' +
+            (val === undefined ? 'var(--muted)' : val < 70 ? 'var(--accent2)' : val > 73 ? 'var(--danger)' : 'var(--text)') + '">' +
+            (val !== undefined ? val : '—') + '</td>';
+        }).join('') +
+        '<td style="font-family:var(--mono);font-size:12px;color:var(--muted)">' + p.thru + '</td>' +
+        '</tr>';
+    }).join('');
+
+    checkGolfPushReady();
+  }
+
+  function checkGolfPushReady() {
+    const poolId  = document.getElementById('golfPoolSelect').value;
+    const roundIdx = document.getElementById('golfRoundSelect').value;
+    const btn = document.getElementById('golfPushBtn');
+    btn.disabled = !(poolId && roundIdx !== '' && golfEspnPlayers.length > 0);
+  }
+
+  async function pushGolfRoundScores() {
+    const poolId   = document.getElementById('golfPoolSelect').value;
+    const roundIdx = parseInt(document.getElementById('golfRoundSelect').value);
+    const autoSettle = document.getElementById('golfAutoSettle').checked;
+
+    if (!poolId || isNaN(roundIdx)) {
+      setStatus('Select a pool and round first.', 'warn');
+      return;
+    }
+
+    const pool = golfBoxPools.find(p => p.id === poolId);
+    if (!pool) { setStatus('Pool not found.', 'error'); return; }
+
+    const poolGolfers = pool.golfers || [];
+    const rounds = JSON.parse(JSON.stringify(pool.rounds || []));
+    const round  = rounds[roundIdx];
+    if (!round) { setStatus('Round not found in pool.', 'error'); return; }
+
+    const btn = document.getElementById('golfPushBtn');
+    btn.disabled  = true;
+    btn.innerHTML = '<span class="spinner"></span> Pushing...';
+    setStatus('Pushing round ' + (roundIdx+1) + ' scores to ' + (pool.name || poolId) + '...', 'info', true);
+
+    // Build scores map: { golferIndex: roundScore }
+    if (!round.scores) round.scores = {};
+    let pushed = 0;
+
+    poolGolfers.forEach((pg, idx) => {
+      // Match ESPN player by name
+      const en = pg.name.toLowerCase();
+      const last = en.split(' ').pop();
+      const espnPlayer = golfEspnPlayers.find(ep => {
+        const epn = ep.name.toLowerCase();
+        return epn === en || epn.split(' ').pop() === last;
+      });
+      if (espnPlayer) {
+        const roundScore = espnPlayer.rounds[roundIdx];
+        if (roundScore !== undefined) {
+          round.scores[idx] = roundScore;
+          log('Matched: ' + pg.name + ' R' + (roundIdx+1) + ' = ' + roundScore, 'ok');
+          pushed++;
+        } else {
+          log(pg.name + ': no R' + (roundIdx+1) + ' score yet (thru ' + espnPlayer.thru + ')', 'warn');
+        }
+      } else {
+        log(pg.name + ': not found in ESPN leaderboard', 'warn');
+      }
+    });
+
+    // Auto-settle: compute winner if requested
+    if (autoSettle && pushed > 0) {
+      const entries = pool.entries || {};
+      const result  = computeGolfRoundWinner(round, poolGolfers, entries);
+      if (result) {
+        round.settled = true;
+        round.winner  = result.key;
+        log('Auto-settled: winner = box ' + result.key + ' (' + result.combined + ' combined)', 'ok');
+      } else {
+        log('Auto-settle: could not determine winner (missing scores or all ineligible)', 'warn');
+      }
+    }
+
+    rounds[roundIdx] = round;
+
+    try {
+      await db.collection('golfPools').doc(poolId).update({ rounds: rounds });
+      // Update local cache
+      const localPool = golfBoxPools.find(p => p.id === poolId);
+      if (localPool) localPool.rounds = rounds;
+      currentGolfPool = localPool || currentGolfPool;
+      buildGolfRoundSelect(); // refresh settled indicators
+
+      const msg = 'Pushed ' + pushed + ' score(s) to ' + (pool.name || poolId) + ' Round ' + (roundIdx+1) +
+        (autoSettle && round.settled ? ' · Round settled ✓' : '');
+      setStatus(msg, 'success');
+      log(msg, 'ok');
+    } catch(e) {
+      log('Push failed: ' + e.message, 'err');
+      setStatus('Push failed: ' + e.message, 'error');
+    }
+
+    btn.disabled  = false;
+    btn.innerHTML = 'Push Round Scores';
+  }
+
+  function computeGolfRoundWinner(round, golfers, entries) {
+    const scores = round.scores || {};
+    const n = golfers.length;
+    let bestCombined = Infinity;
+    let bestResult   = null;
+    for (let col = 0; col < n; col++) {
+      for (let row = 0; row < n; row++) {
+        if (col === row) continue;
+        const colG = golfers[col];
+        const rowG = golfers[row];
+        if ((colG.status || 'active') !== 'active') continue;
+        if ((rowG.status || 'active') !== 'active') continue;
+        const cs = scores[col];
+        const rs = scores[row];
+        if (cs === undefined || rs === undefined) continue;
+        const combined = cs + rs;
+        if (combined < bestCombined) {
+          bestCombined = combined;
+          bestResult = { col, row, colScore: cs, rowScore: rs, combined, key: col + '-' + row };
+        }
+      }
+    }
+    return bestResult;
+  }
+  // ─────────────────────────────────────────────────────────────────────────
     const el = document.getElementById('statusBar');
     el.className = 'status-bar ' + (type||'');
     el.innerHTML = pulse ? '<span class="pulse"></span> ' + msg : msg;
