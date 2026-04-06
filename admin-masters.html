@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Masters Admin — SportsPools</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+  :root{
+    --bg:#0d0f14;--surface:#151821;--surface2:#1c2030;--border:#252a3a;
+    --accent:#3b82f6;--accent2:#10b981;--warn:#f59e0b;--danger:#ef4444;
+    --masters-green:#1a6b3a;--masters-gold:#d4a017;
+    --text:#e2e8f0;--muted:#64748b;
+    --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh}
+  header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between}
+  .logo{font-family:var(--mono);font-size:13px;color:var(--muted);letter-spacing:.08em}
+  .logo span{color:var(--masters-gold)}
+  .header-title{font-size:15px;font-weight:600;letter-spacing:.02em}
+  .back-link{font-family:var(--mono);font-size:12px;color:var(--muted);text-decoration:none;transition:color .2s}
+  .back-link:hover{color:var(--text)}
+  main{max-width:1200px;margin:0 auto;padding:32px 24px}
+  h1{font-size:22px;font-weight:700;margin-bottom:4px}
+  .page-subtitle{color:var(--muted);font-size:14px;margin-bottom:32px}
+
+  /* Tabs */
+  .tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:28px}
+  .tab{padding:10px 20px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+  .tab.active{color:var(--masters-gold);border-bottom-color:var(--masters-gold)}
+  .tab:hover:not(.active){color:var(--text)}
+  .tab-panel{display:none}
+  .tab-panel.active{display:block}
+
+  /* Cards */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:24px;margin-bottom:20px}
+  .card-title{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px}
+  .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+
+  /* Fields */
+  .field label{display:block;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+  .field input,.field select,.field textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:9px 12px;outline:none;transition:border-color .2s}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--masters-gold)}
+  .field textarea{resize:vertical;min-height:80px}
+
+  /* Buttons */
+  .btn{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.04em;border:none;border-radius:7px;padding:10px 20px;cursor:pointer;transition:all .15s;white-space:nowrap}
+  .btn-primary{background:var(--masters-green);color:#fff}
+  .btn-primary:hover{background:#145e32;transform:translateY(-1px)}
+  .btn-gold{background:var(--masters-gold);color:#0d0f14}
+  .btn-gold:hover{background:#c8920a}
+  .btn-danger{background:var(--danger);color:#fff}
+  .btn-danger:hover{background:#dc2626}
+  .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+  .btn-ghost:hover{color:var(--text);border-color:var(--text)}
+  .btn-sm{padding:6px 14px;font-size:12px}
+  .btn:disabled{background:var(--border);color:var(--muted);cursor:not-allowed;transform:none}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+
+  /* Status */
+  .status-bar{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:20px;display:flex;align-items:center;gap:10px;min-height:44px}
+  .status-bar.info{border-color:var(--accent);color:var(--accent)}
+  .status-bar.success{border-color:var(--accent2);color:var(--accent2)}
+  .status-bar.error{border-color:var(--danger);color:var(--danger)}
+  .status-bar.warn{border-color:var(--warn);color:var(--warn)}
+  .pulse{width:8px;height:8px;border-radius:50%;background:currentColor;animation:pulse 1.4s ease-in-out infinite;flex-shrink:0}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+
+  /* Payout table */
+  .payout-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:12px}
+  .payout-row{display:flex;align-items:center;gap:8px}
+  .payout-pos{font-family:var(--mono);font-size:12px;color:var(--muted);width:50px;flex-shrink:0}
+  .payout-input{background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:7px 10px;outline:none;width:100%;transition:border-color .2s}
+  .payout-input:focus{border-color:var(--masters-gold)}
+
+  /* Entries table */
+  table{width:100%;border-collapse:collapse}
+  th{padding:10px 12px;text-align:left;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--border)}
+  td{padding:12px 12px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;vertical-align:top}
+  tr:hover td{background:rgba(255,255,255,0.02)}
+  .badge{font-family:var(--mono);font-size:11px;padding:3px 8px;border-radius:4px;font-weight:600}
+  .badge-green{background:rgba(16,185,129,.15);color:var(--accent2)}
+  .badge-gold{background:rgba(212,160,23,.15);color:var(--masters-gold)}
+  .badge-red{background:rgba(239,68,68,.15);color:var(--danger)}
+  .picks-mini{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+  .pick-chip{background:var(--surface2);border:1px solid var(--border);border-radius:3px;padding:2px 6px;font-size:11px;color:var(--muted)}
+
+  /* Log */
+  .log{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px;font-family:var(--mono);font-size:12px;max-height:220px;overflow-y:auto;margin-top:16px}
+  .log-entry{padding:2px 0;color:var(--muted)}
+  .log-entry.ok{color:var(--accent2)}
+  .log-entry.err{color:var(--danger)}
+  .log-entry.info{color:var(--accent)}
+
+  .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .section-label{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+  .empty-msg{text-align:center;padding:3rem;color:var(--muted);font-family:var(--mono);font-size:13px}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <a href="admin.html" class="back-link">← Admin Home</a>
+    <div class="logo" style="margin-top:4px">SPORTS<span>POOLS</span> · MASTERS ADMIN</div>
+  </div>
+  <div class="header-title">2026 Masters Pool Manager</div>
+  <span id="userLabel" style="font-family:var(--mono);font-size:12px;color:var(--muted);"></span>
+</header>
+
+<main>
+  <h1>Masters Pool Admin</h1>
+  <p class="page-subtitle">Manage pool settings · Load payouts by position · Recalculate winnings · View all entries</p>
+
+  <div class="status-bar" id="statusBar">Ready.</div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('settings')">Settings</button>
+    <button class="tab" onclick="switchTab('payouts')">Payouts</button>
+    <button class="tab" onclick="switchTab('entries')">Entries</button>
+    <button class="tab" onclick="switchTab('recalc')">Recalculate</button>
+  </div>
+
+  <!-- SETTINGS TAB -->
+  <div class="tab-panel active" id="tab-settings">
+    <div class="card">
+      <div class="card-title">Pool Configuration</div>
+      <div class="card-grid">
+        <div class="field"><label>Pool Name</label><input type="text" id="poolName" value="2026 Masters Pool"></div>
+        <div class="field"><label>Buy-In ($)</label><input type="number" id="poolBuyIn" value="25" min="0" step="5"></div>
+        <div class="field"><label>Status</label>
+          <select id="poolStatus">
+            <option value="open">Open (accepting picks)</option>
+            <option value="locked">Locked (tournament in progress)</option>
+            <option value="closed">Closed (final)</option>
+          </select>
+        </div>
+        <div class="field"><label>Tournament Dates</label><input type="text" id="tourneyDates" value="April 9–12, 2026"></div>
+      </div>
+      <div class="field" style="margin-top:16px"><label>Description</label><textarea id="poolDescription">Pick 1 golfer from each of 9 tiers. Score = combined prize winnings. Missed cut/WD = $0.</textarea></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+        <button class="btn btn-ghost btn-sm" onclick="loadSettings()">↻ Reload</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAYOUTS TAB -->
+  <div class="tab-panel" id="tab-payouts">
+    <div class="card">
+      <div class="card-title">Tournament Payouts by Finishing Position</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Enter the dollar amount paid to each finishing position. These are used to calculate each entry's total winnings score. Positions not listed pay $0 (including MC/WD).</p>
+      <div class="btn-row" style="margin-bottom:16px;margin-top:0;">
+        <button class="btn btn-ghost btn-sm" onclick="loadDefaultPayouts()">Load 2026 Defaults</button>
+        <button class="btn btn-ghost btn-sm" onclick="clearPayouts()">Clear All</button>
+      </div>
+      <div id="payoutGrid" class="payout-grid"></div>
+      <div class="btn-row">
+        <button class="btn btn-gold" onclick="savePayouts()">Save Payouts to Firebase</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Quick Paste — CSV Format</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Paste a two-column CSV (position, amount) to bulk-load payouts. Example: <code style="color:var(--masters-gold);">1,3600000\n2,2160000\n3,1360000</code></p>
+      <div class="field"><textarea id="payoutCsv" placeholder="1,3600000&#10;2,2160000&#10;3,1360000&#10;4,960000&#10;..."></textarea></div>
+      <div class="btn-row">
+        <button class="btn btn-primary btn-sm" onclick="parseCsvPayouts()">Parse & Load CSV</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ENTRIES TAB -->
+  <div class="tab-panel" id="tab-entries">
+    <div class="section-header">
+      <span class="section-label">All Entries (<span id="entryCount">0</span>)</span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost btn-sm" onclick="loadEntries()">↻ Refresh</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteAllEntries()">Delete All Entries</button>
+      </div>
+    </div>
+    <div id="entriesContent"><div class="empty-msg">Loading entries...</div></div>
+  </div>
+
+  <!-- RECALCULATE TAB -->
+  <div class="tab-panel" id="tab-recalc">
+    <div class="card">
+      <div class="card-title">Recalculate Winnings from ESPN Leaderboard</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">
+        This fetches the current Masters leaderboard from ESPN, looks up each golfer's finishing position, applies your saved payouts, totals each entry's winnings, and writes the result back to Firestore. Run this during or after the tournament.
+      </p>
+      <div class="btn-row">
+        <button class="btn btn-gold" id="recalcBtn" onclick="runRecalculate()">Fetch Leaderboard &amp; Recalculate</button>
+        <button class="btn btn-ghost btn-sm" onclick="clearAllWinnings()">Reset All Winnings to $0</button>
+      </div>
+      <div class="log" id="recalcLog"><div class="log-entry">Ready — click above to start.</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Manual Override — Single Golfer</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Override a golfer's earnings manually (e.g. if ESPN data doesn't match). This reruns the winnings calculation for all entries using your manual value.</p>
+      <div class="card-grid">
+        <div class="field"><label>Golfer Name</label><input type="text" id="overrideGolfer" placeholder="e.g. Scottie Scheffler"></div>
+        <div class="field"><label>Earnings ($)</label><input type="number" id="overrideEarnings" placeholder="e.g. 3600000" min="0"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary btn-sm" onclick="manualOverride()">Apply Override</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script>
+const POOL_ID = 'masters-2026';
+const ESPN_URL = 'https://site.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=pga';
+const PAYOUT_POSITIONS = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
+                          21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,
+                          36,37,38,39,40,41,42,43,44,45,46,47,48,49,50];
+
+// 2026 Masters approximate payout table (based on ~$20M purse)
+const DEFAULT_PAYOUTS_2026 = {
+  1:3600000,2:2160000,3:1360000,4:960000,5:800000,
+  6:720000,7:670000,8:620000,9:580000,10:540000,
+  11:500000,12:460000,13:420000,14:390000,15:364000,
+  16:340000,17:318000,18:298000,19:280000,20:264000,
+  21:248000,22:234000,23:220000,24:208000,25:196000,
+  26:186000,27:176000,28:166000,29:158000,30:150000,
+  31:142000,32:135000,33:128000,34:122000,35:116000,
+  36:110000,37:105000,38:100000,39:96000,40:92000,
+  41:88000,42:84000,43:80000,44:76000,45:72000,
+  46:68000,47:64000,48:60000,49:57000,50:54000
+};
+
+let payouts = {};
+let manualEarnings = {};
+let logLines = [];
+
+// ── AUTH ──
+auth.onAuthStateChanged(async user => {
+  if (!user) { window.location.href='home.html'; return; }
+  const data = await getCurrentUserData();
+  if (!data || data.role !== 'admin') { window.location.href='home.html'; return; }
+  document.getElementById('userLabel').textContent = user.email;
+  loadSettings();
+  loadPayouts();
+  loadEntries();
+});
+
+// ── TABS ──
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    const tabs=['settings','payouts','entries','recalc'];
+    t.classList.toggle('active',tabs[i]===tab);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  if (tab==='entries') loadEntries();
+}
+
+// ── STATUS ──
+function setStatus(msg, type='') {
+  const el = document.getElementById('statusBar');
+  el.textContent = msg;
+  el.className = 'status-bar' + (type ? ' '+type : '');
+}
+
+// ── SETTINGS ──
+async function loadSettings() {
+  try {
+    const doc = await db.collection('mastersPools').doc(POOL_ID).get();
+    if (doc.exists) {
+      const d = doc.data();
+      if (d.name) document.getElementById('poolName').value = d.name;
+      if (d.buyIn) document.getElementById('poolBuyIn').value = d.buyIn;
+      if (d.status) document.getElementById('poolStatus').value = d.status;
+      if (d.dates) document.getElementById('tourneyDates').value = d.dates;
+      if (d.description) document.getElementById('poolDescription').value = d.description;
+    }
+  } catch(e) { setStatus('Error loading settings: '+e.message,'error'); }
+}
+
+async function saveSettings() {
+  setStatus('Saving settings...','info');
+  try {
+    await db.collection('mastersPools').doc(POOL_ID).set({
+      name: document.getElementById('poolName').value,
+      buyIn: parseFloat(document.getElementById('poolBuyIn').value)||0,
+      status: document.getElementById('poolStatus').value,
+      dates: document.getElementById('tourneyDates').value,
+      description: document.getElementById('poolDescription').value,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
+    setStatus('Settings saved.','success');
+  } catch(e) { setStatus('Error: '+e.message,'error'); }
+}
+
+// ── PAYOUTS ──
+function renderPayoutGrid() {
+  const grid = document.getElementById('payoutGrid');
+  grid.innerHTML = PAYOUT_POSITIONS.map(pos =>
+    '<div class="payout-row">' +
+    '<span class="payout-pos">#' + pos + '</span>' +
+    '<input class="payout-input" type="number" min="0" step="1000" id="po-'+pos+'" ' +
+    'value="' + (payouts[pos]||0) + '" placeholder="0">' +
+    '</div>'
+  ).join('');
+}
+
+async function loadPayouts() {
+  try {
+    const doc = await db.collection('mastersPools').doc(POOL_ID).get();
+    if (doc.exists && doc.data().payouts) {
+      payouts = doc.data().payouts;
+    } else {
+      payouts = {};
+    }
+    if (doc.exists && doc.data().manualEarnings) {
+      manualEarnings = doc.data().manualEarnings;
+    }
+  } catch(e) {}
+  renderPayoutGrid();
+}
+
+function loadDefaultPayouts() {
+  payouts = { ...DEFAULT_PAYOUTS_2026 };
+  renderPayoutGrid();
+  setStatus('2026 defaults loaded — click Save to persist.','warn');
+}
+
+function clearPayouts() {
+  payouts = {};
+  renderPayoutGrid();
+}
+
+function readPayoutInputs() {
+  const result = {};
+  PAYOUT_POSITIONS.forEach(pos => {
+    const val = parseFloat(document.getElementById('po-'+pos).value)||0;
+    if (val > 0) result[pos] = val;
+  });
+  return result;
+}
+
+async function savePayouts() {
+  setStatus('Saving payouts...','info');
+  const po = readPayoutInputs();
+  try {
+    await db.collection('mastersPools').doc(POOL_ID).set({ payouts: po }, { merge:true });
+    payouts = po;
+    setStatus('Payouts saved (' + Object.keys(po).length + ' positions).','success');
+  } catch(e) { setStatus('Error: '+e.message,'error'); }
+}
+
+function parseCsvPayouts() {
+  const raw = document.getElementById('payoutCsv').value.trim();
+  if (!raw) return;
+  const result = {};
+  let count = 0;
+  raw.split('\n').forEach(line => {
+    const parts = line.trim().split(',');
+    if (parts.length >= 2) {
+      const pos = parseInt(parts[0]);
+      const amt = parseFloat(parts[1].replace(/[$,]/g,''));
+      if (!isNaN(pos) && !isNaN(amt)) { result[pos]=amt; count++; }
+    }
+  });
+  payouts = result;
+  renderPayoutGrid();
+  setStatus('Parsed '+count+' payouts from CSV. Click Save to persist.','warn');
+}
+
+// ── ENTRIES ──
+async function loadEntries() {
+  const el = document.getElementById('entriesContent');
+  el.innerHTML = '<div class="empty-msg">Loading...</div>';
+  try {
+    const snap = await db.collection('mastersPools').doc(POOL_ID).collection('entries')
+      .orderBy('totalWinnings','desc').get();
+    document.getElementById('entryCount').textContent = snap.size;
+    if (snap.empty) { el.innerHTML='<div class="empty-msg">No entries yet.</div>'; return; }
+    const entries = snap.docs.map(d => ({id:d.id,...d.data()}));
+    const tierNames = ['T1','T2','T3','T4','T5','T6','T7','T8','T9'];
+    let html = '<div style="overflow-x:auto"><table><thead><tr>' +
+      '<th>Entry</th><th>User</th><th>Picks</th><th>Winnings</th><th>Submitted</th><th></th>' +
+      '</tr></thead><tbody>';
+    entries.forEach(e => {
+      const picks = e.picks||{};
+      const chipsHtml = Object.entries(picks).map(([t,g]) =>
+        '<span class="pick-chip">'+g+'</span>'
+      ).join('');
+      const ts = e.submittedAt && e.submittedAt.toDate ? e.submittedAt.toDate().toLocaleDateString() : '—';
+      html += '<tr>' +
+        '<td><strong>' + (e.entryName||'—') + '</strong></td>' +
+        '<td style="color:var(--muted)">' + (e.userName||e.userId||'—') + '</td>' +
+        '<td><div class="picks-mini">'+chipsHtml+'</div></td>' +
+        '<td><span class="badge badge-'+(e.totalWinnings>0?'green':'gold')+'">$'+(e.totalWinnings||0).toLocaleString()+'</span></td>' +
+        '<td style="color:var(--muted)">'+ts+'</td>' +
+        '<td><button class="btn btn-ghost btn-sm" onclick="deleteEntry(\''+e.id+'\')">Delete</button></td>' +
+        '</tr>';
+    });
+    html += '</tbody></table></div>';
+    el.innerHTML = html;
+  } catch(err) {
+    el.innerHTML='<div class="empty-msg" style="color:var(--danger)">Error: '+err.message+'</div>';
+  }
+}
+
+async function deleteEntry(entryId) {
+  if (!confirm('Delete this entry? This cannot be undone.')) return;
+  try {
+    await db.collection('mastersPools').doc(POOL_ID).collection('entries').doc(entryId).delete();
+    setStatus('Entry deleted.','success');
+    loadEntries();
+  } catch(e) { setStatus('Error: '+e.message,'error'); }
+}
+
+async function deleteAllEntries() {
+  if (!confirm('DELETE ALL ENTRIES? This is permanent and irreversible.')) return;
+  if (!confirm('Are you absolutely sure? All picks will be lost.')) return;
+  setStatus('Deleting all entries...','warn');
+  try {
+    const snap = await db.collection('mastersPools').doc(POOL_ID).collection('entries').get();
+    const batch = db.batch();
+    snap.docs.forEach(d => batch.delete(d.ref));
+    await batch.commit();
+    await db.collection('mastersPools').doc(POOL_ID).update({ entryCount:0 });
+    setStatus('All entries deleted.','success');
+    loadEntries();
+  } catch(e) { setStatus('Error: '+e.message,'error'); }
+}
+
+// ── RECALCULATE ──
+function log(msg, type='') {
+  logLines.push({ msg, type });
+  const el = document.getElementById('recalcLog');
+  el.innerHTML = logLines.slice(-60).map(l =>
+    '<div class="log-entry'+( l.type?' '+l.type:'')+'">'+l.msg+'</div>'
+  ).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+async function runRecalculate() {
+  logLines = [];
+  const btn = document.getElementById('recalcBtn');
+  btn.disabled = true; btn.textContent = 'Running...';
+  setStatus('Fetching leaderboard...','info');
+  log('Starting recalculation...','info');
+
+  try {
+    // Load saved payouts
+    const poolDoc = await db.collection('mastersPools').doc(POOL_ID).get();
+    const po = (poolDoc.exists && poolDoc.data().payouts) || DEFAULT_PAYOUTS_2026;
+    const manualEarningsMap = (poolDoc.exists && poolDoc.data().manualEarnings) || {};
+    log('Loaded payouts for ' + Object.keys(po).length + ' positions.','ok');
+
+    // Fetch ESPN leaderboard
+    let espnEarnings = {};
+    try {
+      const res = await fetch(ESPN_URL);
+      const data = await res.json();
+      espnEarnings = parseESPNEarnings(data, po);
+      log('ESPN: parsed '+Object.keys(espnEarnings).length+' golfer earnings.','ok');
+    } catch(espnErr) {
+      log('ESPN fetch failed: '+espnErr.message+' — using manual overrides only.','err');
+    }
+
+    // Merge manual overrides
+    const golferEarnings = { ...espnEarnings, ...manualEarningsMap };
+    log('Total golfers with earnings: '+Object.keys(golferEarnings).length,'info');
+
+    // Load all entries
+    const snap = await db.collection('mastersPools').doc(POOL_ID).collection('entries').get();
+    if (snap.empty) { log('No entries found.','err'); return; }
+    log('Processing '+snap.size+' entries...','info');
+
+    // Calculate winnings per entry
+    const batch = db.batch();
+    snap.docs.forEach(doc => {
+      const entry = doc.data();
+      const picks = entry.picks || {};
+      let total = 0;
+      Object.values(picks).forEach(golferName => {
+        const earned = golferEarnings[golferName] || 0;
+        total += earned;
+      });
+      batch.update(doc.ref, { totalWinnings: total });
+      log('"'+(entry.entryName||entry.userName||doc.id)+'": $'+total.toLocaleString(),'ok');
+    });
+    await batch.commit();
+    log('✅ All ' + snap.size + ' entries updated.','ok');
+    setStatus('Recalculation complete — '+snap.size+' entries updated.','success');
+    loadEntries();
+  } catch(e) {
+    log('Fatal error: '+e.message,'err');
+    setStatus('Error: '+e.message,'error');
+  } finally {
+    btn.disabled=false; btn.textContent='Fetch Leaderboard & Recalculate';
+  }
+}
+
+function parseESPNEarnings(data, po) {
+  const result = {};
+  const events = data.events || [];
+  if (!events.length) return result;
+  const event = events[0];
+  const comps = (event.competitions||[])[0]||{};
+  const competitors = comps.competitors||[];
+  competitors.forEach(c => {
+    const name = (c.athlete && c.athlete.displayName) || '';
+    if (!name) return;
+    const statusName = (c.status && c.status.type && c.status.type.name)||'';
+    if (statusName.toLowerCase().includes('cut') || statusName.toLowerCase().includes('wd')) {
+      result[name] = 0;
+      return;
+    }
+    const posStr = (c.status && c.status.position && c.status.position.displayName)||'';
+    const pos = parseInt(posStr.replace(/[^0-9]/g,''));
+    if (!isNaN(pos) && po[pos]) {
+      result[name] = po[pos];
+    } else {
+      result[name] = 0;
+    }
+  });
+  return result;
+}
+
+async function clearAllWinnings() {
+  if (!confirm('Reset all entries to $0 winnings?')) return;
+  setStatus('Resetting...','warn');
+  try {
+    const snap = await db.collection('mastersPools').doc(POOL_ID).collection('entries').get();
+    const batch = db.batch();
+    snap.docs.forEach(d => batch.update(d.ref, { totalWinnings:0 }));
+    await batch.commit();
+    setStatus('All winnings reset to $0.','success');
+    loadEntries();
+  } catch(e) { setStatus('Error: '+e.message,'error'); }
+}
+
+async function manualOverride() {
+  const golfer = document.getElementById('overrideGolfer').value.trim();
+  const amount = parseFloat(document.getElementById('overrideEarnings').value)||0;
+  if (!golfer) { setStatus('Enter a golfer name.','warn'); return; }
+  setStatus('Saving override for '+golfer+'...','info');
+  try {
+    const update = {};
+    update['manualEarnings.'+golfer] = amount;
+    await db.collection('mastersPools').doc(POOL_ID).update(update);
+    setStatus('Override saved: '+golfer+' = $'+amount.toLocaleString()+'. Now run Recalculate.','success');
+  } catch(e) { setStatus('Error: '+e.message,'error'); }
+}
+</script>
+</body>
+</html>

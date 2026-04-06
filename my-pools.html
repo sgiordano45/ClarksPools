@@ -642,6 +642,7 @@
             <button class="tab active" data-tab="all">All Pools</button>
             <button class="tab" data-tab="fantasy">Fantasy Pools</button>
             <button class="tab" data-tab="betting">Betting Pools</button>
+            <button class="tab" data-tab="golf">⛳ Golf Pools</button>
         </div>
 
         <!-- Tab Content -->
@@ -659,6 +660,10 @@
 
         <div class="tab-content" id="tab-betting">
             <div class="pools-grid" id="bettingPoolsGrid"></div>
+        </div>
+
+        <div class="tab-content" id="tab-golf">
+            <div class="pools-grid" id="golfPoolsGrid"></div>
         </div>
     </main>
 
@@ -799,6 +804,38 @@
                     }
                 }
 
+                // Check Masters Golf Pool
+                try {
+                    const mastersEntriesSnap = await db.collection('mastersPools').doc('masters-2026')
+                        .collection('entries').where('userId', '==', userId).limit(1).get();
+                    if (!mastersEntriesSnap.empty) {
+                        const entry = mastersEntriesSnap.docs[0].data();
+                        const allEntriesSnap = await db.collection('mastersPools').doc('masters-2026')
+                            .collection('entries').orderBy('totalWinnings', 'desc').get();
+                        let rank = 1;
+                        allEntriesSnap.forEach(doc => {
+                            if (doc.id === mastersEntriesSnap.docs[0].id) return;
+                            if ((doc.data().totalWinnings || 0) > (entry.totalWinnings || 0)) rank++;
+                        });
+                        const poolMeta = await db.collection('mastersPools').doc('masters-2026').get();
+                        const meta = poolMeta.exists ? poolMeta.data() : {};
+                        myPools.push({
+                            id: 'masters-2026',
+                            name: meta.name || '2026 Masters Pool',
+                            status: meta.status || 'open',
+                            buyIn: meta.buyIn || 0,
+                            poolType: 'golf',
+                            sport: 'golf',
+                            entryName: entry.entryName || 'My Team',
+                            totalWinnings: entry.totalWinnings || 0,
+                            userRank: rank,
+                            totalParticipants: allEntriesSnap.size,
+                        });
+                        totalEntries++;
+                        if (rank < bestRank) bestRank = rank;
+                    }
+                } catch(e) { /* masters pool may not exist yet */ }
+
                 // Update stats
                 document.getElementById('totalPools').textContent = myPools.length;
                 document.getElementById('totalEntries').textContent = totalEntries;
@@ -822,10 +859,12 @@
                 // Separate by type
                 const fantasyPools = myPools.filter(p => p.poolType === 'fantasy');
                 const bettingPools = myPools.filter(p => p.poolType === 'betting');
+                const golfPools    = myPools.filter(p => p.poolType === 'golf');
 
                 allGrid.innerHTML = myPools.map(renderPoolCard).join('');
                 fantasyGrid.innerHTML = fantasyPools.length ? fantasyPools.map(renderPoolCard).join('') : renderEmptyState('fantasy');
                 bettingGrid.innerHTML = bettingPools.length ? bettingPools.map(renderPoolCard).join('') : renderEmptyState('betting');
+                document.getElementById('golfPoolsGrid').innerHTML = golfPools.length ? golfPools.map(renderPoolCard).join('') : renderEmptyState('golf');
 
             } catch (error) {
                 console.error('Error loading pools:', error);
@@ -838,9 +877,55 @@
         function renderPoolCard(pool) {
             const statusClass = pool.status === 'live' ? 'live' : pool.status === 'open' ? 'open' : 'closed';
             const statusText = pool.status.charAt(0).toUpperCase() + pool.status.slice(1);
-            const typeIcon = pool.poolType === 'betting' ? '💰' : '🏈';
-            const typeLabel = pool.poolType === 'betting' ? 'Betting Pool' : 'Fantasy Pool';
-            const viewPage = pool.poolType === 'betting' ? 'betting-pool.html' : 'pool.html';
+            const typeIcon = pool.poolType === 'betting' ? '💰' : pool.poolType === 'golf' ? '⛳' : '🏈';
+            const typeLabel = pool.poolType === 'betting' ? 'Betting Pool' : pool.poolType === 'golf' ? 'Golf Pool' : 'Fantasy Pool';
+            const viewPage = pool.poolType === 'betting' ? 'betting-pool.html' : pool.poolType === 'golf' ? 'masters-pool.html' : 'pool.html';
+
+            if (pool.poolType === 'golf') {
+                return `
+                    <div class="pool-card">
+                        <div class="pool-card-header">
+                            <div class="pool-info">
+                                <h3>${pool.name}</h3>
+                                <span class="pool-type">${typeIcon} ${typeLabel}</span>
+                            </div>
+                            <span class="pool-status ${statusClass}">
+                                <span class="status-dot"></span>
+                                ${statusText}
+                            </span>
+                        </div>
+                        <div class="pool-card-body">
+                            <div class="pool-stats">
+                                <div class="pool-stat">
+                                    <div class="pool-stat-value">$${pool.buyIn || 0}</div>
+                                    <div class="pool-stat-label">Buy-In</div>
+                                </div>
+                                <div class="pool-stat">
+                                    <div class="pool-stat-value">${pool.totalParticipants}</div>
+                                    <div class="pool-stat-label">Entries</div>
+                                </div>
+                                <div class="pool-stat">
+                                    <div class="pool-stat-value green">$${(pool.totalWinnings || 0).toLocaleString()}</div>
+                                    <div class="pool-stat-label">Your Winnings</div>
+                                </div>
+                            </div>
+                            <div class="pool-standing">
+                                <div>
+                                    <div class="standing-label">Entry</div>
+                                    <div class="standing-value" style="font-size:1rem">${pool.entryName}</div>
+                                </div>
+                                <div class="standing-rank">
+                                    <span class="standing-value">${pool.userRank}</span>
+                                    <span class="ordinal">${getOrdinalSuffix(pool.userRank)}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pool-card-footer">
+                            <a href="${viewPage}" class="btn btn-primary">View Pool</a>
+                        </div>
+                    </div>
+                `;
+            }
 
             if (pool.poolType === 'betting') {
                 return `

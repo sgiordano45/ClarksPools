@@ -113,11 +113,12 @@
   <div class="config-bar">
     <div class="field">
       <label>Sport</label>
-      <select id="sportSelect">
+      <select id="sportSelect" onchange="handleSportChange()">
         <option value="mens-college-basketball">NCAAB &#8212; Men's</option>
         <option value="womens-college-basketball">NCAAB &#8212; Women's</option>
         <option value="basketball/nba">NBA</option>
         <option value="football/nfl">NFL</option>
+        <option value="golf/masters">⛳ Masters Golf Pool</option>
       </select>
     </div>
     <div class="field">
@@ -227,6 +228,33 @@
         <button class="btn btn-success" id="pushBtn" onclick="pushScores()" disabled>Push Scores</button>
       </div>
     </div>
+  </div>
+
+  <!-- MASTERS GOLF PANEL -->
+  <div id="mastersPanel" style="display:none;margin-bottom:28px;">
+    <div class="section-header" style="margin-bottom:16px;">
+      <span class="section-label">⛳ Masters Leaderboard &amp; Earnings</span>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn btn-sm btn-ghost" onclick="fetchMastersLeaderboard()">↻ Refresh</button>
+        <button class="btn btn-sm btn-primary masters-bulk-btn" style="display:none;" onclick="pushAllMastersEarnings()">Push All Earnings</button>
+        <a href="admin-masters.html" class="btn btn-sm btn-ghost" style="text-decoration:none;">Masters Admin →</a>
+      </div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+      <table>
+        <thead>
+          <tr>
+            <th>Pos</th><th>Player</th><th>Score</th><th>Thru</th><th>Prize</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="mastersLbTable">
+          <tr><td colspan="6" style="padding:32px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:12px;">Select ⛳ Masters Golf Pool above to load leaderboard.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:10px;">
+      💡 "Push" saves an individual golfer's earnings to Firestore. After pushing, go to <a href="admin-masters.html" style="color:var(--masters-gold,#d4a017);">Masters Admin → Recalculate</a> to recompute all entry scores.
+    </p>
   </div>
 
   <div class="log-section">
@@ -641,6 +669,103 @@
     btn.disabled  = false;
     btn.innerHTML = '&#9654; Push to Sheets';
   }
+
+  // ── MASTERS GOLF LEADERBOARD ──────────────────────────────────────────────
+  const MASTERS_ESPN = 'https://site.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=pga';
+  const MASTERS_POOL_ID = 'masters-2026';
+  const MASTERS_DEFAULT_PAYOUTS = {
+    1:3600000,2:2160000,3:1360000,4:960000,5:800000,6:720000,7:670000,8:620000,9:580000,10:540000,
+    11:500000,12:460000,13:420000,14:390000,15:364000,16:340000,17:318000,18:298000,19:280000,20:264000,
+    21:248000,22:234000,23:220000,24:208000,25:196000,26:186000,27:176000,28:166000,29:158000,30:150000
+  };
+
+  function handleSportChange() {
+    const sport = document.getElementById('sportSelect').value;
+    const isMasters = sport === 'golf/masters';
+    document.getElementById('mastersPanel').style.display = isMasters ? 'block' : 'none';
+    document.getElementById('fetchBtn').style.display = isMasters ? 'none' : 'inline-block';
+    document.getElementById('espnSection').style.display = 'none';
+    document.getElementById('createSection') && (document.getElementById('createSection').style.display='none');
+    document.getElementById('matchSection') && (document.getElementById('matchSection').style.display='none');
+    if (isMasters) fetchMastersLeaderboard();
+  }
+
+  async function fetchMastersLeaderboard() {
+    setStatus('Fetching Masters leaderboard from ESPN...', 'info', true);
+    const tableEl = document.getElementById('mastersLbTable');
+    tableEl.innerHTML = '<tr><td colspan="6" style="padding:24px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:12px;">Loading...</td></tr>';
+    try {
+      const res = await fetch(MASTERS_ESPN);
+      const data = await res.json();
+      const events = data.events || [];
+      if (!events.length) {
+        tableEl.innerHTML = '<tr><td colspan="6" style="padding:24px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:12px;">No golf events found — tournament may not have started.</td></tr>';
+        setStatus('No Masters data found. Tournament begins April 9.', 'warn');
+        return;
+      }
+      const event = events[0];
+      const comps = (event.competitions||[])[0]||{};
+      const competitors = comps.competitors||[];
+      // Load payouts from Firestore
+      let po = MASTERS_DEFAULT_PAYOUTS;
+      try {
+        const poolDoc = await db.collection('mastersPools').doc(MASTERS_POOL_ID).get();
+        if (poolDoc.exists && poolDoc.data().payouts) po = poolDoc.data().payouts;
+      } catch(e) {}
+      // Render table
+      tableEl.innerHTML = competitors.map(c => {
+        const name = (c.athlete && c.athlete.displayName) || '?';
+        const posStr = (c.status && c.status.position && c.status.position.displayName) || '--';
+        const pos = parseInt(posStr.replace(/[^0-9]/g,''));
+        const score = c.score || 'E';
+        const thru = (c.status && c.status.thru) || '--';
+        const statusName = (c.status && c.status.type && c.status.type.name)||'';
+        const isMC = statusName.toLowerCase().includes('cut')||statusName.toLowerCase().includes('wd');
+        const earnings = isMC ? 0 : (po[pos]||0);
+        const scoreNum = parseInt(score)||0;
+        const scoreStyle = isMC ? 'color:var(--danger)' : scoreNum<0?'color:var(--accent2)':scoreNum>0?'color:var(--danger)':'color:var(--muted)';
+        return '<tr>' +
+          '<td style="font-family:var(--mono);font-size:12px;color:var(--muted)">'+posStr+'</td>' +
+          '<td style="font-weight:600">'+name+'</td>' +
+          '<td style="font-family:var(--mono);'+scoreStyle+'">'+(isMC?'MC':score)+'</td>' +
+          '<td style="font-family:var(--mono);font-size:12px;color:var(--muted)">'+thru+'</td>' +
+          '<td><span style="font-family:var(--mono);font-size:11px;background:rgba(16,185,129,.15);color:var(--accent2);padding:3px 8px;border-radius:4px">'+(earnings>0?'$'+earnings.toLocaleString():'—')+'</span></td>' +
+          '<td><button class="btn btn-sm" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);font-size:11px" ' +
+          'onclick="pushMastersEarnings(\''+name.replace(/'/g,"\\'")+'\','+earnings+')">Push</button></td>' +
+          '</tr>';
+      }).join('');
+      setStatus('Loaded ' + competitors.length + ' golfers. Use Push to write individual earnings, or go to Masters Admin → Recalculate for bulk.', 'success');
+      document.getElementById('mastersPanel').querySelector('.masters-bulk-btn').style.display = 'inline-block';
+    } catch(e) {
+      setStatus('Error: ' + e.message, 'error');
+      tableEl.innerHTML = '<tr><td colspan="6" style="padding:24px;text-align:center;color:var(--danger);font-family:var(--mono);font-size:12px;">'+e.message+'</td></tr>';
+    }
+  }
+
+  async function pushMastersEarnings(golferName, amount) {
+    setStatus('Saving earnings for '+golferName+'...','info',true);
+    try {
+      const update = {};
+      update['manualEarnings.'+golferName] = amount;
+      await db.collection('mastersPools').doc(MASTERS_POOL_ID).set(update, {merge:true});
+      log('Saved '+golferName+' earnings: $'+amount.toLocaleString(), 'ok');
+      setStatus('Saved. Run Recalculate in Masters Admin to update all entry scores.','success');
+    } catch(e) {
+      setStatus('Error: '+e.message,'error');
+    }
+  }
+
+  async function pushAllMastersEarnings() {
+    setStatus('Bulk pushing all visible golfer earnings...','info',true);
+    const rows = document.querySelectorAll('#mastersLbTable tr');
+    for (const row of rows) {
+      const btn = row.querySelector('button');
+      if (btn) btn.click();
+      await new Promise(r=>setTimeout(r,150));
+    }
+    setStatus('All earnings pushed. Go to Masters Admin → Recalculate to update entry scores.','success');
+  }
+  // ─────────────────────────────────────────────────────────────────────────
 
   function setStatus(msg, type, pulse) {
     const el = document.getElementById('statusBar');
