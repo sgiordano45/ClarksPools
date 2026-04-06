@@ -302,7 +302,7 @@ main { position:relative; z-index:1; max-width:1200px; margin:0 auto; padding:0 
       <div id="picksForm">
         <div class="picks-instructions">
           <h3>How to Play</h3>
-          <p>Pick <strong>1 golfer from each of the 9 tiers</strong> below. Tiers are ranked by odds — Tier 1 is the top favorites, Tier 9 is the longest shots. Your final score is the <strong>combined prize money earned</strong> by all 9 of your golfers. Missed cut / WD = $0. Highest total winnings wins the pool!</p>
+          <p>Pick <strong>1 golfer from each tier</strong> below. Tiers are ranked by odds — Tier 1 is the top favorites, the final tier is the longest shots. Your final score is the <strong>combined prize money earned</strong> by all of your golfers. Missed cut / WD = $0. Highest total winnings wins the pool!</p>
         </div>
         <div class="picks-layout">
           <div class="tiers-grid" id="tiersGrid">
@@ -451,6 +451,7 @@ const TIERS = [
 ];
 
 // ── STATE ──
+let TIERS = []; // loaded from Firestore
 let currentUser = null;
 let poolData = null;
 let userEntry = null;
@@ -463,9 +464,7 @@ const ESPN_URL = 'https://site.api.espn.com/apis/site/v2/sports/golf/leaderboard
 
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', () => {
-  renderTiers();
-  updateSummary();
-  loadPoolData();
+  loadPoolData(); // loads tiers + settings, then renders
   loadGolfLeaderboard();
 });
 
@@ -496,6 +495,16 @@ async function loadPoolData() {
     const doc = await db.collection('mastersPools').doc(POOL_ID).get();
     if (doc.exists) {
       poolData = doc.data();
+      // Load tiers from Firestore if saved
+      if (poolData.tiers && poolData.tiers.length) {
+        TIERS = poolData.tiers.map(t => ({
+          ...t,
+          // Admin stores golfers as plain strings; picks page needs {name} objects
+          golfers: (t.golfers || []).map(g =>
+            typeof g === 'string' ? { name: g } : g
+          )
+        }));
+      }
       updatePoolMeta();
       loadPayouts();
     } else {
@@ -503,8 +512,14 @@ async function loadPoolData() {
       document.getElementById('metaStatus').textContent = 'Open';
       document.getElementById('metaBuyIn').textContent = '$--';
     }
+    renderTiers();
+    updateSummary();
     loadStandings();
-  } catch(e) { console.error(e); }
+  } catch(e) {
+    console.error(e);
+    renderTiers();
+    updateSummary();
+  }
 }
 
 function updatePoolMeta() {
@@ -571,25 +586,36 @@ function showExistingEntry() {
 // ── RENDER TIERS ──
 function renderTiers() {
   const container = document.getElementById('tiersGrid');
-  container.innerHTML = TIERS.map(tier => {
-    const golferBtns = tier.golfers.map(g =>
-      '<button class="golfer-btn" data-tier="' + tier.id + '" data-golfer="' + g.name + '" onclick="selectGolfer(\'' + tier.id + '\',\'' + g.name.replace(/'/g,"\\'") + '\',this)">' +
-      '<span>' + g.name + '</span>' +
-      '<span class="golfer-odds">' + g.odds + '</span>' +
-      '</button>'
-    ).join('');
-    return '<div class="tier-card" id="card-' + tier.id + '">' +
+  if (!TIERS.length) {
+    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-secondary);">' +
+      '<div style="font-size:2rem;margin-bottom:1rem;">⛳</div>' +
+      '<p>Tiers are being configured. Check back soon!</p></div>';
+    return;
+  }
+  container.innerHTML = TIERS.map((tier, idx) => {
+    const golferBtns = (tier.golfers || []).map(g => {
+      const name = typeof g === 'string' ? g : g.name;
+      const odds = typeof g === 'object' && g.odds ? g.odds : '';
+      const safeId = tier.id || ('tier' + (idx+1));
+      return '<button class="golfer-btn" data-tier="' + safeId + '" data-golfer="' + name + '" onclick="selectGolfer(\'' + safeId + '\',\'' + name.replace(/'/g,"\\'") + '\',this)">' +
+        '<span>' + name + '</span>' +
+        (odds ? '<span class="golfer-odds">' + odds + '</span>' : '') +
+        '</button>';
+    }).join('');
+    const tierId = tier.id || ('tier' + (idx+1));
+    return '<div class="tier-card" id="card-' + tierId + '">' +
       '<div class="tier-header">' +
       '<div class="tier-label">' +
-      '<span class="tier-badge">' + tier.label + '</span>' +
-      '<div><div class="tier-name">' + tier.name + '</div><div class="tier-odds">' + tier.odds + '</div></div>' +
+      '<span class="tier-badge">' + (tier.label || tier.name || ('Tier ' + (idx+1))) + '</span>' +
+      '<div><div class="tier-name">' + (tier.name || ('Tier ' + (idx+1))) + '</div>' +
+      (tier.odds ? '<div class="tier-odds">' + tier.odds + '</div>' : '') +
       '</div>' +
-      '<span class="selected-indicator" id="sel-' + tier.id + '">✓ Pick Made</span>' +
+      '</div>' +
+      '<span class="selected-indicator" id="sel-' + tierId + '">✓ Pick Made</span>' +
       '</div>' +
       '<div class="golfer-select-grid">' + golferBtns + '</div>' +
       '</div>';
   }).join('');
-  updateSummary();
 }
 
 function selectGolfer(tierId, golferName, btn) {
@@ -607,10 +633,11 @@ function selectGolfer(tierId, golferName, btn) {
 }
 
 function updateSummary() {
+  const total = TIERS.length || 9;
   const pickCount = Object.keys(selections).length;
-  document.getElementById('pickCount').textContent = pickCount + ' / 9';
-  document.getElementById('progressFill').style.width = (pickCount / 9 * 100) + '%';
-  const allPicked = pickCount === 9;
+  document.getElementById('pickCount').textContent = pickCount + ' / ' + total;
+  document.getElementById('progressFill').style.width = (pickCount / total * 100) + '%';
+  const allPicked = pickCount === total;
   const submitBtn = document.getElementById('submitBtn');
   submitBtn.disabled = !allPicked || (poolData && poolData.status === 'locked');
 
