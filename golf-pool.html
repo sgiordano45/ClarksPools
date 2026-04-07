@@ -1032,17 +1032,31 @@ header::before {
     <!-- Golfers Tab -->
     <div class="admin-section" id="tab-golfers">
       <p style="color:var(--text-secondary); margin-bottom:1rem; font-size:0.9rem;">
-        Add golfers for this pool. The grid will be N×N where N = number of golfers. Once the pool is locked, golfer status can be updated (Active / Cut / WD) — any box with a cut/WD golfer becomes ineligible.
+        Add 10 column golfers (across the top) and 10 row golfers (down the side) for a fixed 10×10 grid. Once locked, update golfer status to Cut/WD as the tournament progresses — that entire row or column becomes ineligible.
       </p>
-      <div style="display:flex; gap:0.75rem; margin-bottom:1rem; flex-wrap:wrap; align-items:flex-end;">
+      <div style="display:flex; gap:0.75rem; margin-bottom:1.25rem; flex-wrap:wrap; align-items:flex-end;">
         <div class="form-group" style="margin:0; flex:1; min-width:200px;">
           <label>Golfer Name</label>
           <input type="text" id="newGolferName" placeholder="e.g., Scottie Scheffler" onkeydown="if(event.key==='Enter') addGolfer()">
         </div>
+        <div class="form-group" style="margin:0;">
+          <label>Role</label>
+          <select id="newGolferRole" style="padding:0.75rem 1rem;border-radius:8px;border:2px solid var(--card-border);background:var(--tertiary-dark);color:var(--text-primary);font-size:1rem;">
+            <option value="col">Column (top axis)</option>
+            <option value="row">Row (left axis)</option>
+          </select>
+        </div>
         <button class="btn btn-golf" onclick="addGolfer()">➕ Add Golfer</button>
       </div>
-      <div class="golfer-list" id="golferList">
-        <p style="color:var(--text-secondary); text-align:center; padding:1rem;">No golfers added yet</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+        <div>
+          <div style="font-family:'Oswald',sans-serif;font-size:0.85rem;color:var(--accent-blue);text-transform:uppercase;letter-spacing:1px;margin-bottom:0.5rem;">📊 Column Golfers (<span id="colGolferCount">0</span>/10)</div>
+          <div class="golfer-list" id="colGolferList"><p style="color:var(--text-secondary);text-align:center;padding:1rem;font-size:0.85rem;">No column golfers yet</p></div>
+        </div>
+        <div>
+          <div style="font-family:'Oswald',sans-serif;font-size:0.85rem;color:var(--accent-golf);text-transform:uppercase;letter-spacing:1px;margin-bottom:0.5rem;">📋 Row Golfers (<span id="rowGolferCount">0</span>/10)</div>
+          <div class="golfer-list" id="rowGolferList"><p style="color:var(--text-secondary);text-align:center;padding:1rem;font-size:0.85rem;">No row golfers yet</p></div>
+        </div>
       </div>
       <div style="margin-top:1rem;">
         <button class="btn btn-primary" onclick="saveGolfers()">💾 Save Golfers</button>
@@ -1279,7 +1293,8 @@ var pendingBoxClaim = null;
 var allUsers = [];
 var currentLinkType = 'name';
 var currentLeaderboardView = 'results';
-var localGolfers = [];   // working copy while editing golfers tab
+var localColGolfers = []; // working copy — column golfers
+var localRowGolfers = []; // working copy — row golfers
 var localRounds = [];    // working copy while editing rounds tab
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
@@ -1428,13 +1443,13 @@ function getTournamentLabel(t) {
 function renderGrid() {
   var wrapper = document.getElementById('golfGridWrapper');
   var pool = currentPool;
-  var golfers = pool.golfers || [];
-  var n = golfers.length;
+  var colGolfers = pool.colGolfers || [];
+  var rowGolfers = pool.rowGolfers || [];
   var entries = pool.entries || {};
   var rounds = pool.rounds || [];
 
-  if (n < 2) {
-    wrapper.innerHTML = '<p style="color:var(--text-secondary); text-align:center; padding:2rem;">⛳ No golfers configured yet. Admin must add golfers first.</p>';
+  if (colGolfers.length === 0 || rowGolfers.length === 0) {
+    wrapper.innerHTML = '<p style="color:var(--text-secondary); text-align:center; padding:2rem;">⛳ Add column and row golfers in the Golfers tab first.</p>';
     return;
   }
 
@@ -1447,14 +1462,13 @@ function renderGrid() {
     }
   });
 
-  // Build HTML using string concatenation (Safari-safe)
   var html = '';
 
-  // Column headers row
+  // Column headers row (col golfers across top)
   html += '<div class="golf-col-headers">';
   html += '<div class="golf-corner-cell">ROW ↓ / COL →</div>';
-  for (var c = 0; c < n; c++) {
-    var cg = golfers[c];
+  for (var c = 0; c < colGolfers.length; c++) {
+    var cg = colGolfers[c];
     var cgStatus = (cg.status || 'active');
     html += '<div class="golf-header-cell ' + cgStatus + '" title="' + escHtml(cg.name) + '">';
     html += '<span>' + escHtml(abbreviateName(cg.name)) + '</span>';
@@ -1464,11 +1478,11 @@ function renderGrid() {
   }
   html += '</div>';
 
-  // Grid area with row labels + boxes
+  // Grid area: row labels (row golfers) + boxes
   html += '<div class="golf-grid-area">';
   html += '<div class="golf-row-labels">';
-  for (var r = 0; r < n; r++) {
-    var rg = golfers[r];
+  for (var r = 0; r < rowGolfers.length; r++) {
+    var rg = rowGolfers[r];
     var rgStatus = (rg.status || 'active');
     html += '<div class="golf-row-label ' + rgStatus + '" title="' + escHtml(rg.name) + '">';
     html += escHtml(abbreviateName(rg.name));
@@ -1478,26 +1492,23 @@ function renderGrid() {
   }
   html += '</div>';
 
-  // Grid
+  // Grid boxes: row = rowGolfer index, col = colGolfer index
   html += '<div class="golf-grid">';
-  for (var row = 0; row < n; row++) {
+  for (var row = 0; row < rowGolfers.length; row++) {
     html += '<div class="golf-grid-row">';
-    for (var col = 0; col < n; col++) {
-      // key: col-row (column golfer index, row golfer index)
+    for (var col = 0; col < colGolfers.length; col++) {
       var key = col + '-' + row;
       var entry = entries[key];
       var isTaken = !!entry;
       var isMyBox = entry && currentUser && entry.userId === currentUser.uid;
       var isLocked = !!pool.locked;
 
-      // Ineligible if either golfer is cut or WD (only matters when locked)
-      var colGolfer = golfers[col];
-      var rowGolfer = golfers[row];
+      var colGolfer = colGolfers[col];
+      var rowGolfer = rowGolfers[row];
       var colStatus = (colGolfer ? colGolfer.status || 'active' : 'active');
       var rowStatus = (rowGolfer ? rowGolfer.status || 'active' : 'active');
+      // If either golfer is cut/WD, the whole row or column is ineligible
       var isIneligible = isLocked && (colStatus !== 'active' || rowStatus !== 'active');
-
-      // Skip diagonal? No — allow same golfer pairs (col==row). They would always be ineligible once cut anyway.
 
       var winRounds = winnerBoxes[key] || [];
       var isWinner = winRounds.length > 0;
@@ -1517,14 +1528,14 @@ function renderGrid() {
         onClick = 'onclick="handleBoxClick(\'' + key + '\')"';
       }
 
-      html += '<div class="' + classes.join(' ') + '" ' + onClick + ' title="' + escHtml((colGolfer ? colGolfer.name : '?') + ' + ' + (rowGolfer ? rowGolfer.name : '?')) + '">';
+      html += '<div class="' + classes.join(' ') + '" ' + onClick + ' title="' + escHtml((colGolfer ? colGolfer.name : '?') + ' (col) + ' + (rowGolfer ? rowGolfer.name : '?') + ' (row)') + '">';
       if (isWinner) {
         html += '<div class="win-round-badge">🏆' + winRounds.join(',') + '</div>';
       }
       html += '<span>' + (isTaken ? escHtml(abbreviateName(entry.name)) : '') + '</span>';
       html += '</div>';
     }
-    html += '</div>'; // row
+    html += '</div>';
   }
   html += '</div>'; // golf-grid
   html += '</div>'; // golf-grid-area
@@ -1550,16 +1561,16 @@ function escHtml(s) {
 
 function updateStats() {
   var pool = currentPool;
-  var golfers = pool.golfers || [];
-  var n = golfers.length;
-  var total = n * n;
+  var colG = pool.colGolfers || [];
+  var rowG = pool.rowGolfers || [];
+  var total = colG.length * rowG.length;
   var entries = pool.entries || {};
   var claimed = Object.keys(entries).length;
   var available = total - claimed;
   var myBoxes = Object.keys(entries).filter(function(k) { return entries[k].userId === (currentUser && currentUser.uid); }).length;
   var prizePool = claimed * (pool.costPerBox || 0);
 
-  document.getElementById('statGolfers').textContent = n;
+  document.getElementById('statGolfers').textContent = colG.length + ' col / ' + rowG.length + ' row';
   document.getElementById('statClaimed').textContent = claimed;
   document.getElementById('statAvailable').textContent = available;
   document.getElementById('statMyBoxes').textContent = myBoxes;
@@ -1588,12 +1599,11 @@ window.handleBoxClick = function(key) {
   if (isLocked) return;
 
   pendingBoxClaim = key;
-  var golfers = pool.golfers || [];
   var parts = key.split('-');
   var col = parseInt(parts[0]);
   var row = parseInt(parts[1]);
-  var colG = golfers[col];
-  var rowG = golfers[row];
+  var colG = (pool.colGolfers || [])[col];
+  var rowG = (pool.rowGolfers || [])[row];
 
   document.getElementById('confirmBoxCoord').textContent = key;
   document.getElementById('confirmBoxGolfers').innerHTML =
@@ -1652,7 +1662,8 @@ function renderLeaderboard() {
 function renderResults() {
   var pool = currentPool;
   var rounds = pool.rounds || [];
-  var golfers = pool.golfers || [];
+  var colGolfers = pool.colGolfers || [];
+  var rowGolfers = pool.rowGolfers || [];
   var entries = pool.entries || {};
   var rp = pool.roundPayouts || {};
   var roundPayoutKeys = ['round1','round2','round3','round4'];
@@ -1677,10 +1688,10 @@ function renderResults() {
       var parts = round.winner.split('-');
       var col = parseInt(parts[0]);
       var row = parseInt(parts[1]);
-      var colG = golfers[col];
-      var rowG = golfers[row];
-      var colScore = round.scores && round.scores[col] !== undefined ? round.scores[col] : null;
-      var rowScore = round.scores && round.scores[row] !== undefined ? round.scores[row] : null;
+      var colG = colGolfers[col];
+      var rowG = rowGolfers[row];
+      var colScore = round.scores && round.scores['c'+col] !== undefined ? round.scores['c'+col] : null;
+      var rowScore = round.scores && round.scores['r'+row] !== undefined ? round.scores['r'+row] : null;
       var combined = (colScore !== null && rowScore !== null) ? (colScore + rowScore) : null;
       html += '<div class="results-winner-row">';
       html += '<div class="results-winner-info">';
@@ -1690,8 +1701,8 @@ function renderResults() {
       if (payout > 0) html += '<span class="results-winner-payout">💰 $' + payout + '</span>';
       html += '</div>';
       html += '<div class="results-combo-score">';
-      html += escHtml(colG ? colG.name : '?') + ': ' + (colScore !== null ? colScore : '--');
-      html += ' + ' + escHtml(rowG ? rowG.name : '?') + ': ' + (rowScore !== null ? rowScore : '--');
+      html += escHtml(colG ? colG.name : '?') + ' (col): ' + (colScore !== null ? colScore : '--');
+      html += ' + ' + escHtml(rowG ? rowG.name : '?') + ' (row): ' + (rowScore !== null ? rowScore : '--');
       if (combined !== null) html += ' = <strong>' + combined + '</strong>';
       html += '</div>';
     } else {
@@ -1792,8 +1803,8 @@ window.savePoolSettings = async function() {
 window.togglePoolLock = async function() {
   if (!currentPool) return;
   var newLocked = !currentPool.locked;
-  if (newLocked && (!currentPool.golfers || currentPool.golfers.length < 2)) {
-    showToast('Add at least 2 golfers before locking', 'warning');
+  if (newLocked && (!(currentPool.colGolfers||[]).length || !(currentPool.rowGolfers||[]).length)) {
+    showToast('Add column and row golfers before locking', 'warning');
     return;
   }
   try {
@@ -1821,58 +1832,76 @@ window.confirmDeletePool = function() {
 
 // ── Golfers Editor ────────────────────────────────────────────────────────────
 function renderGolfersEditor(resetFromPool) {
-  if (resetFromPool) { localGolfers = JSON.parse(JSON.stringify(currentPool.golfers || [])); }
-  var container = document.getElementById('golferList');
-  if (localGolfers.length === 0) {
-    container.innerHTML = '<p style="color:var(--text-secondary); text-align:center; padding:1rem;">No golfers added yet</p>';
-    return;
+  if (resetFromPool) {
+    localColGolfers = JSON.parse(JSON.stringify(currentPool.colGolfers || []));
+    localRowGolfers = JSON.parse(JSON.stringify(currentPool.rowGolfers || []));
   }
-  var html = '';
-  localGolfers.forEach(function(g, i) {
-    var status = g.status || 'active';
-    html += '<div class="golfer-item" id="golfer-item-' + i + '">';
-    html += '<span class="golfer-num">' + (i+1) + '</span>';
-    html += '<span class="golfer-name">' + escHtml(g.name) + '</span>';
-    html += '<span class="golfer-status ' + status + '">' + status.toUpperCase() + '</span>';
-    html += '<select class="status-select" data-idx="' + i + '" onchange="updateGolferStatus(' + i + ', this.value)">';
-    html += '<option value="active"' + (status==='active'?' selected':'') + '>Active</option>';
-    html += '<option value="cut"' + (status==='cut'?' selected':'') + '>Cut</option>';
-    html += '<option value="wd"' + (status==='wd'?' selected':'') + '>WD</option>';
-    html += '</select>';
-    html += '<button class="remove-golfer-btn" onclick="removeGolfer(' + i + ')" title="Remove">✕</button>';
-    html += '</div>';
-  });
-  container.innerHTML = html;
+
+  function buildList(list, role) {
+    if (list.length === 0) return '<p style="color:var(--text-secondary);text-align:center;padding:1rem;font-size:0.85rem;">No ' + role + ' golfers yet</p>';
+    var html = '';
+    list.forEach(function(g, i) {
+      var status = g.status || 'active';
+      html += '<div class="golfer-item">';
+      html += '<span class="golfer-num">' + (i+1) + '</span>';
+      html += '<span class="golfer-name">' + escHtml(g.name) + '</span>';
+      html += '<span class="golfer-status ' + status + '">' + status.toUpperCase() + '</span>';
+      html += '<select class="status-select" onchange="updateGolferStatus(\'' + role + '\',' + i + ', this.value)">';
+      html += '<option value="active"' + (status==='active'?' selected':'') + '>Active</option>';
+      html += '<option value="cut"' + (status==='cut'?' selected':'') + '>Cut</option>';
+      html += '<option value="wd"' + (status==='wd'?' selected':'') + '>WD</option>';
+      html += '</select>';
+      html += '<button class="remove-golfer-btn" onclick="removeGolfer(\'' + role + '\',' + i + ')" title="Remove">✕</button>';
+      html += '</div>';
+    });
+    return html;
+  }
+
+  document.getElementById('colGolferList').innerHTML = buildList(localColGolfers, 'col');
+  document.getElementById('rowGolferList').innerHTML = buildList(localRowGolfers, 'row');
+  document.getElementById('colGolferCount').textContent = localColGolfers.length;
+  document.getElementById('rowGolferCount').textContent = localRowGolfers.length;
 }
 
-window.updateGolferStatus = function(idx, newStatus) {
-  localGolfers[idx].status = newStatus;
+window.updateGolferStatus = function(role, idx, newStatus) {
+  if (role === 'col') localColGolfers[idx].status = newStatus;
+  else localRowGolfers[idx].status = newStatus;
   renderGolfersEditor();
 };
 
 window.addGolfer = function() {
   var input = document.getElementById('newGolferName');
-  var name = input.value.trim();
+  var role  = document.getElementById('newGolferRole').value;
+  var name  = input.value.trim();
   if (!name) { showToast('Enter a golfer name', 'warning'); return; }
-  localGolfers.push({ name: name, status: 'active' });
+  var limit = 10;
+  if (role === 'col' && localColGolfers.length >= limit) { showToast('Max 10 column golfers', 'warning'); return; }
+  if (role === 'row' && localRowGolfers.length >= limit) { showToast('Max 10 row golfers', 'warning'); return; }
+  if (role === 'col') localColGolfers.push({ name: name, status: 'active' });
+  else localRowGolfers.push({ name: name, status: 'active' });
   input.value = '';
   renderGolfersEditor();
 };
 
-window.removeGolfer = function(idx) {
-  localGolfers.splice(idx, 1);
+window.removeGolfer = function(role, idx) {
+  if (role === 'col') localColGolfers.splice(idx, 1);
+  else localRowGolfers.splice(idx, 1);
   renderGolfersEditor();
 };
 
 window.saveGolfers = async function() {
   if (!currentPool) return;
   try {
-    await db.collection('golfPools').doc(currentPool.id).update({ golfers: localGolfers });
-    currentPool.golfers = JSON.parse(JSON.stringify(localGolfers));
+    await db.collection('golfPools').doc(currentPool.id).update({
+      colGolfers: localColGolfers,
+      rowGolfers: localRowGolfers
+    });
+    currentPool.colGolfers = JSON.parse(JSON.stringify(localColGolfers));
+    currentPool.rowGolfers = JSON.parse(JSON.stringify(localRowGolfers));
     updatePoolDisplay();
     renderGrid();
     updateStats();
-    showToast('Golfers saved (' + localGolfers.length + ')', 'success');
+    showToast('Golfers saved (' + localColGolfers.length + ' col, ' + localRowGolfers.length + ' row)', 'success');
   } catch(e) { console.error(e); showToast('Error saving golfers', 'error'); }
 };
 
@@ -1883,7 +1912,8 @@ function renderRoundsEditor() {
 }
 
 function buildRoundsEditorHTML() {
-  var golfers = currentPool.golfers || [];
+  var colGolfers = currentPool.colGolfers || [];
+  var rowGolfers = currentPool.rowGolfers || [];
   var container = document.getElementById('roundsEditor');
   if (localRounds.length === 0) {
     container.innerHTML = '<p style="color:var(--text-secondary); padding:1rem;">No rounds yet. Click "Add Round" to get started.</p>';
@@ -1904,25 +1934,39 @@ function buildRoundsEditorHTML() {
     html += '<input type="text" value="' + escHtml(round.label || '') + '" placeholder="e.g., Round 1" oninput="updateRoundLabel(' + rIdx + ', this.value)" style="max-width:250px;">';
     html += '</div>';
     html += '<div class="round-score-grid">';
-    golfers.forEach(function(g, gIdx) {
-      var score = (round.scores && round.scores[gIdx] !== undefined) ? round.scores[gIdx] : '';
+    html += '<div style="grid-column:1/-1;font-family:var(--mono);font-size:0.7rem;color:var(--accent-blue);text-transform:uppercase;letter-spacing:1px;margin-bottom:0.25rem;">Column Golfers</div>';
+    colGolfers.forEach(function(g, gIdx) {
+      var score = (round.scores && round.scores['c'+gIdx] !== undefined) ? round.scores['c'+gIdx] : '';
       var gStatus = g.status || 'active';
       html += '<div class="golfer-score-input">';
-      html += '<label title="' + escHtml(g.name) + '">';
-      html += escHtml(abbreviateName(g.name));
+      html += '<label title="' + escHtml(g.name) + '">COL: ' + escHtml(abbreviateName(g.name));
       if (gStatus === 'cut') html += ' ✂️';
       if (gStatus === 'wd') html += ' 🚫';
       html += '</label>';
       html += '<input type="number" value="' + (score !== '' ? score : '') + '" placeholder="--" min="50" max="120"';
       if (gStatus !== 'active') html += ' disabled';
-      html += ' oninput="updateGolferScore(' + rIdx + ',' + gIdx + ', this.value)" onchange="previewRoundWinner(' + rIdx + ')">';
+      html += ' oninput="updateGolferScore(' + rIdx + ','c'+' + gIdx + ', this.value)" onchange="previewRoundWinner(' + rIdx + ')">';
+      html += '</div>';
+    });
+    html += '<div style="grid-column:1/-1;font-family:var(--mono);font-size:0.7rem;color:var(--accent-golf);text-transform:uppercase;letter-spacing:1px;margin-top:0.5rem;margin-bottom:0.25rem;">Row Golfers</div>';
+    rowGolfers.forEach(function(g, gIdx) {
+      var score = (round.scores && round.scores['r'+gIdx] !== undefined) ? round.scores['r'+gIdx] : '';
+      var gStatus = g.status || 'active';
+      html += '<div class="golfer-score-input">';
+      html += '<label title="' + escHtml(g.name) + '">ROW: ' + escHtml(abbreviateName(g.name));
+      if (gStatus === 'cut') html += ' ✂️';
+      if (gStatus === 'wd') html += ' 🚫';
+      html += '</label>';
+      html += '<input type="number" value="' + (score !== '' ? score : '') + '" placeholder="--" min="50" max="120"';
+      if (gStatus !== 'active') html += ' disabled';
+      html += ' oninput="updateGolferScore(' + rIdx + ','r'+' + gIdx + ', this.value)" onchange="previewRoundWinner(' + rIdx + ')">';
       html += '</div>';
     });
     html += '</div>'; // round-score-grid
 
     // Winner preview
     html += '<div class="winner-preview-golf" id="winner-preview-' + rIdx + '">';
-    html += buildWinnerPreview(round, golfers);
+    html += buildWinnerPreview(round);
     html += '</div>';
 
     // Settle button
@@ -1938,45 +1982,47 @@ function buildRoundsEditorHTML() {
   container.innerHTML = html;
 }
 
-function buildWinnerPreview(round, golfers) {
+function buildWinnerPreview(round) {
   if (!round.scores || Object.keys(round.scores).length === 0) {
     return '<span style="color:var(--text-muted);">Enter scores to preview winner</span>';
   }
   var pool = currentPool;
+  var colGolfers = pool.colGolfers || [];
+  var rowGolfers = pool.rowGolfers || [];
   var entries = pool.entries || {};
-  var result = computeRoundWinner(round, golfers, entries);
+  var result = computeRoundWinner(round, colGolfers, rowGolfers, entries);
   if (!result) return '<span style="color:var(--text-muted);">Not enough data to compute winner</span>';
-  var colG = golfers[result.col];
-  var rowG = golfers[result.row];
+  var colG = colGolfers[result.col];
+  var rowG = rowGolfers[result.row];
   return '<strong>⛳ Best combo: </strong>' +
-    escHtml(colG ? colG.name : '?') + ' (' + result.colScore + ') + ' +
-    escHtml(rowG ? rowG.name : '?') + ' (' + result.rowScore + ') = ' +
+    escHtml(colG ? colG.name : '?') + ' (col, ' + result.colScore + ') + ' +
+    escHtml(rowG ? rowG.name : '?') + ' (row, ' + result.rowScore + ') = ' +
     '<span class="combo-score">' + result.combined + '</span>' +
     ' → Box <strong>' + result.key + '</strong>' +
     (entries[result.key] ? ' (' + escHtml(entries[result.key].name) + ')' : ' (Unclaimed)');
 }
 
-function computeRoundWinner(round, golfers, entries) {
+function computeRoundWinner(round, colGolfers, rowGolfers, entries) {
   var scores = round.scores || {};
-  var n = golfers.length;
   var bestCombined = Infinity;
   var bestResult = null;
 
-  for (var col = 0; col < n; col++) {
-    for (var row = 0; row < n; row++) {
-      if (col === row) continue; // skip diagonal (same golfer both axes)
-      var colG = golfers[col];
-      var rowG = golfers[row];
-      var colStatus = colG ? (colG.status || 'active') : 'active';
-      var rowStatus = rowG ? (rowG.status || 'active') : 'active';
-      if (colStatus !== 'active' || rowStatus !== 'active') continue; // ineligible
-      var colScore = scores[col];
-      var rowScore = scores[row];
-      if (colScore === undefined || colScore === null || colScore === '' ||
-          rowScore === undefined || rowScore === null || rowScore === '') continue;
-      var cs = parseFloat(colScore);
-      var rs = parseFloat(rowScore);
-      if (isNaN(cs) || isNaN(rs)) continue;
+  for (var col = 0; col < colGolfers.length; col++) {
+    var colG = colGolfers[col];
+    if ((colG.status || 'active') !== 'active') continue; // entire column ineligible
+    var cs = scores['c' + col];
+    if (cs === undefined || cs === null || cs === '') continue;
+    cs = parseFloat(cs);
+    if (isNaN(cs)) continue;
+
+    for (var row = 0; row < rowGolfers.length; row++) {
+      var rowG = rowGolfers[row];
+      if ((rowG.status || 'active') !== 'active') continue; // entire row ineligible
+      var rs = scores['r' + row];
+      if (rs === undefined || rs === null || rs === '') continue;
+      rs = parseFloat(rs);
+      if (isNaN(rs)) continue;
+
       var combined = cs + rs;
       if (combined < bestCombined) {
         bestCombined = combined;
@@ -1989,20 +2035,18 @@ function computeRoundWinner(round, golfers, entries) {
 
 window.updateRoundLabel = function(rIdx, val) { localRounds[rIdx].label = val; };
 
-window.updateGolferScore = function(rIdx, gIdx, val) {
+window.updateGolferScore = function(rIdx, scoreKey, val) {
   if (!localRounds[rIdx].scores) localRounds[rIdx].scores = {};
   if (val === '' || val === null || val === undefined) {
-    delete localRounds[rIdx].scores[gIdx];
+    delete localRounds[rIdx].scores[scoreKey];
   } else {
-    localRounds[rIdx].scores[gIdx] = parseFloat(val);
+    localRounds[rIdx].scores[scoreKey] = parseFloat(val);
   }
 };
 
 window.previewRoundWinner = function(rIdx) {
-  var golfers = currentPool.golfers || [];
-  var entries = currentPool.entries || {};
   var preview = document.getElementById('winner-preview-' + rIdx);
-  if (preview) preview.innerHTML = buildWinnerPreview(localRounds[rIdx], golfers, entries);
+  if (preview) preview.innerHTML = buildWinnerPreview(localRounds[rIdx]);
 };
 
 window.addRound = function() {
@@ -2018,9 +2062,10 @@ window.removeRound = function(rIdx) {
 };
 
 window.settleRound = function(rIdx) {
-  var golfers = currentPool.golfers || [];
+  var colGolfers = currentPool.colGolfers || [];
+  var rowGolfers = currentPool.rowGolfers || [];
   var entries = currentPool.entries || {};
-  var result = computeRoundWinner(localRounds[rIdx], golfers, entries);
+  var result = computeRoundWinner(localRounds[rIdx], colGolfers, rowGolfers, entries);
   if (!result) { showToast('Cannot determine winner — check scores', 'warning'); return; }
   localRounds[rIdx].settled = true;
   localRounds[rIdx].winner = result.key;
@@ -2050,7 +2095,8 @@ function renderEntriesList() {
   var pool = currentPool;
   if (!pool) return;
   var entries = pool.entries || {};
-  var golfers = pool.golfers || [];
+  var colGolfers = pool.colGolfers || [];
+  var rowGolfers = pool.rowGolfers || [];
   var keys = Object.keys(entries);
   var container = document.getElementById('entriesList');
   if (keys.length === 0) {
@@ -2071,8 +2117,8 @@ function renderEntriesList() {
     var boxLabels = u.boxes.map(function(k) {
       var parts = k.split('-');
       var col = parseInt(parts[0]); var row = parseInt(parts[1]);
-      var colName = golfers[col] ? abbreviateName(golfers[col].name) : '?';
-      var rowName = golfers[row] ? abbreviateName(golfers[row].name) : '?';
+      var colName = colGolfers[col] ? abbreviateName(colGolfers[col].name) : '?';
+      var rowName = rowGolfers[row] ? abbreviateName(rowGolfers[row].name) : '?';
       return colName + '+' + rowName;
     }).join(', ');
     html += '<div class="entry-item">';
@@ -2132,10 +2178,10 @@ var currentAssignKey = null;
 
 function showAdminAssignModal(key) {
   currentAssignKey = key;
-  var golfers = currentPool.golfers || [];
   var parts = key.split('-');
   var col = parseInt(parts[0]); var row = parseInt(parts[1]);
-  var colG = golfers[col]; var rowG = golfers[row];
+  var colG = (currentPool.colGolfers || [])[col];
+  var rowG = (currentPool.rowGolfers || [])[row];
   document.getElementById('assignBoxCoord').textContent = key;
   document.getElementById('assignBoxGolfers').textContent =
     (colG ? colG.name : '?') + ' (col) + ' + (rowG ? rowG.name : '?') + ' (row)';
@@ -2181,10 +2227,10 @@ window.confirmAdminAssign = async function() {
 
 function showAdminManageModal(key, entry) {
   currentManageKey = key;
-  var golfers = currentPool.golfers || [];
   var parts = key.split('-');
   var col = parseInt(parts[0]); var row = parseInt(parts[1]);
-  var colG = golfers[col]; var rowG = golfers[row];
+  var colG = (currentPool.colGolfers || [])[col];
+  var rowG = (currentPool.rowGolfers || [])[row];
   document.getElementById('manageBoxCoord').textContent = key;
   document.getElementById('manageBoxOwner').textContent = entry.name || 'Unknown';
   document.getElementById('manageBoxMeta').textContent = (entry.email || '') + (entry.paid ? ' · Paid' : ' · Unpaid');
