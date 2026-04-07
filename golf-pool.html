@@ -1755,7 +1755,7 @@ function setupAdminTabs() {
       tab.classList.add('active');
       var section = document.getElementById('tab-' + tab.dataset.tab);
       if (section) section.classList.add('active');
-      if (tab.dataset.tab === 'golfers') renderGolfersEditor();
+      if (tab.dataset.tab === 'golfers') renderGolfersEditor(true);
       if (tab.dataset.tab === 'rounds') renderRoundsEditor();
       if (tab.dataset.tab === 'entries') renderEntriesList();
     });
@@ -1769,7 +1769,7 @@ function populateAdminFields() {
   document.getElementById('adminDescription').value = currentPool.description || '';
   document.getElementById('toggleLockBtn').textContent = currentPool.locked ? '🔓 Unlock Pool' : '🔒 Lock Pool';
   // Init local working copies
-  localGolfers = JSON.parse(JSON.stringify(currentPool.golfers || []));
+  if (resetFromPool) { localGolfers = JSON.parse(JSON.stringify(currentPool.golfers || [])); }
   localRounds = JSON.parse(JSON.stringify(currentPool.rounds || []));
 }
 
@@ -1820,8 +1820,8 @@ window.confirmDeletePool = function() {
 };
 
 // ── Golfers Editor ────────────────────────────────────────────────────────────
-function renderGolfersEditor() {
-  localGolfers = JSON.parse(JSON.stringify(currentPool.golfers || []));
+function renderGolfersEditor(resetFromPool) {
+  if (resetFromPool) { localGolfers = JSON.parse(JSON.stringify(currentPool.golfers || [])); }
   var container = document.getElementById('golferList');
   if (localGolfers.length === 0) {
     container.innerHTML = '<p style="color:var(--text-secondary); text-align:center; padding:1rem;">No golfers added yet</p>';
