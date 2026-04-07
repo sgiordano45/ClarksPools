@@ -950,8 +950,8 @@ header::before {
     <!-- Pre-lock message -->
     <div class="pre-lock-message" id="preLockMessage">
       <div class="pre-lock-icon">⛳</div>
-      <p>Pick your golfer combination now!</p>
-      <p style="font-size:0.9rem; color:var(--text-muted); margin-top:0.5rem;">Each box represents a row golfer + column golfer pairing. Lowest combined round score wins each round!</p>
+      <p style="font-size:1.1rem; font-weight:600; color:var(--text-primary);">Blind pick your box!</p>
+      <p style="font-size:0.95rem; color:var(--text-secondary); margin-top:0.5rem;">Golfer names are <strong style="color:var(--accent-gold);">hidden until the pool locks</strong>. Click any open box to claim it — you'll find out which golfer pairing you got once the pool closes. Lowest combined round score wins each round!</p>
     </div>
 
     <!-- Golf Grid -->
@@ -1199,14 +1199,12 @@ header::before {
 <div class="modal-overlay" id="confirmBoxModal">
   <div class="modal">
     <h3>⛳ Claim This Box?</h3>
-    <p style="color:var(--text-secondary); margin-bottom:0.75rem;">
-      You're about to claim box <strong id="confirmBoxCoord"></strong>:
-    </p>
-    <div id="confirmBoxGolfers" style="background:var(--tertiary-dark); border-radius:8px; padding:1rem; margin-bottom:1rem; font-size:0.9rem; color:var(--text-secondary);"></div>
-    <p style="font-size:0.8rem; color:var(--text-muted);">Your box wins a round if your two golfers have the <strong>lowest combined score</strong> that round (both must make the cut).</p>
+    <p style="color:var(--text-secondary); margin-bottom:1rem;">You're claiming box <strong id="confirmBoxCoord" style="color:var(--accent-gold); font-size:1.25rem;"></strong>.</p>
+    <div id="confirmBoxGolfers" style="margin-bottom:1.25rem;"></div>
+    <p style="font-size:0.8rem; color:var(--text-muted); padding:0.75rem; background:var(--tertiary-dark); border-radius:8px;">You win a round if your two golfers have the <strong>lowest combined stroke total</strong> that round. If either golfer misses the cut, your box is ineligible for remaining rounds.</p>
     <div class="modal-buttons">
       <button class="btn btn-secondary" onclick="hideConfirmModal()">Cancel</button>
-      <button class="btn btn-golf" onclick="confirmClaimBox()">Claim Box</button>
+      <button class="btn btn-golf" onclick="confirmClaimBox()">✔ Claim This Pairing</button>
     </div>
   </div>
 </div>
@@ -1462,19 +1460,24 @@ function renderGrid() {
     }
   });
 
+  var isLocked = !!pool.locked;
   var html = '';
 
   // Column headers row (col golfers across top)
   html += '<div class="golf-col-headers">';
-  html += '<div class="golf-corner-cell">ROW ↓ / COL →</div>';
+  html += '<div class="golf-corner-cell" style="font-size:0.6rem;line-height:1.4;">' + (isLocked ? '<span style="color:var(--accent-blue);">→ COL</span><br><span style="color:var(--accent-golf);">↓ ROW</span>' : '<span style="color:var(--accent-gold);">🎲 Blind</span><br><span style="color:var(--text-muted);">Pick!</span>') + '</div>';
   for (var c = 0; c < colGolfers.length; c++) {
     var cg = colGolfers[c];
     var cgStatus = (cg.status || 'active');
-    html += '<div class="golf-header-cell ' + cgStatus + '" title="' + escHtml(cg.name) + '">';
-    html += '<span>' + escHtml(abbreviateName(cg.name)) + '</span>';
-    if (cgStatus === 'cut') html += '<br><span style="font-size:0.55rem;color:var(--accent-red);">CUT</span>';
-    if (cgStatus === 'wd') html += '<br><span style="font-size:0.55rem;color:var(--text-muted);">WD</span>';
-    html += '</div>';
+    if (isLocked) {
+      html += '<div class="golf-header-cell ' + cgStatus + '" title="' + escHtml(cg.name) + '">';
+      html += '<span>' + escHtml(abbreviateName(cg.name)) + '</span>';
+      if (cgStatus === 'cut') html += '<br><span style="font-size:0.55rem;color:var(--accent-red);">CUT</span>';
+      if (cgStatus === 'wd') html += '<br><span style="font-size:0.55rem;color:var(--text-muted);">WD</span>';
+      html += '</div>';
+    } else {
+      html += '<div class="golf-header-cell" style="color:var(--text-muted);letter-spacing:2px;">?</div>';
+    }
   }
   html += '</div>';
 
@@ -1484,11 +1487,15 @@ function renderGrid() {
   for (var r = 0; r < rowGolfers.length; r++) {
     var rg = rowGolfers[r];
     var rgStatus = (rg.status || 'active');
-    html += '<div class="golf-row-label ' + rgStatus + '" title="' + escHtml(rg.name) + '">';
-    html += escHtml(abbreviateName(rg.name));
-    if (rgStatus === 'cut') html += '<br><span style="font-size:0.55rem;color:var(--accent-red);">CUT</span>';
-    if (rgStatus === 'wd') html += '<br><span style="font-size:0.55rem;color:var(--text-muted);">WD</span>';
-    html += '</div>';
+    if (isLocked) {
+      html += '<div class="golf-row-label ' + rgStatus + '" title="' + escHtml(rg.name) + '">';
+      html += escHtml(abbreviateName(rg.name));
+      if (rgStatus === 'cut') html += '<br><span style="font-size:0.55rem;color:var(--accent-red);">CUT</span>';
+      if (rgStatus === 'wd') html += '<br><span style="font-size:0.55rem;color:var(--text-muted);">WD</span>';
+      html += '</div>';
+    } else {
+      html += '<div class="golf-row-label" style="color:var(--text-muted);letter-spacing:2px;justify-content:center;">?</div>';
+    }
   }
   html += '</div>';
 
@@ -1501,7 +1508,6 @@ function renderGrid() {
       var entry = entries[key];
       var isTaken = !!entry;
       var isMyBox = entry && currentUser && entry.userId === currentUser.uid;
-      var isLocked = !!pool.locked;
 
       var colGolfer = colGolfers[col];
       var rowGolfer = rowGolfers[row];
@@ -1606,8 +1612,28 @@ window.handleBoxClick = function(key) {
   var rowG = (pool.rowGolfers || [])[row];
 
   document.getElementById('confirmBoxCoord').textContent = key;
-  document.getElementById('confirmBoxGolfers').innerHTML =
-    '🏌️ <strong>' + escHtml(colG ? colG.name : '?') + '</strong> (column) + <strong>' + escHtml(rowG ? rowG.name : '?') + '</strong> (row)';
+  var isLocked = !!currentPool.locked;
+  if (isLocked) {
+    document.getElementById('confirmBoxGolfers').innerHTML =
+      '<div style="display:flex;gap:1rem;align-items:stretch;justify-content:center;">' +
+      '<div style="flex:1;background:rgba(0,212,255,0.08);border:2px solid rgba(0,212,255,0.3);border-radius:10px;padding:1rem;text-align:center;">' +
+      '<div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:1px;color:var(--accent-blue);margin-bottom:0.4rem;">Column Golfer</div>' +
+      '<div style="font-family:Oswald,sans-serif;font-size:1.2rem;font-weight:700;color:var(--text-primary);">' + escHtml(colG ? colG.name : '?') + '</div>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;font-size:1.25rem;color:var(--text-muted);padding:0 0.25rem;">+</div>' +
+      '<div style="flex:1;background:rgba(76,175,80,0.08);border:2px solid rgba(76,175,80,0.3);border-radius:10px;padding:1rem;text-align:center;">' +
+      '<div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:1px;color:var(--accent-golf);margin-bottom:0.4rem;">Row Golfer</div>' +
+      '<div style="font-family:Oswald,sans-serif;font-size:1.2rem;font-weight:700;color:var(--text-primary);">' + escHtml(rowG ? rowG.name : '?') + '</div>' +
+      '</div>' +
+      '</div>';
+  } else {
+    document.getElementById('confirmBoxGolfers').innerHTML =
+      '<div style="text-align:center;padding:1rem;background:rgba(255,193,7,0.08);border:2px dashed rgba(255,193,7,0.3);border-radius:10px;">' +
+      '<div style="font-size:2rem;margin-bottom:0.5rem;">🎲</div>' +
+      '<div style="font-family:Oswald,sans-serif;font-size:1rem;color:var(--accent-gold);">Your golfer pairing will be revealed when the pool locks!</div>' +
+      '<div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.4rem;">Position: column ' + col + ', row ' + row + '</div>' +
+      '</div>';
+  }
   document.getElementById('confirmBoxModal').classList.add('visible');
 };
 
