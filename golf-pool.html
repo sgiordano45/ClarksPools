@@ -1945,7 +1945,7 @@ function buildRoundsEditorHTML() {
       html += '</label>';
       html += '<input type="number" value="' + (score !== '' ? score : '') + '" placeholder="--" min="50" max="120"';
       if (gStatus !== 'active') html += ' disabled';
-      html += ' oninput="updateGolferScore(' + rIdx + ','c'+' + gIdx + ', this.value)" onchange="previewRoundWinner(' + rIdx + ')">';
+      html += ' oninput="updateGolferScore(' + rIdx + ',\"c' + gIdx + '\", this.value)" onchange="previewRoundWinner(' + rIdx + ')">';
       html += '</div>';
     });
     html += '<div style="grid-column:1/-1;font-family:var(--mono);font-size:0.7rem;color:var(--accent-golf);text-transform:uppercase;letter-spacing:1px;margin-top:0.5rem;margin-bottom:0.25rem;">Row Golfers</div>';
@@ -1959,7 +1959,7 @@ function buildRoundsEditorHTML() {
       html += '</label>';
       html += '<input type="number" value="' + (score !== '' ? score : '') + '" placeholder="--" min="50" max="120"';
       if (gStatus !== 'active') html += ' disabled';
-      html += ' oninput="updateGolferScore(' + rIdx + ','r'+' + gIdx + ', this.value)" onchange="previewRoundWinner(' + rIdx + ')">';
+      html += ' oninput="updateGolferScore(' + rIdx + ',\"r' + gIdx + '\", this.value)" onchange="previewRoundWinner(' + rIdx + ')">';
       html += '</div>';
     });
     html += '</div>'; // round-score-grid
