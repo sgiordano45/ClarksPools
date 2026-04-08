@@ -1132,6 +1132,7 @@
     return bestResult;
   }
   // ─────────────────────────────────────────────────────────────────────────
+  function setStatus(msg, type, pulse) {
     const el = document.getElementById('statusBar');
     el.className = 'status-bar ' + (type||'');
     el.innerHTML = pulse ? '<span class="pulse"></span> ' + msg : msg;
