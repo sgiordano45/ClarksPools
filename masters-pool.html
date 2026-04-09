@@ -276,13 +276,12 @@ main { position:relative; z-index:1; max-width:1200px; margin:0 auto; padding:0 
 
   <!-- Page Tabs -->
   <div class="page-tabs">
-    <button class="page-tab active" onclick="switchTab('picks')">My Picks</button>
-    <button class="page-tab" onclick="switchTab('standings')">Pool Standings</button>
+    <button class="page-tab active" onclick="switchTab('standings')">Pool Standings</button>
     <button class="page-tab" onclick="switchTab('golfers')">Golf Leaderboard</button>
   </div>
 
-  <!-- PICKS TAB -->
-  <div class="tab-panel active" id="tab-picks">
+  <!-- PICKS TAB (hidden) -->
+  <div class="tab-panel" id="tab-picks" style="display:none;">
     <div class="picks-container">
       <div id="authGate" style="display:none;">
         <div class="empty-state">
@@ -335,7 +334,7 @@ main { position:relative; z-index:1; max-width:1200px; margin:0 auto; padding:0 
   </div>
 
   <!-- STANDINGS TAB -->
-  <div class="tab-panel" id="tab-standings">
+  <div class="tab-panel active" id="tab-standings">
     <div class="leaderboard-panel">
       <div class="lb-header">
         <div class="lb-title">Pool Standings</div>
@@ -465,11 +464,14 @@ async function loadPoolData() {
     }
     renderTiers();
     updateSummary();
+    // Load leaderboard first so earnings are stamped before standings renders chips
+    await loadGolfLeaderboard();
     loadStandings();
   } catch(e) {
     console.error(e);
     renderTiers();
     updateSummary();
+    loadStandings();
   }
 }
 
@@ -648,8 +650,10 @@ async function loadStandings() {
     }
     const entries = snap.docs.map(d => ({ id:d.id, ...d.data() }));
     document.getElementById('metaEntries').textContent = entries.length;
-    const total = entries.reduce((s,e) => s + (e.totalWinnings||0), 0);
-    document.getElementById('metaPrize').textContent = total > 0 ? '$' + total.toLocaleString() : '$--';
+    // Prize pool = buy-in × entries, not sum of winnings
+    const buyIn = poolData && poolData.buyIn ? poolData.buyIn : 0;
+    const prizePool = buyIn * entries.length;
+    document.getElementById('metaPrize').textContent = prizePool > 0 ? '$' + prizePool.toLocaleString() : '$--';
 
     let html = '<div style="overflow-x:auto;"><table class="leaderboard-table"><thead><tr>' +
       '<th>Rank</th><th>Entry</th><th>Picks</th><th>Winnings</th>' +
@@ -663,14 +667,21 @@ async function loadStandings() {
         if (!g) return '';
         const lb = golfLeaderboard.find(p => p.name === g);
         const mc = lb && lb.status === 'cut';
-        return '<span class="golfer-chip' + (mc?' mc':'') + '">' + g + (lb ? ' · ' + (lb.score||'E') : '') + '</span>';
+        // Build label: name · score · $earnings
+        let label = g;
+        if (lb) {
+          label += ' · ' + (lb.score || 'E');
+          if (lb.earnings && lb.earnings > 0) {
+            label += ' · $' + lb.earnings.toLocaleString();
+          }
+        }
+        return '<span class="golfer-chip' + (mc ? ' mc' : (lb && lb.score && lb.score !== 'E' && parseInt(lb.score) < 0 ? ' active' : '')) + '">' + label + '</span>';
       }).join('');
       html += '<tr>' +
         '<td class="rank-cell ' + rankClass + '">' + rank + '</td>' +
-        '<td class="entry-name-cell">' + (entry.entryName||entry.userName||'—') + 
-        '<div style="font-size:0.8rem;color:var(--text-secondary);">' + (entry.userName||'') + '</div></td>' +
+        '<td class="entry-name-cell">' + (entry.entryName || '—') + '</td>' +
         '<td><div class="golfer-chips">' + chipsHtml + '</div></td>' +
-        '<td class="winnings-cell">$' + ((entry.totalWinnings||0)).toLocaleString() + '</td>' +
+        '<td class="winnings-cell">$' + (entry.totalWinnings || 0).toLocaleString() + '</td>' +
         '</tr>';
     });
     html += '</tbody></table></div>';
@@ -739,6 +750,10 @@ function parseLeaderboard(data) {
   });
   // Sort by ESPN sortOrder — leaders first, not-yet-started last
   golfLeaderboard.sort((a, b) => (a.sortOrder || 9999) - (b.sortOrder || 9999));
+  // Stamp earnings onto each player so standings chips can display it
+  golfLeaderboard.forEach(p => {
+    p.earnings = payoutMap[p.position] || 0;
+  });
 }
 
 function renderGolfLeaderboard(el) {
@@ -771,7 +786,7 @@ function renderGolfLeaderboard(el) {
 // ── TAB SWITCHING ──
 function switchTab(tab) {
   document.querySelectorAll('.page-tab').forEach((t,i) => {
-    const tabs = ['picks','standings','golfers'];
+    const tabs = ['standings','golfers'];
     t.classList.toggle('active', tabs[i] === tab);
   });
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
