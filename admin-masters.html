@@ -343,8 +343,9 @@
     <div class="card">
       <div class="card-title">Recalculate Scores from ESPN Leaderboard</div>
       <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">
-        Fetches the current Masters leaderboard from ESPN, computes each entry's total strokes
-        (best 6 of 9 golfers count; MC/WD players receive worst R3 + worst R4 as their score for penalty slots).
+        Fetches the current Masters leaderboard from ESPN, computes each entry's total score
+        relative to par (best 6 of 9 golfers count; MC/WD players receive worst R3 to-par + worst R4 to-par
+        as their penalty and only fill slots needed to reach 6 scorers). Lowest score wins.
         Writes <code style="color:var(--masters-gold)">totalScore</code> back to every entry.
       </p>
       <div class="btn-row">
@@ -1088,37 +1089,49 @@ async function runRecalculate() {
       return;
     }
 
-    // Build golfer stroke map: name -> { strokes, rounds, isMC }
+    // Build golfer to-par map: name -> { toPar, roundPars, isMC }
     const golferMap = {};
     competitors.forEach(c => {
       const name = (c.athlete && c.athlete.displayName) || '';
       if (!name) return;
       const statusName = ((c.status && c.status.type && c.status.type.name) || '').toLowerCase();
       const isMC = statusName.includes('cut') || statusName.includes('wd');
-      const rawScore = c.score;
-      const strokes = (typeof rawScore === 'object' && rawScore !== null)
-        ? (parseInt(rawScore.value) || 0)
-        : (parseInt(rawScore) || 0);
-      const rounds = {};
-      (c.linescores || []).forEach((ls, i) => {
-        const raw = (typeof ls === 'object' && ls !== null)
-          ? (ls.displayValue !== undefined ? ls.displayValue : ls.value)
-          : ls;
-        const val = parseInt(raw);
-        if (!isNaN(val)) rounds[i] = val;
-      });
-      golferMap[name] = { strokes, rounds, isMC };
-    });
-    log('Built golfer map for ' + Object.keys(golferMap).length + ' players.','ok');
 
-    // Compute worst R3/R4 for MC penalty
-    let worstR3 = 0, worstR4 = 0;
-    Object.values(golferMap).forEach(p => {
-      if (p.rounds[2] && p.rounds[2] > worstR3) worstR3 = p.rounds[2];
-      if (p.rounds[3] && p.rounds[3] > worstR4) worstR4 = p.rounds[3];
+      // Cumulative to-par from statistics
+      const scoreToParStat = Array.isArray(c.statistics)
+        ? c.statistics.find(s => s.name === 'scoreToPar')
+        : null;
+      let toPar = null;
+      if (scoreToParStat) {
+        toPar = (scoreToParStat.value !== undefined) ? Number(scoreToParStat.value) : null;
+        if (toPar === null && scoreToParStat.displayValue) {
+          const s = String(scoreToParStat.displayValue).trim();
+          toPar = s === 'E' ? 0 : parseInt(s) || null;
+        }
+      }
+
+      // Per-round to-par from linescores displayValue
+      const roundPars = {};
+      (c.linescores || []).forEach((ls, i) => {
+        const dv = (typeof ls === 'object' && ls !== null) ? ls.displayValue : null;
+        if (!dv) return;
+        const s = String(dv).trim();
+        const val = s === 'E' ? 0 : parseInt(s);
+        if (!isNaN(val)) roundPars[i] = val;
+      });
+
+      golferMap[name] = { toPar, roundPars, isMC };
     });
-    if (worstR3) log('Worst R3: ' + worstR3, 'info');
-    if (worstR4) log('Worst R4: ' + worstR4, 'info');
+    log('Built golfer map for ' + Object.keys(golferMap).length + ' players.', 'ok');
+
+    // Worst to-par per round for MC penalty (R3=index 2, R4=index 3)
+    let worstParR3 = null, worstParR4 = null;
+    Object.values(golferMap).forEach(p => {
+      if (p.roundPars[2] !== undefined && (worstParR3 === null || p.roundPars[2] > worstParR3)) worstParR3 = p.roundPars[2];
+      if (p.roundPars[3] !== undefined && (worstParR4 === null || p.roundPars[3] > worstParR4)) worstParR4 = p.roundPars[3];
+    });
+    if (worstParR3 !== null) log('Worst R3 to-par: ' + (worstParR3 >= 0 ? '+' : '') + worstParR3, 'info');
+    if (worstParR4 !== null) log('Worst R4 to-par: ' + (worstParR4 >= 0 ? '+' : '') + worstParR4, 'info');
 
     // Load all entries
     const snap = await db.collection('mastersPools').doc(POOL_ID).collection('entries').get();
@@ -1130,24 +1143,27 @@ async function runRecalculate() {
       const entry = doc.data();
       const picks = Object.values(entry.picks || {}).filter(Boolean);
 
-      // Score each pick
+      // Score each pick using to-par
       const scores = picks.map(name => {
         const p = golferMap[name];
-        if (!p) return { name, strokes: null, isMC: false };
+        if (!p) return { name, toPar: null, isMC: false };
         if (p.isMC) {
-          return { name, strokes: worstR3 + worstR4, isMC: true };
+          const penalty = (worstParR3 !== null ? worstParR3 : 0) +
+                          (worstParR4 !== null ? worstParR4 : 0);
+          return { name, toPar: penalty, isMC: true };
         }
-        return { name, strokes: p.strokes, isMC: false };
+        return { name, toPar: p.toPar, isMC: false };
       });
 
-      // Best 6: madecut first (sorted asc), then penalty slots
-      const madecut = scores.filter(s => !s.isMC && s.strokes).sort((a,b) => a.strokes - b.strokes);
+      // Best 6: sort madecut by toPar ascending, then MC penalties
+      const madecut = scores.filter(s => !s.isMC && s.toPar !== null).sort((a,b) => a.toPar - b.toPar);
       const missed  = scores.filter(s => s.isMC);
       const top6    = [...madecut, ...missed].slice(0, 6);
-      const total   = top6.reduce((sum, s) => sum + (s.strokes || 0), 0);
+      const total   = top6.reduce((sum, s) => sum + (s.toPar !== null ? s.toPar : 0), 0);
+      const display = total === 0 ? 'E' : total > 0 ? '+' + total : String(total);
 
       batch.update(doc.ref, { totalScore: total, totalWinnings: total });
-      log('"' + (entry.entryName || doc.id) + '": ' + total + ' strokes (top6: ' + top6.map(s=>s.name.split(' ').pop()+(s.isMC?'⚠':'')).join(', ') + ')','ok');
+      log('"' + (entry.entryName || doc.id) + '": ' + display + ' (top6: ' + top6.map(s => s.name.split(' ').pop() + (s.isMC ? '⚠' : '')).join(', ') + ')', 'ok');
     });
 
     await batch.commit();

@@ -654,21 +654,23 @@ async function loadStandings() {
     const prizePool = buyIn * entries.length;
     document.getElementById('metaPrize').textContent = prizePool > 0 ? '$' + prizePool.toLocaleString() : '$--';
 
-    // Compute worst R3/R4 for MC penalty (rounds index 2 and 3)
-    const worstR3 = worstRoundScore(golfLeaderboard, 2);
-    const worstR4 = worstRoundScore(golfLeaderboard, 3);
+    // Worst to-par per round for MC penalty (rounds index 2=R3, 3=R4)
+    const worstParR3 = worstRoundPar(golfLeaderboard, 2);
+    const worstParR4 = worstRoundPar(golfLeaderboard, 3);
 
     // Score every entry client-side
     const scored = entries.map(entry => {
-      const { score, top6, all } = calcEntryScore(entry.picks || {}, golfLeaderboard, worstR3, worstR4);
+      const { score, top6, all } = calcEntryScore(entry.picks || {}, golfLeaderboard, worstParR3, worstParR4);
       return { ...entry, computedScore: score, top6, allScores: all };
     });
 
-    // Sort ascending (lowest strokes wins), unscored (0) go to bottom
+    // Sort ascending (lowest/most negative to-par wins); unscored stay at bottom
     scored.sort((a, b) => {
-      if (a.computedScore === 0 && b.computedScore === 0) return 0;
-      if (a.computedScore === 0) return 1;
-      if (b.computedScore === 0) return -1;
+      const aHas = a.top6 && a.top6.some(s => s.toPar !== null);
+      const bHas = b.top6 && b.top6.some(s => s.toPar !== null);
+      if (!aHas && !bHas) return 0;
+      if (!aHas) return 1;
+      if (!bHas) return -1;
       return a.computedScore - b.computedScore;
     });
 
@@ -693,9 +695,9 @@ async function loadStandings() {
         let label = g;
         if (lb) {
           label += ' · ' + (lb.score || 'E');
-          if (lb.strokes) label += ' (' + lb.strokes + ')';
+        } else if (isPenalty) {
+          label += ' · MC⚠';
         }
-        if (isPenalty) label += ' ⚠';
         const chipClass = 'golfer-chip' +
           (isMC ? ' mc' : '') +
           (isTop6 && !isMC ? ' active' : '') +
@@ -703,15 +705,14 @@ async function loadStandings() {
         return '<span class="' + chipClass + '" title="' + (isTop6 ? 'Counting' : 'Not counting') + '">' + label + '</span>';
       }).join('');
 
-      const scoreDisplay = entry.computedScore > 0
-        ? entry.computedScore + ' strokes'
-        : '—';
+      const scoreDisplay = formatToPar(entry.computedScore);
 
+      const scoreColor = entry.computedScore < 0 ? 'var(--accent-green)' : entry.computedScore > 0 ? 'var(--accent-red)' : 'var(--text-secondary)';
       html += '<tr>' +
         '<td class="rank-cell ' + rankClass + '">' + rank + '</td>' +
         '<td class="entry-name-cell">' + (entry.entryName || '—') + '</td>' +
         '<td><div class="golfer-chips">' + chipsHtml + '</div></td>' +
-        '<td class="winnings-cell" style="font-size:1rem;">' + scoreDisplay + '</td>' +
+        '<td class="winnings-cell" style="font-size:1.2rem;color:' + scoreColor + '">' + scoreDisplay + '</td>' +
         '</tr>';
     });
     html += '</tbody></table></div>';
@@ -744,49 +745,67 @@ async function loadGolfLeaderboard() {
   }
 }
 
-// ── STROKE-BASED SCORING ──────────────────────────────────────────────────
+// ── TO-PAR SCORING ───────────────────────────────────────────────────────────
 //
-// calcEntryScore(picks, leaderboard, worstR3, worstR4)
-//   picks      : { tier1: 'Name', tier2: 'Name', ... }
-//   leaderboard: parsed golfLeaderboard array
-//   worstR3/R4 : worst (highest) stroke count shot by anyone in that round
+// All scoring is relative to par (E=0, -2=-2, +3=+3). Lower is better.
 //
-// Returns { score, breakdown } where score is the total strokes for the entry's
-// best 6 golfers (lower = better). MC/WD players get worstR3+worstR4 as their
-// stroke total, and only fill slots if needed to reach 6 scorers.
+// calcEntryScore(picks, leaderboard, worstParR3, worstParR4)
+//   Scores an entry: best 6 of 9 by to-par. MC players get
+//   worstParR3 + worstParR4 as their penalty, only filling slots
+//   needed to reach 6 scorers.
 //
-function calcEntryScore(picks, leaderboard, worstR3, worstR4) {
+function parseScoreToPar(str) {
+  // Convert ESPN display string to integer: "E"->0, "-3"->-3, "+2"->2
+  if (!str || str === '--') return null;
+  const s = String(str).trim();
+  if (s === 'E') return 0;
+  const n = parseInt(s);
+  return isNaN(n) ? null : n;
+}
+
+function formatToPar(n) {
+  // Format integer back to display string
+  if (n === null || n === undefined) return '--';
+  if (n === 0) return 'E';
+  return n > 0 ? '+' + n : String(n);
+}
+
+function calcEntryScore(picks, leaderboard, worstParR3, worstParR4) {
   const names = Object.values(picks).filter(Boolean);
   const scores = names.map(name => {
     const p = leaderboard.find(lb => lb.name === name);
-    if (!p) return { name, strokes: null, isMC: false, isPenalty: false };
+    if (!p) return { name, toPar: null, isMC: false, isPenalty: false };
     if (p.isMC) {
-      // Penalty = worst R3 + worst R4 (only applied if needed to reach 6)
-      const penalty = (worstR3 || 0) + (worstR4 || 0);
-      return { name, strokes: penalty, isMC: true, isPenalty: true };
+      // Penalty = worst to-par R3 + worst to-par R4
+      // Only applied if needed to fill the 6-scorer minimum
+      const penalty = (worstParR3 !== null ? worstParR3 : 0) +
+                      (worstParR4 !== null ? worstParR4 : 0);
+      return { name, toPar: penalty, isMC: true, isPenalty: true };
     }
-    return { name, strokes: p.strokes, isMC: false, isPenalty: false };
+    return { name, toPar: p.toPar, isMC: false, isPenalty: false };
   });
 
-  // Separate made-cut and MC players
-  const madecut  = scores.filter(s => !s.isMC && s.strokes !== null).sort((a,b) => a.strokes - b.strokes);
-  const missed   = scores.filter(s => s.isMC);
-  const unknown  = scores.filter(s => !s.isMC && s.strokes === null); // not yet in leaderboard
+  // Best 6: madecut sorted best-to-worst (ascending toPar), then MC penalty slots
+  const madecut = scores.filter(s => !s.isMC && s.toPar !== null)
+                        .sort((a, b) => a.toPar - b.toPar);
+  const missed  = scores.filter(s => s.isMC);
+  const unknown = scores.filter(s => !s.isMC && s.toPar === null);
 
-  // Take best 6: fill from madecut first, then penalty slots, then unknown
-  const pool = [...madecut, ...missed, ...unknown];
-  const top6 = pool.slice(0, 6);
-  const score = top6.reduce((sum, s) => sum + (s.strokes || 0), 0);
+  // Fill to 6: best madecut first, then MC penalties as needed
+  const top6 = [...madecut, ...missed, ...unknown].slice(0, 6);
+  const score = top6.reduce((sum, s) => sum + (s.toPar !== null ? s.toPar : 0), 0);
 
   return { score, top6, all: scores };
 }
 
-// Extract worst (highest) stroke total for a given round index from the leaderboard
-function worstRoundScore(leaderboard, roundIdx) {
-  let worst = 0;
+// Worst (highest/most over par) to-par value for a given round index
+function worstRoundPar(leaderboard, roundIdx) {
+  let worst = null;
   leaderboard.forEach(p => {
-    const r = p.rounds && p.rounds[roundIdx];
-    if (r && r > worst) worst = r;
+    const r = p.roundPars && p.roundPars[roundIdx];
+    if (r !== undefined && r !== null) {
+      if (worst === null || r > worst) worst = r;
+    }
   });
   return worst;
 }
@@ -803,33 +822,34 @@ function parseLeaderboard(data) {
     const statusName = ((c.status && c.status.type && c.status.type.name) || '').toLowerCase();
     const isMC = statusName.includes('cut') || statusName.includes('wd');
 
-    // to-par score for display (scoreToPar stat)
-    const scoreToPar = Array.isArray(c.statistics)
+    // Cumulative to-par: from statistics[scoreToPar].value (integer) or .displayValue
+    const scoreToParStat = Array.isArray(c.statistics)
       ? c.statistics.find(s => s.name === 'scoreToPar')
       : null;
-    const scoreStr = (scoreToPar && scoreToPar.displayValue !== undefined && scoreToPar.displayValue !== '--')
-      ? String(scoreToPar.displayValue)
-      : ((c.status && c.status.detail)
-          ? (String(c.status.detail).match(/^([+-]?\d+|E)/) || [])[1] || 'E'
-          : 'E');
+    let toPar = null;
+    let scoreStr = 'E';
+    if (scoreToParStat) {
+      toPar = (scoreToParStat.value !== undefined) ? Number(scoreToParStat.value) : parseScoreToPar(scoreToParStat.displayValue);
+      scoreStr = (scoreToParStat.displayValue !== undefined && scoreToParStat.displayValue !== '--')
+        ? String(scoreToParStat.displayValue)
+        : formatToPar(toPar);
+    } else if (c.status && c.status.detail) {
+      const m = String(c.status.detail).match(/^([+-]?\d+|E)/);
+      if (m) { scoreStr = m[1]; toPar = parseScoreToPar(m[1]); }
+    }
 
-    // cumulative stroke total — c.score.value is raw strokes (e.g. 68, 140, 212)
-    const rawScore = c.score;
-    const strokes = (typeof rawScore === 'object' && rawScore !== null)
-      ? (parseInt(rawScore.value) || null)
-      : (parseInt(rawScore) || null);
-
-    // per-round stroke totals from linescores
-    const rounds = {};
+    // Per-round to-par from linescores
+    // linescores[i].displayValue is the round to-par display e.g. "-2", "E", "+3"
+    const roundPars = {};
     (c.linescores || []).forEach((ls, i) => {
-      const raw = (typeof ls === 'object' && ls !== null)
-        ? (ls.displayValue !== undefined ? ls.displayValue : ls.value)
-        : ls;
-      const val = parseInt(raw);
-      if (!isNaN(val)) rounds[i] = val;
+      const dv = (typeof ls === 'object' && ls !== null) ? ls.displayValue : null;
+      // displayValue for rounds is the to-par string ("E", "-2", "+3")
+      // value is raw strokes (71, 68, etc.) — we want to-par
+      const val = parseScoreToPar(dv);
+      if (val !== null) roundPars[i] = val;
     });
 
-    // today display
+    // Today to-par from todayDetail e.g. "-2(9)"
     const todayMatch = c.status && c.status.todayDetail
       ? String(c.status.todayDetail).match(/^([+-]?\d+|E)/)
       : null;
@@ -839,16 +859,15 @@ function parseLeaderboard(data) {
       position: (c.status && c.status.position && c.status.position.displayName) || '--',
       sortOrder: c.sortOrder || 9999,
       name: athlete.displayName || athlete.name || '?',
-      score: scoreStr,       // to-par string for display
-      strokes,               // raw cumulative strokes for scoring
-      rounds,                // { 0: 71, 1: 68, 2: 74, 3: 70 }
+      score: scoreStr,       // to-par string for display e.g. "-3", "E", "+2"
+      toPar,                 // integer for math e.g. -3, 0, 2
+      roundPars,             // { 0: -2, 1: 1, 2: 3, 3: -1 } — to-par per round
       thru: (c.status && c.status.thru) || '--',
       today: todayStr,
       isMC,
       status: (c.status && c.status.type && c.status.type.name) || '',
     });
   });
-  // Sort by ESPN sortOrder
   golfLeaderboard.sort((a, b) => (a.sortOrder || 9999) - (b.sortOrder || 9999));
 }
 
