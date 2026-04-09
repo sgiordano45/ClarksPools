@@ -341,9 +341,11 @@
   <!-- RECALCULATE TAB -->
   <div class="tab-panel" id="tab-recalc">
     <div class="card">
-      <div class="card-title">Recalculate Winnings from ESPN Leaderboard</div>
+      <div class="card-title">Recalculate Scores from ESPN Leaderboard</div>
       <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">
-        This fetches the current Masters leaderboard from ESPN, looks up each golfer's finishing position, applies your saved payouts, totals each entry's winnings, and writes the result back to Firestore. Run this during or after the tournament.
+        Fetches the current Masters leaderboard from ESPN, computes each entry's total strokes
+        (best 6 of 9 golfers count; MC/WD players receive worst R3 + worst R4 as their score for penalty slots).
+        Writes <code style="color:var(--masters-gold)">totalScore</code> back to every entry.
       </p>
       <div class="btn-row">
         <button class="btn btn-gold" id="recalcBtn" onclick="runRecalculate()">Fetch Leaderboard &amp; Recalculate</button>
@@ -916,7 +918,7 @@ async function loadEntries() {
   el.innerHTML = '<div class="empty-msg">Loading…</div>';
   try {
     const snap = await db.collection('mastersPools').doc(POOL_ID).collection('entries')
-      .orderBy('totalWinnings', 'desc').get();
+      .orderBy('totalScore', 'asc').get();
     document.getElementById('entryCount').textContent = snap.size;
     if (snap.empty) {
       el.innerHTML = '<div class="empty-msg">No entries yet. Import a spreadsheet or add one above.</div>';
@@ -925,7 +927,7 @@ async function loadEntries() {
     const entries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
     let html = '<div style="overflow-x:auto"><table><thead><tr>' +
-      '<th>#</th><th>Entry</th><th>Source</th><th>Picks</th><th>Winnings</th><th>Date</th><th>Actions</th>' +
+      '<th>#</th><th>Entry</th><th>Source</th><th>Picks</th><th>Score</th><th>Date</th><th>Actions</th>' +
       '</tr></thead><tbody>';
 
     entries.forEach((e, idx) => {
@@ -948,7 +950,7 @@ async function loadEntries() {
         '</td>' +
         '<td>' + src + '</td>' +
         '<td><div class="picks-mini">' + chipsHtml + '</div></td>' +
-        '<td><span class="badge badge-' + (e.totalWinnings>0?'green':'gold') + '">$' + (e.totalWinnings||0).toLocaleString() + '</span></td>' +
+        '<td><span class="badge badge-' + (e.totalScore > 0 ? 'green' : 'gold') + '">' + (e.totalScore || 0) + (e.totalScore > 0 ? ' strokes' : ' —') + '</span></td>' +
         '<td style="color:var(--muted);font-size:12px">' + ts + '</td>' +
         '<td><div style="display:flex;gap:6px;">' +
           '<button class="btn btn-ghost btn-sm" onclick="openEditModal(\'' + safeId + '\')">Edit</button>' +
@@ -1071,52 +1073,90 @@ async function runRecalculate() {
   log('Starting recalculation...','info');
 
   try {
-    // Load saved payouts
-    const poolDoc = await db.collection('mastersPools').doc(POOL_ID).get();
-    const po = (poolDoc.exists && poolDoc.data().payouts) || DEFAULT_PAYOUTS_2026;
-    const manualEarningsMap = (poolDoc.exists && poolDoc.data().manualEarnings) || {};
-    log('Loaded payouts for ' + Object.keys(po).length + ' positions.','ok');
-
     // Fetch ESPN leaderboard
-    let espnEarnings = {};
+    let competitors = [];
     try {
       const res = await fetch(ESPN_URL);
       const data = await res.json();
-      espnEarnings = parseESPNEarnings(data, po);
-      log('ESPN: parsed '+Object.keys(espnEarnings).length+' golfer earnings.','ok');
+      const events = data.events || [];
+      const comps = (events[0] && events[0].competitions && events[0].competitions[0]) || {};
+      competitors = comps.competitors || [];
+      log('ESPN: loaded ' + competitors.length + ' competitors.','ok');
     } catch(espnErr) {
-      log('ESPN fetch failed: '+espnErr.message+' — using manual overrides only.','err');
+      log('ESPN fetch failed: ' + espnErr.message, 'err');
+      setStatus('ESPN fetch failed: ' + espnErr.message, 'error');
+      return;
     }
 
-    // Merge manual overrides
-    const golferEarnings = { ...espnEarnings, ...manualEarningsMap };
-    log('Total golfers with earnings: '+Object.keys(golferEarnings).length,'info');
+    // Build golfer stroke map: name -> { strokes, rounds, isMC }
+    const golferMap = {};
+    competitors.forEach(c => {
+      const name = (c.athlete && c.athlete.displayName) || '';
+      if (!name) return;
+      const statusName = ((c.status && c.status.type && c.status.type.name) || '').toLowerCase();
+      const isMC = statusName.includes('cut') || statusName.includes('wd');
+      const rawScore = c.score;
+      const strokes = (typeof rawScore === 'object' && rawScore !== null)
+        ? (parseInt(rawScore.value) || 0)
+        : (parseInt(rawScore) || 0);
+      const rounds = {};
+      (c.linescores || []).forEach((ls, i) => {
+        const raw = (typeof ls === 'object' && ls !== null)
+          ? (ls.displayValue !== undefined ? ls.displayValue : ls.value)
+          : ls;
+        const val = parseInt(raw);
+        if (!isNaN(val)) rounds[i] = val;
+      });
+      golferMap[name] = { strokes, rounds, isMC };
+    });
+    log('Built golfer map for ' + Object.keys(golferMap).length + ' players.','ok');
+
+    // Compute worst R3/R4 for MC penalty
+    let worstR3 = 0, worstR4 = 0;
+    Object.values(golferMap).forEach(p => {
+      if (p.rounds[2] && p.rounds[2] > worstR3) worstR3 = p.rounds[2];
+      if (p.rounds[3] && p.rounds[3] > worstR4) worstR4 = p.rounds[3];
+    });
+    if (worstR3) log('Worst R3: ' + worstR3, 'info');
+    if (worstR4) log('Worst R4: ' + worstR4, 'info');
 
     // Load all entries
     const snap = await db.collection('mastersPools').doc(POOL_ID).collection('entries').get();
     if (snap.empty) { log('No entries found.','err'); return; }
-    log('Processing '+snap.size+' entries...','info');
+    log('Processing ' + snap.size + ' entries...','info');
 
-    // Calculate winnings per entry
     const batch = db.batch();
     snap.docs.forEach(doc => {
       const entry = doc.data();
-      const picks = entry.picks || {};
-      let total = 0;
-      Object.values(picks).forEach(golferName => {
-        const earned = golferEarnings[golferName] || 0;
-        total += earned;
+      const picks = Object.values(entry.picks || {}).filter(Boolean);
+
+      // Score each pick
+      const scores = picks.map(name => {
+        const p = golferMap[name];
+        if (!p) return { name, strokes: null, isMC: false };
+        if (p.isMC) {
+          return { name, strokes: worstR3 + worstR4, isMC: true };
+        }
+        return { name, strokes: p.strokes, isMC: false };
       });
-      batch.update(doc.ref, { totalWinnings: total });
-      log('"'+(entry.entryName||entry.userName||doc.id)+'": $'+total.toLocaleString(),'ok');
+
+      // Best 6: madecut first (sorted asc), then penalty slots
+      const madecut = scores.filter(s => !s.isMC && s.strokes).sort((a,b) => a.strokes - b.strokes);
+      const missed  = scores.filter(s => s.isMC);
+      const top6    = [...madecut, ...missed].slice(0, 6);
+      const total   = top6.reduce((sum, s) => sum + (s.strokes || 0), 0);
+
+      batch.update(doc.ref, { totalScore: total, totalWinnings: total });
+      log('"' + (entry.entryName || doc.id) + '": ' + total + ' strokes (top6: ' + top6.map(s=>s.name.split(' ').pop()+(s.isMC?'⚠':'')).join(', ') + ')','ok');
     });
+
     await batch.commit();
     log('✅ All ' + snap.size + ' entries updated.','ok');
-    setStatus('Recalculation complete — '+snap.size+' entries updated.','success');
+    setStatus('Recalculation complete — ' + snap.size + ' entries updated.','success');
     loadEntries();
   } catch(e) {
-    log('Fatal error: '+e.message,'err');
-    setStatus('Error: '+e.message,'error');
+    log('Fatal error: ' + e.message,'err');
+    setStatus('Error: ' + e.message,'error');
   } finally {
     btn.disabled=false; btn.textContent='Fetch Leaderboard & Recalculate';
   }
@@ -1172,7 +1212,7 @@ async function clearAllWinnings() {
   try {
     const snap = await db.collection('mastersPools').doc(POOL_ID).collection('entries').get();
     const batch = db.batch();
-    snap.docs.forEach(d => batch.update(d.ref, { totalWinnings:0 }));
+    snap.docs.forEach(d => batch.update(d.ref, { totalScore: 0, totalWinnings: 0 }));
     await batch.commit();
     setStatus('All winnings reset to $0.','success');
     loadEntries();

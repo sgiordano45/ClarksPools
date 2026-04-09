@@ -159,6 +159,7 @@ main { position:relative; z-index:1; max-width:1200px; margin:0 auto; padding:0 
 .golfer-chip { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:0.2rem 0.5rem; font-size:0.75rem; color:var(--text-secondary); }
 .golfer-chip.mc { color:var(--accent-red); border-color:rgba(255,82,82,0.3); }
 .golfer-chip.active { color:var(--accent-green); border-color:rgba(0,200,83,0.3); }
+.golfer-chip.benched { opacity:0.35; }
 
 /* ── GOLF LEADERBOARD ── */
 .golf-lb-panel { padding-top:2rem; }
@@ -641,8 +642,7 @@ async function loadStandings() {
   const el = document.getElementById('standingsContent');
   el.innerHTML = '<div class="loading-state"><div class="loading-spinner"></div><p>Loading standings...</p></div>';
   try {
-    const snap = await db.collection('mastersPools').doc(POOL_ID).collection('entries')
-      .orderBy('totalWinnings','desc').get();
+    const snap = await db.collection('mastersPools').doc(POOL_ID).collection('entries').get();
     if (snap.empty) {
       el.innerHTML = '<div class="empty-state"><div class="empty-icon">🏌️</div><h3>No Entries Yet</h3><p>Be the first to submit your picks!</p></div>';
       document.getElementById('metaEntries').textContent = '0';
@@ -650,44 +650,75 @@ async function loadStandings() {
     }
     const entries = snap.docs.map(d => ({ id:d.id, ...d.data() }));
     document.getElementById('metaEntries').textContent = entries.length;
-    // Prize pool = buy-in × entries, not sum of winnings
     const buyIn = poolData && poolData.buyIn ? poolData.buyIn : 0;
     const prizePool = buyIn * entries.length;
     document.getElementById('metaPrize').textContent = prizePool > 0 ? '$' + prizePool.toLocaleString() : '$--';
 
+    // Compute worst R3/R4 for MC penalty (rounds index 2 and 3)
+    const worstR3 = worstRoundScore(golfLeaderboard, 2);
+    const worstR4 = worstRoundScore(golfLeaderboard, 3);
+
+    // Score every entry client-side
+    const scored = entries.map(entry => {
+      const { score, top6, all } = calcEntryScore(entry.picks || {}, golfLeaderboard, worstR3, worstR4);
+      return { ...entry, computedScore: score, top6, allScores: all };
+    });
+
+    // Sort ascending (lowest strokes wins), unscored (0) go to bottom
+    scored.sort((a, b) => {
+      if (a.computedScore === 0 && b.computedScore === 0) return 0;
+      if (a.computedScore === 0) return 1;
+      if (b.computedScore === 0) return -1;
+      return a.computedScore - b.computedScore;
+    });
+
     let html = '<div style="overflow-x:auto;"><table class="leaderboard-table"><thead><tr>' +
-      '<th>Rank</th><th>Entry</th><th>Picks</th><th>Winnings</th>' +
+      '<th>Rank</th><th>Entry</th><th>Top 6 Picks</th><th>Score</th>' +
       '</tr></thead><tbody>';
-    entries.forEach((entry, idx) => {
+
+    scored.forEach((entry, idx) => {
       const rank = idx + 1;
       const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : '';
+
+      // Build chips — show all 9, highlight top 6, dim the rest
       const picks = entry.picks || {};
+      const top6Names = new Set((entry.top6 || []).map(s => s.name));
       const chipsHtml = TIERS.map(t => {
         const g = picks[t.id];
         if (!g) return '';
         const lb = golfLeaderboard.find(p => p.name === g);
-        const mc = lb && lb.status === 'cut';
-        // Build label: name · score · $earnings
+        const isTop6 = top6Names.has(g);
+        const isMC = lb && lb.isMC;
+        const isPenalty = isMC && isTop6;
         let label = g;
         if (lb) {
           label += ' · ' + (lb.score || 'E');
-          if (lb.earnings && lb.earnings > 0) {
-            label += ' · $' + lb.earnings.toLocaleString();
-          }
+          if (lb.strokes) label += ' (' + lb.strokes + ')';
         }
-        return '<span class="golfer-chip' + (mc ? ' mc' : (lb && lb.score && lb.score !== 'E' && parseInt(lb.score) < 0 ? ' active' : '')) + '">' + label + '</span>';
+        if (isPenalty) label += ' ⚠';
+        const chipClass = 'golfer-chip' +
+          (isMC ? ' mc' : '') +
+          (isTop6 && !isMC ? ' active' : '') +
+          (!isTop6 ? ' benched' : '');
+        return '<span class="' + chipClass + '" title="' + (isTop6 ? 'Counting' : 'Not counting') + '">' + label + '</span>';
       }).join('');
+
+      const scoreDisplay = entry.computedScore > 0
+        ? entry.computedScore + ' strokes'
+        : '—';
+
       html += '<tr>' +
         '<td class="rank-cell ' + rankClass + '">' + rank + '</td>' +
         '<td class="entry-name-cell">' + (entry.entryName || '—') + '</td>' +
         '<td><div class="golfer-chips">' + chipsHtml + '</div></td>' +
-        '<td class="winnings-cell">$' + (entry.totalWinnings || 0).toLocaleString() + '</td>' +
+        '<td class="winnings-cell" style="font-size:1rem;">' + scoreDisplay + '</td>' +
         '</tr>';
     });
     html += '</tbody></table></div>';
     el.innerHTML = html;
   } catch(e) {
     el.innerHTML = '<div class="empty-state"><p style="color:var(--accent-red);">Error loading standings.</p></div>';
+    console.error(e);
   }
 }
 
@@ -713,44 +744,51 @@ async function loadGolfLeaderboard() {
   }
 }
 
-// ── TIE-AWARE EARNINGS CALCULATOR ──
-// Groups competitors by numeric position, averages payouts across tied spots.
-// Works mid-tournament (T3 of 3 splits pos 3+4+5) and final (solo pos = full amount).
-// po = { 1: 3600000, 2: 2160000, ... }
-// competitors = raw ESPN competitors array (needs c.status.position.displayName, c.status.type.name)
-function calcTiedEarnings(competitors, po) {
-  const result = {}; // name -> earnings
-
-  // Group by numeric position, skip MC/WD
-  const groups = {}; // { 3: ['Player A', 'Player B', 'Player C'], ... }
-  competitors.forEach(c => {
-    const name = (c.athlete && c.athlete.displayName) || '';
-    if (!name) return;
-    const statusName = ((c.status && c.status.type && c.status.type.name) || '').toLowerCase();
-    if (statusName.includes('cut') || statusName.includes('wd')) {
-      result[name] = 0;
-      return;
+// ── STROKE-BASED SCORING ──────────────────────────────────────────────────
+//
+// calcEntryScore(picks, leaderboard, worstR3, worstR4)
+//   picks      : { tier1: 'Name', tier2: 'Name', ... }
+//   leaderboard: parsed golfLeaderboard array
+//   worstR3/R4 : worst (highest) stroke count shot by anyone in that round
+//
+// Returns { score, breakdown } where score is the total strokes for the entry's
+// best 6 golfers (lower = better). MC/WD players get worstR3+worstR4 as their
+// stroke total, and only fill slots if needed to reach 6 scorers.
+//
+function calcEntryScore(picks, leaderboard, worstR3, worstR4) {
+  const names = Object.values(picks).filter(Boolean);
+  const scores = names.map(name => {
+    const p = leaderboard.find(lb => lb.name === name);
+    if (!p) return { name, strokes: null, isMC: false, isPenalty: false };
+    if (p.isMC) {
+      // Penalty = worst R3 + worst R4 (only applied if needed to reach 6)
+      const penalty = (worstR3 || 0) + (worstR4 || 0);
+      return { name, strokes: penalty, isMC: true, isPenalty: true };
     }
-    const posStr = (c.status && c.status.position && c.status.position.displayName) || '';
-    const pos = parseInt(posStr.replace(/[^0-9]/g, ''));
-    if (isNaN(pos)) { result[name] = 0; return; }
-    if (!groups[pos]) groups[pos] = [];
-    groups[pos].push(name);
+    return { name, strokes: p.strokes, isMC: false, isPenalty: false };
   });
 
-  // For each group, average the payouts across the tied positions
-  Object.entries(groups).forEach(([posStr, names]) => {
-    const pos = parseInt(posStr);
-    const count = names.length;
-    let totalPayout = 0;
-    for (let i = 0; i < count; i++) {
-      totalPayout += (po[pos + i] || 0);
-    }
-    const share = count > 0 ? Math.round(totalPayout / count) : 0;
-    names.forEach(name => { result[name] = share; });
-  });
+  // Separate made-cut and MC players
+  const madecut  = scores.filter(s => !s.isMC && s.strokes !== null).sort((a,b) => a.strokes - b.strokes);
+  const missed   = scores.filter(s => s.isMC);
+  const unknown  = scores.filter(s => !s.isMC && s.strokes === null); // not yet in leaderboard
 
-  return result;
+  // Take best 6: fill from madecut first, then penalty slots, then unknown
+  const pool = [...madecut, ...missed, ...unknown];
+  const top6 = pool.slice(0, 6);
+  const score = top6.reduce((sum, s) => sum + (s.strokes || 0), 0);
+
+  return { score, top6, all: scores };
+}
+
+// Extract worst (highest) stroke total for a given round index from the leaderboard
+function worstRoundScore(leaderboard, roundIdx) {
+  let worst = 0;
+  leaderboard.forEach(p => {
+    const r = p.rounds && p.rounds[roundIdx];
+    if (r && r > worst) worst = r;
+  });
+  return worst;
 }
 
 function parseLeaderboard(data) {
@@ -762,8 +800,10 @@ function parseLeaderboard(data) {
   const competitors = comps.competitors || [];
   competitors.forEach(c => {
     const athlete = c.athlete || {};
-    // c.score.displayValue is the cumulative STROKE total (e.g. "72"), NOT to-par.
-    // The to-par score lives in c.statistics where name === "scoreToPar".
+    const statusName = ((c.status && c.status.type && c.status.type.name) || '').toLowerCase();
+    const isMC = statusName.includes('cut') || statusName.includes('wd');
+
+    // to-par score for display (scoreToPar stat)
     const scoreToPar = Array.isArray(c.statistics)
       ? c.statistics.find(s => s.name === 'scoreToPar')
       : null;
@@ -772,52 +812,67 @@ function parseLeaderboard(data) {
       : ((c.status && c.status.detail)
           ? (String(c.status.detail).match(/^([+-]?\d+|E)/) || [])[1] || 'E'
           : 'E');
-    // Today's round score from status.todayDetail e.g. "-2(9)"
+
+    // cumulative stroke total — c.score.value is raw strokes (e.g. 68, 140, 212)
+    const rawScore = c.score;
+    const strokes = (typeof rawScore === 'object' && rawScore !== null)
+      ? (parseInt(rawScore.value) || null)
+      : (parseInt(rawScore) || null);
+
+    // per-round stroke totals from linescores
+    const rounds = {};
+    (c.linescores || []).forEach((ls, i) => {
+      const raw = (typeof ls === 'object' && ls !== null)
+        ? (ls.displayValue !== undefined ? ls.displayValue : ls.value)
+        : ls;
+      const val = parseInt(raw);
+      if (!isNaN(val)) rounds[i] = val;
+    });
+
+    // today display
     const todayMatch = c.status && c.status.todayDetail
       ? String(c.status.todayDetail).match(/^([+-]?\d+|E)/)
       : null;
     const todayStr = todayMatch ? todayMatch[1] : '--';
+
     golfLeaderboard.push({
       position: (c.status && c.status.position && c.status.position.displayName) || '--',
       sortOrder: c.sortOrder || 9999,
       name: athlete.displayName || athlete.name || '?',
-      score: scoreStr,
+      score: scoreStr,       // to-par string for display
+      strokes,               // raw cumulative strokes for scoring
+      rounds,                // { 0: 71, 1: 68, 2: 74, 3: 70 }
       thru: (c.status && c.status.thru) || '--',
       today: todayStr,
+      isMC,
       status: (c.status && c.status.type && c.status.type.name) || '',
-      earnings: 0,
     });
   });
-  // Sort by ESPN sortOrder — leaders first, not-yet-started last
+  // Sort by ESPN sortOrder
   golfLeaderboard.sort((a, b) => (a.sortOrder || 9999) - (b.sortOrder || 9999));
-  // Stamp tie-aware earnings onto each player
-  const earningsMap = calcTiedEarnings(competitors, payoutMap);
-  golfLeaderboard.forEach(p => {
-    p.earnings = earningsMap[p.name] || 0;
-  });
 }
 
 function renderGolfLeaderboard(el) {
   if (!golfLeaderboard.length) {
-    el.innerHTML = '<div class="empty-state"><div class="empty-icon">⛳</div><h3>Tournament Hasn\'t Started Yet</h3><p>The Masters begins April 9, 2026. Check back then for live scores!</p></div>';
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">⛳</div><h3>Tournament Hasn\'t Started Yet</h3><p>Check back once the tournament begins.</p></div>';
     return;
   }
   let html = '<div class="golf-lb-card"><table class="golf-lb-table"><thead><tr>' +
-    '<th>Pos</th><th>Player</th><th>Score</th><th>Thru</th><th>Today</th><th>Prize</th>' +
+    '<th>Pos</th><th>Player</th><th>Score</th><th>Thru</th><th>Today</th><th>Strokes</th>' +
     '</tr></thead><tbody>';
   golfLeaderboard.forEach(p => {
     const scoreNum = parseInt(p.score) || 0;
-    const scoreClass = p.status === 'cut' ? 'score-mc' : scoreNum < 0 ? 'score-under' : scoreNum > 0 ? 'score-over' : 'score-even';
-    const scoreDisplay = p.status === 'cut' ? 'MC' : p.score || 'E';
-    const earnings = p.earnings || 0;
-    const earningsBadge = earnings > 0 ? '<span class="winnings-badge">$' + earnings.toLocaleString() + '</span>' : '<span style="color:var(--text-secondary);font-size:0.85rem;">—</span>';
+    const scoreClass = p.isMC ? 'score-mc' : scoreNum < 0 ? 'score-under' : scoreNum > 0 ? 'score-over' : 'score-even';
+    const scoreDisplay = p.isMC ? 'MC' : p.score || 'E';
+    const strokesDisplay = p.isMC ? '<span style="color:var(--accent-red);font-size:0.85rem;">MC</span>'
+      : (p.strokes ? String(p.strokes) : '—');
     html += '<tr>' +
       '<td class="pos-cell">' + p.position + '</td>' +
       '<td><div class="player-name">' + p.name + '</div></td>' +
       '<td class="' + scoreClass + '">' + scoreDisplay + '</td>' +
       '<td class="thru-cell">' + p.thru + '</td>' +
       '<td class="' + scoreClass + '">' + (p.today !== '--' ? (String(p.today).startsWith('+') || String(p.today).startsWith('-') || p.today === 'E' ? p.today : (parseInt(p.today) > 0 ? '+' + p.today : p.today)) : '--') + '</td>' +
-      '<td>' + earningsBadge + '</td>' +
+      '<td style="font-family:var(--mono-font,monospace);color:var(--text-secondary)">' + strokesDisplay + '</td>' +
       '</tr>';
   });
   html += '</tbody></table></div>';
