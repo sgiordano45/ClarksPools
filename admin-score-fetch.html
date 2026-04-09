@@ -735,6 +735,31 @@
     btn.innerHTML = '&#9654; Push to Sheets';
   }
 
+  // ── GOLF SCORE HELPER ──
+  // ESPN golf API score field varies — try every known path before giving up
+  function extractGolfScore(c) {
+    // Path 1: c.score is a plain string/number e.g. "-3" or -3
+    if (c.score !== undefined && c.score !== null) {
+      if (typeof c.score === 'string' && c.score.trim() !== '') return c.score.trim();
+      if (typeof c.score === 'number') return c.score === 0 ? 'E' : String(c.score);
+      // Path 2: c.score is an object with displayValue
+      if (typeof c.score === 'object') {
+        if (c.score.displayValue !== undefined) return String(c.score.displayValue);
+        if (c.score.value !== undefined) return String(c.score.value);
+      }
+    }
+    // Path 3: c.statistics array (some ESPN endpoints put score here)
+    if (Array.isArray(c.statistics)) {
+      const scoreStat = c.statistics.find(s => s.name === 'score' || s.abbreviation === 'SC' || s.abbreviation === 'TOT');
+      if (scoreStat) return String(scoreStat.displayValue || scoreStat.value || 'E');
+    }
+    // Path 4: c.totalScore
+    if (c.totalScore !== undefined && c.totalScore !== null) return String(c.totalScore);
+    // Path 5: c.status.score
+    if (c.status && c.status.score !== undefined) return String(c.status.score);
+    return 'E';
+  }
+
   // ── MASTERS GOLF LEADERBOARD ──────────────────────────────────────────────
   const MASTERS_ESPN = 'https://site.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=pga';
   const MASTERS_POOL_ID = 'masters-2026';
@@ -781,15 +806,16 @@
         const poolDoc = await db.collection('mastersPools').doc(MASTERS_POOL_ID).get();
         if (poolDoc.exists && poolDoc.data().payouts) po = poolDoc.data().payouts;
       } catch(e) {}
+
+      // Log first competitor so we can inspect score field structure in DevTools
+      if (competitors.length) console.log('[Masters ESPN] sample competitor:', JSON.stringify(competitors[0]).slice(0,1000));
+
       // Render table
       tableEl.innerHTML = competitors.map(c => {
         const name = (c.athlete && c.athlete.displayName) || '?';
         const posStr = (c.status && c.status.position && c.status.position.displayName) || '--';
         const pos = parseInt(posStr.replace(/[^0-9]/g,''));
-        const rawScore = c.score;
-        const score = (typeof rawScore === 'object' && rawScore !== null)
-          ? (rawScore.displayValue || rawScore.value || 'E')
-          : (rawScore || 'E');
+        const score = extractGolfScore(c);
         const thru = (c.status && c.status.thru) || '--';
         const statusName = (c.status && c.status.type && c.status.type.name)||'';
         const isMC = statusName.toLowerCase().includes('cut')||statusName.toLowerCase().includes('wd');
@@ -929,19 +955,15 @@
         const statusName= (c.status && c.status.type && c.status.type.name) || '';
         const isMC      = statusName.toLowerCase().includes('cut') || statusName.toLowerCase().includes('wd');
         const isWD      = statusName.toLowerCase().includes('wd');
-        const rawScore  = c.score;
-        const totalScore= (typeof rawScore === 'object' && rawScore !== null)
-          ? (rawScore.displayValue || rawScore.value || 'E')
-          : (rawScore || 'E');
-        // Parse per-round linescores
+        const totalScore= extractGolfScore(c);
+        // Parse per-round linescores — value may be object or primitive
         const linescores = (c.linescores || []);
         const rounds = {};
         linescores.forEach((ls, i) => {
-          const val = parseInt(
-            (typeof ls === 'object' && ls !== null)
-              ? (ls.displayValue || ls.value)
-              : ls
-          );
+          const raw = (typeof ls === 'object' && ls !== null)
+            ? (ls.displayValue !== undefined ? ls.displayValue : ls.value)
+            : ls;
+          const val = parseInt(raw);
           if (!isNaN(val)) rounds[i] = val;
         });
         return { name, posStr, thru, isMC, isWD, totalScore, rounds };
