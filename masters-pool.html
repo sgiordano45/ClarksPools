@@ -667,8 +667,7 @@ async function loadStandings() {
       }).join('');
       html += '<tr>' +
         '<td class="rank-cell ' + rankClass + '">' + rank + '</td>' +
-        '<td class="entry-name-cell">' + (entry.entryName||entry.userName||'—') + 
-        '<div style="font-size:0.8rem;color:var(--text-secondary);">' + (entry.userName||'') + '</div></td>' +
+        '<td class="entry-name-cell">' + (entry.entryName||entry.userName||'—') + '</td>' +
         '<td><div class="golfer-chips">' + chipsHtml + '</div></td>' +
         '<td class="winnings-cell">$' + ((entry.totalWinnings||0)).toLocaleString() + '</td>' +
         '</tr>';
@@ -714,7 +713,9 @@ function parseLeaderboard(data) {
     golfLeaderboard.push({
       position: c.status && c.status.position && c.status.position.displayName || c.sortOrder || '--',
       name: athlete.displayName || athlete.name || '?',
-      score: c.score || 'E',
+      score: (typeof c.score === 'object' && c.score !== null)
+               ? (c.score.displayValue || c.score.value || 'E')
+               : (c.score || 'E'),
       thru: (c.status && c.status.thru) || '--',
       today: c.linescores && c.linescores[c.linescores.length-1] ? c.linescores[c.linescores.length-1].value : '--',
       status: c.status && c.status.type && c.status.type.name || '',
