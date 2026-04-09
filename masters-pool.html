@@ -178,7 +178,25 @@ main { position:relative; z-index:1; max-width:1200px; margin:0 auto; padding:0 
 .winnings-badge { background:rgba(0,200,83,0.1); border:1px solid rgba(0,200,83,0.25); color:#4ade80; padding:0.2rem 0.6rem; border-radius:4px; font-size:0.85rem; font-weight:700; font-family:'Oswald',sans-serif; }
 .golfer-owned { font-size:0.8rem; color:var(--text-secondary); margin-top:0.2rem; }
 
-/* ── LOADING / EMPTY ── */
+/* ── OWNERSHIP ── */
+.ownership-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:1.25rem; padding-top:2rem; }
+.ownership-card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:12px; overflow:hidden; }
+.ownership-card-header { padding:0.9rem 1.25rem; background:rgba(255,255,255,0.03); border-bottom:1px solid var(--card-border); display:flex; align-items:center; gap:0.75rem; }
+.ownership-tier-badge { background:linear-gradient(135deg,var(--masters-green),#2d8a50); color:#fff; font-family:'Oswald',sans-serif; font-size:0.8rem; font-weight:600; padding:0.25rem 0.65rem; border-radius:5px; letter-spacing:0.5px; }
+.ownership-tier-name { font-family:'Oswald',sans-serif; font-size:1rem; font-weight:600; }
+.ownership-rows { padding:0.5rem 0; }
+.ownership-row { display:flex; align-items:center; gap:0.75rem; padding:0.55rem 1.25rem; transition:background 0.15s; }
+.ownership-row:hover { background:rgba(255,255,255,0.03); }
+.ownership-rank { font-family:'IBM Plex Mono',monospace; font-size:0.75rem; color:var(--text-secondary); width:18px; flex-shrink:0; text-align:right; }
+.ownership-name { flex:1; font-size:0.95rem; font-weight:600; }
+.ownership-name.leading { color:var(--accent-gold); }
+.ownership-score { font-family:'IBM Plex Mono',monospace; font-size:0.8rem; color:var(--text-secondary); width:36px; text-align:right; flex-shrink:0; }
+.ownership-score.under { color:var(--accent-green); }
+.ownership-score.over { color:var(--accent-red); }
+.ownership-bar-wrap { width:100px; flex-shrink:0; }
+.ownership-bar-bg { height:6px; background:rgba(255,255,255,0.07); border-radius:3px; overflow:hidden; }
+.ownership-bar-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--masters-green),var(--masters-gold)); transition:width 0.4s; }
+.ownership-pct { font-family:'IBM Plex Mono',monospace; font-size:0.75rem; color:var(--text-secondary); width:36px; text-align:right; flex-shrink:0; }
 .loading-state { text-align:center; padding:4rem 2rem; color:var(--text-secondary); }
 .loading-spinner { width:40px; height:40px; border:3px solid rgba(255,255,255,0.1); border-top-color:var(--masters-gold); border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 1rem; }
 @keyframes spin { to{transform:rotate(360deg)} }
@@ -279,6 +297,7 @@ main { position:relative; z-index:1; max-width:1200px; margin:0 auto; padding:0 
   <div class="page-tabs">
     <button class="page-tab active" onclick="switchTab('standings')">Pool Standings</button>
     <button class="page-tab" onclick="switchTab('golfers')">Golf Leaderboard</button>
+    <button class="page-tab" onclick="switchTab('ownership')">Ownership</button>
   </div>
 
   <!-- PICKS TAB (hidden) -->
@@ -356,6 +375,19 @@ main { position:relative; z-index:1; max-width:1200px; margin:0 auto; padding:0 
       </div>
       <div id="golfLbContent">
         <div class="loading-state"><div class="loading-spinner"></div><p>Fetching leaderboard...</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OWNERSHIP TAB -->
+  <div class="tab-panel" id="tab-ownership">
+    <div class="leaderboard-panel">
+      <div class="lb-header">
+        <div class="lb-title">Ownership by Tier</div>
+        <button class="refresh-btn" onclick="renderOwnership()">↻ Refresh</button>
+      </div>
+      <div id="ownershipContent">
+        <div class="loading-state"><div class="loading-spinner"></div><p>Loading...</p></div>
       </div>
     </div>
   </div>
@@ -911,13 +943,122 @@ function renderGolfLeaderboard(el) {
 // ── TAB SWITCHING ──
 function switchTab(tab) {
   document.querySelectorAll('.page-tab').forEach((t,i) => {
-    const tabs = ['standings','golfers'];
+    const tabs = ['standings','golfers','ownership'];
     t.classList.toggle('active', tabs[i] === tab);
   });
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
   if (tab === 'standings') loadStandings();
   if (tab === 'golfers') loadGolfLeaderboard();
+  if (tab === 'ownership') renderOwnership();
+}
+
+// ── OWNERSHIP ──
+async function renderOwnership() {
+  const el = document.getElementById('ownershipContent');
+  el.innerHTML = '<div class="loading-state"><div class="loading-spinner"></div><p>Loading...</p></div>';
+
+  try {
+    // Load all entries from Firestore
+    const snap = await db.collection('mastersPools').doc(POOL_ID).collection('entries').get();
+    if (snap.empty) {
+      el.innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div><h3>No Entries Yet</h3></div>';
+      return;
+    }
+    const entries = snap.docs.map(d => d.data());
+    const totalEntries = entries.length;
+
+    if (!TIERS.length) {
+      el.innerHTML = '<div class="empty-state"><p style="color:var(--text-secondary);">Tiers not loaded yet.</p></div>';
+      return;
+    }
+
+    // Count picks per golfer per tier
+    // ownershipMap[tierId][golferName] = count
+    const ownershipMap = {};
+    TIERS.forEach(t => { ownershipMap[t.id] = {}; });
+
+    entries.forEach(entry => {
+      const picks = entry.picks || {};
+      TIERS.forEach((tier, idx) => {
+        const tierId = tier.id || ('tier' + (idx+1));
+        const pick = picks[tierId];
+        if (!pick) return;
+        if (!ownershipMap[tierId]) ownershipMap[tierId] = {};
+        ownershipMap[tierId][pick] = (ownershipMap[tierId][pick] || 0) + 1;
+      });
+    });
+
+    // Render one card per tier
+    let html = '<div class="ownership-grid">';
+    TIERS.forEach((tier, idx) => {
+      const tierId = tier.id || ('tier' + (idx+1));
+      const counts = ownershipMap[tierId] || {};
+
+      // Sort golfers by pick count desc, then by current score asc
+      const golfers = Object.entries(counts)
+        .map(([name, count]) => {
+          const lb = findInLeaderboard(name);
+          return { name, count, toPar: lb ? lb.toPar : null, score: lb ? lb.score : null, isMC: lb ? lb.isMC : false };
+        })
+        .sort((a, b) => {
+          if (b.count !== a.count) return b.count - a.count;
+          // Tiebreak by current score (lower/better first)
+          if (a.toPar !== null && b.toPar !== null) return a.toPar - b.toPar;
+          if (a.toPar !== null) return -1;
+          if (b.toPar !== null) return 1;
+          return 0;
+        });
+
+      // Also include golfers in the tier with 0 picks (not selected by anyone)
+      const pickedNames = new Set(golfers.map(g => g.name));
+      (tier.golfers || []).forEach(g => {
+        const name = typeof g === 'string' ? g : g.name;
+        if (!pickedNames.has(name)) {
+          const lb = findInLeaderboard(name);
+          golfers.push({ name, count: 0, toPar: lb ? lb.toPar : null, score: lb ? lb.score : null, isMC: lb ? lb.isMC : false });
+        }
+      });
+
+      const maxCount = golfers.length ? Math.max(...golfers.map(g => g.count)) : 1;
+
+      html += '<div class="ownership-card">' +
+        '<div class="ownership-card-header">' +
+        '<span class="ownership-tier-badge">' + (tier.name || ('Tier ' + (idx+1))) + '</span>' +
+        '<span style="font-size:0.8rem;color:var(--text-secondary);">' + Object.values(counts).reduce((a,b)=>a+b,0) + ' picks</span>' +
+        '</div>' +
+        '<div class="ownership-rows">';
+
+      golfers.forEach((g, ri) => {
+        const pct = totalEntries > 0 ? Math.round(g.count / totalEntries * 100) : 0;
+        const barWidth = maxCount > 0 ? Math.round(g.count / maxCount * 100) : 0;
+        const scoreClass = g.isMC ? '' : (g.toPar !== null && g.toPar < 0 ? 'under' : g.toPar !== null && g.toPar > 0 ? 'over' : '');
+        const scoreDisplay = g.isMC ? 'MC' : (g.score || (g.toPar !== null ? formatToPar(g.toPar) : '—'));
+        const isLeading = ri === 0 && g.count > 0;
+
+        html += '<div class="ownership-row">' +
+          '<span class="ownership-rank">' + (ri+1) + '</span>' +
+          '<span class="ownership-name' + (isLeading ? ' leading' : '') + '">' + g.name + '</span>' +
+          '<span class="ownership-score ' + scoreClass + '">' + scoreDisplay + '</span>' +
+          '<div class="ownership-bar-wrap">' +
+            '<div class="ownership-bar-bg">' +
+              '<div class="ownership-bar-fill" style="width:' + barWidth + '%"></div>' +
+            '</div>' +
+          '</div>' +
+          '<span class="ownership-pct">' + (g.count > 0 ? pct + '%' : '—') + '</span>' +
+          '</div>';
+      });
+
+      html += '</div></div>';
+    });
+
+    html += '</div>';
+    el.innerHTML = html;
+
+  } catch(e) {
+    el.innerHTML = '<div class="empty-state"><p style="color:var(--accent-red);">Error loading ownership.</p></div>';
+    console.error(e);
+  }
 }
 
 // ── AUTH ──
