@@ -736,27 +736,26 @@
   }
 
   // ── GOLF SCORE HELPER ──
-  // ESPN golf API score field varies — try every known path before giving up
+  // ESPN golf API: c.score.displayValue is the cumulative stroke total formatted as "E"
+  // but does NOT reflect to-par. The actual to-par score is in c.statistics[0] (scoreToPar).
   function extractGolfScore(c) {
-    // Path 1: c.score is a plain string/number e.g. "-3" or -3
-    if (c.score !== undefined && c.score !== null) {
-      if (typeof c.score === 'string' && c.score.trim() !== '') return c.score.trim();
-      if (typeof c.score === 'number') return c.score === 0 ? 'E' : String(c.score);
-      // Path 2: c.score is an object with displayValue
-      if (typeof c.score === 'object') {
-        if (c.score.displayValue !== undefined) return String(c.score.displayValue);
-        if (c.score.value !== undefined) return String(c.score.value);
+    // Primary: statistics[0] where name === "scoreToPar" — this is the real to-par display
+    if (Array.isArray(c.statistics) && c.statistics.length > 0) {
+      const scoreToPar = c.statistics.find(s => s.name === 'scoreToPar');
+      if (scoreToPar && scoreToPar.displayValue !== undefined && scoreToPar.displayValue !== '--') {
+        return String(scoreToPar.displayValue);
       }
     }
-    // Path 3: c.statistics array (some ESPN endpoints put score here)
-    if (Array.isArray(c.statistics)) {
-      const scoreStat = c.statistics.find(s => s.name === 'score' || s.abbreviation === 'SC' || s.abbreviation === 'TOT');
-      if (scoreStat) return String(scoreStat.displayValue || scoreStat.value || 'E');
+    // Fallback: status.detail e.g. "-3(8)" — extract the leading score part
+    if (c.status && c.status.detail) {
+      const match = c.status.detail.match(/^([+-]?\d+|E)/);
+      if (match) return match[1];
     }
-    // Path 4: c.totalScore
-    if (c.totalScore !== undefined && c.totalScore !== null) return String(c.totalScore);
-    // Path 5: c.status.score
-    if (c.status && c.status.score !== undefined) return String(c.status.score);
+    // Last resort: c.score.displayValue
+    if (c.score && typeof c.score === 'object' && c.score.displayValue !== undefined) {
+      return String(c.score.displayValue);
+    }
+    if (c.score && typeof c.score === 'string') return c.score;
     return 'E';
   }
 

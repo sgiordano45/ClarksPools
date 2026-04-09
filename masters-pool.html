@@ -711,18 +711,23 @@ function parseLeaderboard(data) {
   const competitors = comps.competitors || [];
   competitors.forEach(c => {
     const athlete = c.athlete || {};
-    // score and today can be objects or primitives depending on ESPN API version
-    const rawScore = c.score;
-    const scoreStr = (typeof rawScore === 'object' && rawScore !== null)
-      ? (rawScore.displayValue || rawScore.value || 'E')
-      : (rawScore || 'E');
-    const lastLine = c.linescores && c.linescores.length
-      ? c.linescores[c.linescores.length - 1]
+    // c.score.displayValue is the cumulative STROKE total (e.g. "72"), NOT to-par.
+    // The to-par score lives in c.statistics where name === "scoreToPar".
+    const scoreToPar = Array.isArray(c.statistics)
+      ? c.statistics.find(s => s.name === 'scoreToPar')
       : null;
-    const rawToday = lastLine ? (lastLine.displayValue || lastLine.value) : null;
-    const todayStr = (rawToday !== null && rawToday !== undefined) ? String(rawToday) : '--';
+    const scoreStr = (scoreToPar && scoreToPar.displayValue !== undefined && scoreToPar.displayValue !== '--')
+      ? String(scoreToPar.displayValue)
+      : ((c.status && c.status.detail)
+          ? (String(c.status.detail).match(/^([+-]?\d+|E)/) || [])[1] || 'E'
+          : 'E');
+    // Today's round score from status.todayDetail e.g. "-2(9)"
+    const todayMatch = c.status && c.status.todayDetail
+      ? String(c.status.todayDetail).match(/^([+-]?\d+|E)/)
+      : null;
+    const todayStr = todayMatch ? todayMatch[1] : '--';
     golfLeaderboard.push({
-      position: (c.status && c.status.position && c.status.position.displayName) || c.sortOrder || '--',
+      position: (c.status && c.status.position && c.status.position.displayName) || '--',
       sortOrder: c.sortOrder || 9999,
       name: athlete.displayName || athlete.name || '?',
       score: scoreStr,
@@ -732,21 +737,8 @@ function parseLeaderboard(data) {
       earnings: 0,
     });
   });
-  // Sort by position — players who haven't started go to the bottom
-  golfLeaderboard.sort((a, b) => {
-    const aNum = parseInt(a.sortOrder) || 9999;
-    const bNum = parseInt(b.sortOrder) || 9999;
-    return aNum - bNum;
-  });
-}
-
-function formatToday(val) {
-  if (!val || val === '--') return '--';
-  const s = String(val).trim();
-  if (s === 'E' || s === '0') return 'E';
-  const n = parseInt(s);
-  if (!isNaN(n)) return n > 0 ? '+' + n : String(n);
-  return s; // already formatted (e.g. "-3")
+  // Sort by ESPN sortOrder — leaders first, not-yet-started last
+  golfLeaderboard.sort((a, b) => (a.sortOrder || 9999) - (b.sortOrder || 9999));
 }
 
 function renderGolfLeaderboard(el) {
@@ -768,7 +760,7 @@ function renderGolfLeaderboard(el) {
       '<td><div class="player-name">' + p.name + '</div></td>' +
       '<td class="' + scoreClass + '">' + scoreDisplay + '</td>' +
       '<td class="thru-cell">' + p.thru + '</td>' +
-      '<td class="' + scoreClass + '">' + formatToday(p.today) + '</td>' +
+      '<td class="' + scoreClass + '">' + (p.today !== '--' ? (p.today > 0 ? '+' + p.today : p.today) : '--') + '</td>' +
       '<td>' + earningsBadge + '</td>' +
       '</tr>';
   });
