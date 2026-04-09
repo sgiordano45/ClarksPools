@@ -688,7 +688,7 @@ async function loadStandings() {
       const chipsHtml = TIERS.map(t => {
         const g = picks[t.id];
         if (!g) return '';
-        const lb = golfLeaderboard.find(p => p.name === g);
+        const lb = findInLeaderboard(g);
         const isTop6 = top6Names.has(g);
         const isMC = lb && lb.isMC;
         const isPenalty = isMC && isTop6;
@@ -754,6 +754,16 @@ async function loadGolfLeaderboard() {
 //   worstParR3 + worstParR4 as their penalty, only filling slots
 //   needed to reach 6 scorers.
 //
+// Strip diacritics for fuzzy name matching (e.g. "Aberg" matches "Åberg")
+function normalizeName(s) {
+  return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+}
+
+function findInLeaderboard(name) {
+  const norm = normalizeName(name);
+  return golfLeaderboard.find(p => normalizeName(p.name) === norm);
+}
+
 function parseScoreToPar(str) {
   // Convert ESPN display string to integer: "E"->0, "-3"->-3, "+2"->2
   if (!str || str === '--') return null;
@@ -773,7 +783,7 @@ function formatToPar(n) {
 function calcEntryScore(picks, leaderboard, worstParR3, worstParR4) {
   const names = Object.values(picks).filter(Boolean);
   const scores = names.map(name => {
-    const p = leaderboard.find(lb => lb.name === name);
+    const p = findInLeaderboard(name);
     if (!p) return { name, toPar: null, isMC: false, isPenalty: false };
     if (p.isMC) {
       // Penalty = worst to-par R3 + worst to-par R4
