@@ -786,7 +786,10 @@
         const name = (c.athlete && c.athlete.displayName) || '?';
         const posStr = (c.status && c.status.position && c.status.position.displayName) || '--';
         const pos = parseInt(posStr.replace(/[^0-9]/g,''));
-        const score = c.score || 'E';
+        const rawScore = c.score;
+        const score = (typeof rawScore === 'object' && rawScore !== null)
+          ? (rawScore.displayValue || rawScore.value || 'E')
+          : (rawScore || 'E');
         const thru = (c.status && c.status.thru) || '--';
         const statusName = (c.status && c.status.type && c.status.type.name)||'';
         const isMC = statusName.toLowerCase().includes('cut')||statusName.toLowerCase().includes('wd');
@@ -926,12 +929,19 @@
         const statusName= (c.status && c.status.type && c.status.type.name) || '';
         const isMC      = statusName.toLowerCase().includes('cut') || statusName.toLowerCase().includes('wd');
         const isWD      = statusName.toLowerCase().includes('wd');
-        const totalScore= c.score || 'E';
+        const rawScore  = c.score;
+        const totalScore= (typeof rawScore === 'object' && rawScore !== null)
+          ? (rawScore.displayValue || rawScore.value || 'E')
+          : (rawScore || 'E');
         // Parse per-round linescores
         const linescores = (c.linescores || []);
         const rounds = {};
         linescores.forEach((ls, i) => {
-          const val = parseInt(ls.value);
+          const val = parseInt(
+            (typeof ls === 'object' && ls !== null)
+              ? (ls.displayValue || ls.value)
+              : ls
+          );
           if (!isNaN(val)) rounds[i] = val;
         });
         return { name, posStr, thru, isMC, isWD, totalScore, rounds };
