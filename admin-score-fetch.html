@@ -735,8 +735,33 @@
     btn.innerHTML = '&#9654; Push to Sheets';
   }
 
+  // ── TIE-AWARE EARNINGS ──
+  function calcTiedEarnings(competitors, po) {
+    const result = {};
+    const groups = {};
+    competitors.forEach(c => {
+      const name = (c.athlete && c.athlete.displayName) || '';
+      if (!name) return;
+      const statusName = ((c.status && c.status.type && c.status.type.name) || '').toLowerCase();
+      if (statusName.includes('cut') || statusName.includes('wd')) { result[name] = 0; return; }
+      const posStr = (c.status && c.status.position && c.status.position.displayName) || '';
+      const pos = parseInt(posStr.replace(/[^0-9]/g, ''));
+      if (isNaN(pos)) { result[name] = 0; return; }
+      if (!groups[pos]) groups[pos] = [];
+      groups[pos].push(name);
+    });
+    Object.entries(groups).forEach(([posStr, names]) => {
+      const pos = parseInt(posStr);
+      const count = names.length;
+      let total = 0;
+      for (let i = 0; i < count; i++) total += (po[pos + i] || 0);
+      const share = count > 0 ? Math.round(total / count) : 0;
+      names.forEach(n => { result[n] = share; });
+    });
+    return result;
+  }
+
   // ── GOLF SCORE HELPER ──
-  // ESPN golf API: c.score.displayValue is the cumulative stroke total formatted as "E"
   // but does NOT reflect to-par. The actual to-par score is in c.statistics[0] (scoreToPar).
   function extractGolfScore(c) {
     // Primary: statistics[0] where name === "scoreToPar" — this is the real to-par display
@@ -809,16 +834,18 @@
       // Log first competitor so we can inspect score field structure in DevTools
       if (competitors.length) console.log('[Masters ESPN] sample competitor:', JSON.stringify(competitors[0]).slice(0,1000));
 
+      // Calculate tie-aware earnings for all competitors at once
+      const earningsMap = calcTiedEarnings(competitors, po);
+
       // Render table
       tableEl.innerHTML = competitors.map(c => {
         const name = (c.athlete && c.athlete.displayName) || '?';
         const posStr = (c.status && c.status.position && c.status.position.displayName) || '--';
-        const pos = parseInt(posStr.replace(/[^0-9]/g,''));
         const score = extractGolfScore(c);
         const thru = (c.status && c.status.thru) || '--';
         const statusName = (c.status && c.status.type && c.status.type.name)||'';
         const isMC = statusName.toLowerCase().includes('cut')||statusName.toLowerCase().includes('wd');
-        const earnings = isMC ? 0 : (po[pos]||0);
+        const earnings = earningsMap[name] || 0;
         const scoreNum = parseInt(score)||0;
         const scoreStyle = isMC ? 'color:var(--danger)' : scoreNum<0?'color:var(--accent2)':scoreNum>0?'color:var(--danger)':'color:var(--muted)';
         return '<tr>' +

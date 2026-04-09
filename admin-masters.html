@@ -1120,28 +1120,46 @@ async function runRecalculate() {
 }
 
 function parseESPNEarnings(data, po) {
-  const result = {};
   const events = data.events || [];
-  if (!events.length) return result;
+  if (!events.length) return {};
   const event = events[0];
   const comps = (event.competitions||[])[0]||{};
   const competitors = comps.competitors||[];
+  return calcTiedEarnings(competitors, po);
+}
+
+// Tie-aware earnings: groups players by numeric position, averages payouts across tied spots.
+// e.g. 3 players tied for T3 each get average of po[3]+po[4]+po[5] / 3
+function calcTiedEarnings(competitors, po) {
+  const result = {};
+  const groups = {}; // { numericPos: [name, name, ...] }
+
   competitors.forEach(c => {
     const name = (c.athlete && c.athlete.displayName) || '';
     if (!name) return;
-    const statusName = (c.status && c.status.type && c.status.type.name)||'';
-    if (statusName.toLowerCase().includes('cut') || statusName.toLowerCase().includes('wd')) {
+    const statusName = ((c.status && c.status.type && c.status.type.name) || '').toLowerCase();
+    if (statusName.includes('cut') || statusName.includes('wd')) {
       result[name] = 0;
       return;
     }
-    const posStr = (c.status && c.status.position && c.status.position.displayName)||'';
-    const pos = parseInt(posStr.replace(/[^0-9]/g,''));
-    if (!isNaN(pos) && po[pos]) {
-      result[name] = po[pos];
-    } else {
-      result[name] = 0;
-    }
+    const posStr = (c.status && c.status.position && c.status.position.displayName) || '';
+    const pos = parseInt(posStr.replace(/[^0-9]/g, ''));
+    if (isNaN(pos)) { result[name] = 0; return; }
+    if (!groups[pos]) groups[pos] = [];
+    groups[pos].push(name);
   });
+
+  Object.entries(groups).forEach(([posStr, names]) => {
+    const pos = parseInt(posStr);
+    const count = names.length;
+    let totalPayout = 0;
+    for (let i = 0; i < count; i++) {
+      totalPayout += (po[pos + i] || 0);
+    }
+    const share = count > 0 ? Math.round(totalPayout / count) : 0;
+    names.forEach(name => { result[name] = share; });
+  });
+
   return result;
 }
 

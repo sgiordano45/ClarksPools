@@ -713,6 +713,46 @@ async function loadGolfLeaderboard() {
   }
 }
 
+// ── TIE-AWARE EARNINGS CALCULATOR ──
+// Groups competitors by numeric position, averages payouts across tied spots.
+// Works mid-tournament (T3 of 3 splits pos 3+4+5) and final (solo pos = full amount).
+// po = { 1: 3600000, 2: 2160000, ... }
+// competitors = raw ESPN competitors array (needs c.status.position.displayName, c.status.type.name)
+function calcTiedEarnings(competitors, po) {
+  const result = {}; // name -> earnings
+
+  // Group by numeric position, skip MC/WD
+  const groups = {}; // { 3: ['Player A', 'Player B', 'Player C'], ... }
+  competitors.forEach(c => {
+    const name = (c.athlete && c.athlete.displayName) || '';
+    if (!name) return;
+    const statusName = ((c.status && c.status.type && c.status.type.name) || '').toLowerCase();
+    if (statusName.includes('cut') || statusName.includes('wd')) {
+      result[name] = 0;
+      return;
+    }
+    const posStr = (c.status && c.status.position && c.status.position.displayName) || '';
+    const pos = parseInt(posStr.replace(/[^0-9]/g, ''));
+    if (isNaN(pos)) { result[name] = 0; return; }
+    if (!groups[pos]) groups[pos] = [];
+    groups[pos].push(name);
+  });
+
+  // For each group, average the payouts across the tied positions
+  Object.entries(groups).forEach(([posStr, names]) => {
+    const pos = parseInt(posStr);
+    const count = names.length;
+    let totalPayout = 0;
+    for (let i = 0; i < count; i++) {
+      totalPayout += (po[pos + i] || 0);
+    }
+    const share = count > 0 ? Math.round(totalPayout / count) : 0;
+    names.forEach(name => { result[name] = share; });
+  });
+
+  return result;
+}
+
 function parseLeaderboard(data) {
   golfLeaderboard = [];
   const events = data.events || [];
@@ -750,9 +790,10 @@ function parseLeaderboard(data) {
   });
   // Sort by ESPN sortOrder — leaders first, not-yet-started last
   golfLeaderboard.sort((a, b) => (a.sortOrder || 9999) - (b.sortOrder || 9999));
-  // Stamp earnings onto each player so standings chips can display it
+  // Stamp tie-aware earnings onto each player
+  const earningsMap = calcTiedEarnings(competitors, payoutMap);
   golfLeaderboard.forEach(p => {
-    p.earnings = payoutMap[p.position] || 0;
+    p.earnings = earningsMap[p.name] || 0;
   });
 }
 
@@ -768,7 +809,7 @@ function renderGolfLeaderboard(el) {
     const scoreNum = parseInt(p.score) || 0;
     const scoreClass = p.status === 'cut' ? 'score-mc' : scoreNum < 0 ? 'score-under' : scoreNum > 0 ? 'score-over' : 'score-even';
     const scoreDisplay = p.status === 'cut' ? 'MC' : p.score || 'E';
-    const earnings = payoutMap[p.position] || 0;
+    const earnings = p.earnings || 0;
     const earningsBadge = earnings > 0 ? '<span class="winnings-badge">$' + earnings.toLocaleString() + '</span>' : '<span style="color:var(--text-secondary);font-size:0.85rem;">—</span>';
     html += '<tr>' +
       '<td class="pos-cell">' + p.position + '</td>' +
