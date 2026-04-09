@@ -816,7 +816,7 @@ function renderGolfLeaderboard(el) {
       '<td><div class="player-name">' + p.name + '</div></td>' +
       '<td class="' + scoreClass + '">' + scoreDisplay + '</td>' +
       '<td class="thru-cell">' + p.thru + '</td>' +
-      '<td class="' + scoreClass + '">' + (p.today !== '--' ? (p.today > 0 ? '+' + p.today : p.today) : '--') + '</td>' +
+      '<td class="' + scoreClass + '">' + (p.today !== '--' ? (String(p.today).startsWith('+') || String(p.today).startsWith('-') || p.today === 'E' ? p.today : (parseInt(p.today) > 0 ? '+' + p.today : p.today)) : '--') + '</td>' +
       '<td>' + earningsBadge + '</td>' +
       '</tr>';
   });
