@@ -832,9 +832,10 @@ function calcEntryScore(picks, leaderboard, worstParR3, worstParR4) {
     const p = findInLeaderboard(name);
     if (!p) return { name, toPar: null, isMC: false, isPenalty: false };
     if (p.isMC) {
-      // Penalty = worst to-par R3 + worst to-par R4
-      // Only applied if needed to fill the 6-scorer minimum
-      const penalty = (worstParR3 !== null ? worstParR3 : 0) +
+      // Penalty = player's actual R1+R2 score + worst R3 + worst R4
+      // worst R3/R4 default to 0 until those rounds are played
+      const penalty = (p.toPar !== null ? p.toPar : 0) +
+                      (worstParR3 !== null ? worstParR3 : 0) +
                       (worstParR4 !== null ? worstParR4 : 0);
       return { name, toPar: penalty, isMC: true, isPenalty: true };
     }
