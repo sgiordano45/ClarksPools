@@ -918,10 +918,35 @@ function renderGolfLeaderboard(el) {
     el.innerHTML = '<div class="empty-state"><div class="empty-icon">⛳</div><h3>Tournament Hasn\'t Started Yet</h3><p>Check back once the tournament begins.</p></div>';
     return;
   }
+
+  // Determine whether cut is already official (any player has isMC status)
+  const cutIsOfficial = golfLeaderboard.some(p => p.isMC);
+
+  // Projected cut: 50th player among those with a score (sortOrder sorted, non-MC)
+  // Masters is top 50 + ties after R2
+  let cutLineIdx = -1;
+  let cutLineToPar = null;
+  if (!cutIsOfficial) {
+    // Only players who have started (toPar !== null)
+    const activePlayers = golfLeaderboard.filter(p => !p.isMC && p.toPar !== null);
+    if (activePlayers.length >= 50) {
+      // 50th player (0-indexed = 49)
+      cutLineToPar = activePlayers[49].toPar;
+      // Find where in the full sorted leaderboard that score boundary falls
+      // Insert cut line after the last player at or better than cutLineToPar
+      let lastSafeIdx = -1;
+      golfLeaderboard.forEach((p, i) => {
+        if (!p.isMC && p.toPar !== null && p.toPar <= cutLineToPar) lastSafeIdx = i;
+      });
+      cutLineIdx = lastSafeIdx;
+    }
+  }
+
   let html = '<div class="golf-lb-card"><table class="golf-lb-table"><thead><tr>' +
     '<th>Pos</th><th>Player</th><th>Score</th><th>Thru</th><th>Today</th><th>Strokes</th>' +
     '</tr></thead><tbody>';
-  golfLeaderboard.forEach(p => {
+
+  golfLeaderboard.forEach((p, i) => {
     const scoreNum = parseInt(p.score) || 0;
     const scoreClass = p.isMC ? 'score-mc' : scoreNum < 0 ? 'score-under' : scoreNum > 0 ? 'score-over' : 'score-even';
     const scoreDisplay = p.isMC ? 'MC' : p.score || 'E';
@@ -935,7 +960,17 @@ function renderGolfLeaderboard(el) {
       '<td class="' + scoreClass + '">' + (p.today !== '--' ? (String(p.today).startsWith('+') || String(p.today).startsWith('-') || p.today === 'E' ? p.today : (parseInt(p.today) > 0 ? '+' + p.today : p.today)) : '--') + '</td>' +
       '<td style="font-family:var(--mono-font,monospace);color:var(--text-secondary)">' + strokesDisplay + '</td>' +
       '</tr>';
+
+    // Insert projected cut line after the last player who would make it
+    if (!cutIsOfficial && i === cutLineIdx) {
+      const cutDisplay = formatToPar(cutLineToPar);
+      html += '<tr style="background:rgba(245,158,11,0.08);">' +
+        '<td colspan="6" style="padding:0.5rem 1rem;text-align:center;font-family:var(--mono-font,monospace);font-size:0.75rem;letter-spacing:0.08em;color:var(--accent-gold);border-top:1px dashed rgba(245,158,11,0.5);border-bottom:1px dashed rgba(245,158,11,0.5);">' +
+        '✂ PROJECTED CUT — ' + cutDisplay + ' · Top 50 + ties make the weekend' +
+        '</td></tr>';
+    }
   });
+
   html += '</tbody></table></div>';
   el.innerHTML = html;
 }
