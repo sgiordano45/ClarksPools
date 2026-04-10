@@ -160,6 +160,7 @@ main { position:relative; z-index:1; max-width:1200px; margin:0 auto; padding:0 
 .golfer-chip.mc { color:var(--accent-red); border-color:rgba(255,82,82,0.3); }
 .golfer-chip.active { color:var(--accent-green); border-color:rgba(0,200,83,0.3); }
 .golfer-chip.benched { opacity:0.35; }
+.golfer-chip.bubble { color:var(--accent-gold); border-color:rgba(245,158,11,0.5); background:rgba(245,158,11,0.08); }
 
 /* ── GOLF LEADERBOARD ── */
 .golf-lb-panel { padding-top:2rem; }
@@ -441,6 +442,8 @@ let userEntry = null;
 let selections = {}; // { tierId: golferName }
 let golfLeaderboard = [];
 let payoutMap = {}; // { position: dollarAmount }
+let cutLineToPar = null;   // projected cut score (to-par integer)
+let cutIsOfficial = false;  // true once ESPN marks players as MC
 
 const POOL_ID = 'masters-2026';
 const ESPN_URL = 'https://site.api.espn.com/apis/site/v2/sports/golf/leaderboard?league=pga';
@@ -724,17 +727,28 @@ async function loadStandings() {
         const isTop6 = top6Names.has(g);
         const isMC = lb && lb.isMC;
         const isPenalty = isMC && isTop6;
+
+        // Danger: counting player currently outside projected cut line
+        const onBubble = !cutIsOfficial && isTop6 && !isMC && lb &&
+          lb.toPar !== null && cutLineToPar !== null &&
+          lb.toPar > cutLineToPar;
+
         let label = g;
         if (lb) {
           label += ' · ' + (lb.score || 'E');
+          if (onBubble) label += ' ✂';
         } else if (isPenalty) {
           label += ' · MC⚠';
         }
+
         const chipClass = 'golfer-chip' +
           (isMC ? ' mc' : '') +
-          (isTop6 && !isMC ? ' active' : '') +
+          (onBubble ? ' bubble' : '') +
+          (isTop6 && !isMC && !onBubble ? ' active' : '') +
           (!isTop6 ? ' benched' : '');
-        return '<span class="' + chipClass + '" title="' + (isTop6 ? 'Counting' : 'Not counting') + '">' + label + '</span>';
+
+        const tipText = isMC ? 'Missed cut' : onBubble ? 'Currently outside cut line' : isTop6 ? 'Counting' : 'Not counting';
+        return '<span class="' + chipClass + '" title="' + tipText + '">' + label + '</span>';
       }).join('');
 
       const scoreDisplay = formatToPar(entry.computedScore);
@@ -920,12 +934,12 @@ function renderGolfLeaderboard(el) {
   }
 
   // Determine whether cut is already official (any player has isMC status)
-  const cutIsOfficial = golfLeaderboard.some(p => p.isMC);
+  cutIsOfficial = golfLeaderboard.some(p => p.isMC);
 
   // Projected cut: 50th player among those with a score (sortOrder sorted, non-MC)
   // Masters is top 50 + ties after R2
   let cutLineIdx = -1;
-  let cutLineToPar = null;
+  cutLineToPar = null;
   if (!cutIsOfficial) {
     // Only players who have started (toPar !== null)
     const activePlayers = golfLeaderboard.filter(p => !p.isMC && p.toPar !== null);
